@@ -40,9 +40,6 @@
 </template>
 
 <script lang="ts" setup>
-import EditorCard from "@/components/EditorCard.vue"
-import { onMounted, ref } from "vue"
-
 const editorStore = useEditorStore()
 const editors = computed(() => editorStore.editors)
 const diffVisible = ref(false)
@@ -65,7 +62,6 @@ const showDiff = () => {
 
 onMounted(async () => {
 	const response = await fetch("example.luau")
-	editorStore.addEditor()
 	editors.value[0].input = await response.text()
 })
 </script>

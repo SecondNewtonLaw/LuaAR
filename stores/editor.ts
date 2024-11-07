@@ -1,7 +1,14 @@
+import { invoke } from "@tauri-apps/api/core"
 import type { Editor } from "~/types"
-
 export const useEditorStore = defineStore("editors", () => {
-	const editors = ref<Editor[]>([])
+	const editors = ref<Editor[]>([
+		{
+			input: "",
+			collapsed: false,
+			selected: false,
+		},
+	])
+	const tauri = useTauri()
 	const currentLanguage = ref<string>("lua")
 	const addEditor = () => {
 		editors.value.push({ input: "", collapsed: false, selected: false })
@@ -20,10 +27,33 @@ export const useEditorStore = defineStore("editors", () => {
 	}
 
 	const formatCode = async (index: number) => {
-		const editor = editors.value[index]
-		const input = editor.input
+		if (!tauri.isTauri) return
 
-		editor.input = input + "test"
+		try {
+			const code = editors.value[index].input
+			const result = await invoke<string>("format_code", {
+				luaCode: code,
+			})
+
+			editors.value[index].input = result
+		} catch (error) {
+			console.error("Error formatting code:", error)
+		}
+	}
+
+	const lintCode = async (index: number) => {
+		if (!tauri.isTauri) return
+
+		try {
+			const code = editors.value[index].input
+			const result = await invoke<string>("lint_code", {
+				luaCode: code,
+			})
+
+			console.log(result)
+		} catch (error) {
+			console.error("Error linting code:", error)
+		}
 	}
 
 	const stripCode = (index: number) => {
@@ -53,6 +83,7 @@ export const useEditorStore = defineStore("editors", () => {
 		toggleCollapse,
 		removeEditor,
 		formatCode,
+		lintCode,
 		stripCode,
 		removeLogs,
 	}

@@ -1,6 +1,12 @@
-export const useTauri = () => {
-	const isTauri = process.env.TAURI === "true"
+declare global {
+	interface Window {
+		__TAURI__?: any
+	}
+}
 
+export const useTauri = () => {
+	const isTauri = window.__TAURI__ !== undefined
+	console.log(isTauri)
 	return {
 		isTauri,
 	}
