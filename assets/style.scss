@@ -1,6 +1,5 @@
 @import url("highlight.js/styles/base16/solarized-dark.css") screen and (prefers-color-scheme: dark);
-@import url("highlight.js/styles/base16/solarized-light.css") screen and
-	(prefers-color-scheme: light);
+@import url("highlight.js/styles/base16/solarized-light.css") screen and (prefers-color-scheme: light);
 
 *,
 *::after,
@@ -10,4 +9,8 @@
 
 html {
 	text-wrap: balance;
+}
+
+p {
+	max-width: 40em;
 }

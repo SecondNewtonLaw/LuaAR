@@ -2,7 +2,7 @@ import type { Editor } from "~/types"
 
 export const useEditorStore = defineStore("editors", () => {
 	const editors = ref<Editor[]>([])
-
+	const currentLanguage = ref<string>("lua")
 	const addEditor = () => {
 		editors.value.push({ input: "", collapsed: false, selected: false })
 	}
@@ -38,13 +38,22 @@ export const useEditorStore = defineStore("editors", () => {
 			.filter((line) => line.trim() !== "")
 			.join("\n")
 	}
+
+	const removeLogs = (index: number) => {
+		//remove all print, warn and error statements ^.*(print|warn|error)\(.*\).*\n?
+		let code = editors.value[index].input
+		code = code.replace(/^.*(print|warn|error)\(.*\).*\n?/gm, "")
+		editors.value[index].input = code
+	}
 	return {
 		editors,
+		currentLanguage,
 		addEditor,
 		resetEditors,
 		toggleCollapse,
 		removeEditor,
 		formatCode,
 		stripCode,
+		removeLogs,
 	}
 })

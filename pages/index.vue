@@ -29,14 +29,7 @@
 		</v-row>
 		<v-row>
 			<v-col :cols="editors.length > 1 ? 6 : 12" v-for="(editor, index) in editors" :key="index">
-				<EditorCard
-					:editor="editor"
-					:index="index"
-					@removeEditor="editorStore.removeEditor"
-					@toggleCollapse="editorStore.toggleCollapse"
-					@stripCode="editorStore.stripCode"
-					@formatCode="editorStore.formatCode"
-				/>
+				<EditorCard :editor :index />
 			</v-col>
 
 			<v-col v-if="diffVisible" cols="12">
@@ -57,6 +50,9 @@ const originalContent = ref("")
 const modifiedContent = ref("")
 
 const showDiff = () => {
+	if (editors.value.length == 2) {
+		editors.value.forEach((editor) => (editor.selected = true))
+	}
 	const selectedEditors = editors.value.filter((editor) => editor.selected)
 	if (selectedEditors.length === 2) {
 		originalContent.value = selectedEditors[0].input

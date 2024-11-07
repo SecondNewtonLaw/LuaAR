@@ -8,6 +8,7 @@
 				:options="{
 					theme: 'vs-dark',
 				}"
+				:lang="useEditorStore().currentLanguage"
 				class="editor"
 			/>
 		</v-card-text>
