@@ -11,12 +11,12 @@
 		</v-row>
 		<v-row>
 			<v-col>
-				<v-btn-toggle>
-					<v-btn icon @click="addEditor">
+				<v-btn-group>
+					<v-btn icon @click="editorStore.addEditor">
 						<v-icon>mdi-plus</v-icon>
 						<v-tooltip activator="parent" location="bottom">Add Editor</v-tooltip>
 					</v-btn>
-					<v-btn icon @click="resetEditors">
+					<v-btn icon @click="editorStore.resetEditors">
 						<v-icon>mdi-refresh</v-icon>
 						<v-tooltip activator="parent" location="bottom">Reset Editors</v-tooltip>
 					</v-btn>
@@ -24,96 +24,37 @@
 						<v-icon>mdi-file-compare</v-icon>
 						<v-tooltip activator="parent" location="bottom">Show Diff</v-tooltip>
 					</v-btn>
-				</v-btn-toggle>
+				</v-btn-group>
 			</v-col>
 		</v-row>
 		<v-row>
-			<v-col v-for="(editor, index) in editors" :key="index" :cols="editors.length > 1 ? 6 : 12">
-				<v-card>
-					<v-card-title>
-						Editor {{ index + 1 }}
-
-						<v-checkbox v-model="editor.selected" :label="'Select ' + (index + 1)" density="compact">
-							<v-tooltip activator="parent" location="bottom">Select Editor</v-tooltip>
-						</v-checkbox>
-						<v-btn icon @click="toggleCollapse(index)">
-							<v-icon>{{ editor.collapsed ? "mdi-chevron-down" : "mdi-chevron-up" }}</v-icon>
-							<v-tooltip activator="parent" location="bottom">{{
-								editor.collapsed ? "Expand" : "Collapse"
-							}}</v-tooltip>
-						</v-btn>
-						<v-btn icon @click="removeEditor(index)">
-							<v-icon>mdi-close</v-icon>
-							<v-tooltip activator="parent" location="bottom">Remove Editor</v-tooltip>
-						</v-btn>
-						<v-btn icon @click="stripCode(index)">
-							<v-icon>mdi-format-align-left</v-icon>
-							<v-tooltip activator="parent" location="bottom">Strip Code</v-tooltip>
-						</v-btn>
-						<!-- format -->
-						<v-btn icon @click="formatCode(index)" :disabled="editor.input === '' || !tauri.isTauri">
-							<v-icon>mdi-format-align-left</v-icon>
-							<v-tooltip activator="parent" location="bottom">Format Code</v-tooltip>
-						</v-btn>
-					</v-card-title>
-					<v-expand-transition>
-						<v-card-text v-show="!editor.collapsed">
-							<MonacoEditor
-								:options="{
-									theme: 'vs-dark',
-									formatOnPaste: true,
-									formatOnType: true,
-									language: 'lua',
-									autoIndent: 'full',
-								}"
-								lang="lua"
-								v-model="editor.input"
-								class="editor"
-							/>
-						</v-card-text>
-					</v-expand-transition>
-				</v-card>
+			<v-col :cols="editors.length > 1 ? 6 : 12" v-for="(editor, index) in editors" :key="index">
+				<EditorCard
+					:editor="editor"
+					:index="index"
+					@removeEditor="editorStore.removeEditor"
+					@toggleCollapse="editorStore.toggleCollapse"
+					@stripCode="editorStore.stripCode"
+					@formatCode="editorStore.formatCode"
+				/>
 			</v-col>
-			<v-col cols="12" v-if="diffVisible">
-				<v-card>
-					<v-card-title>Diff Viewer</v-card-title>
-					<v-card-text>
-						<MonacoDiffEditor
-							:original="originalContent"
-							v-model="modifiedContent"
-							:options="{
-								theme: 'vs-dark',
-							}"
-							class="editor"
-						/>
-					</v-card-text>
-				</v-card>
+
+			<v-col v-if="diffVisible" cols="12">
+				<DiffViewer :originalContent="originalContent" v-model:modifiedContent="modifiedContent" />
 			</v-col>
 		</v-row>
 	</v-container>
 </template>
 
 <script lang="ts" setup>
-const editors = ref([{ input: "", collapsed: false, selected: false }])
+import EditorCard from "@/components/EditorCard.vue"
+import { onMounted, ref } from "vue"
+
+const editorStore = useEditorStore()
+const editors = computed(() => editorStore.editors)
 const diffVisible = ref(false)
 const originalContent = ref("")
 const modifiedContent = ref("")
-const tauri = useTauri()
-const addEditor = () => {
-	editors.value.push({ input: "", collapsed: false, selected: false })
-}
-
-const resetEditors = () => {
-	editors.value = [{ input: "", collapsed: false, selected: false }]
-}
-
-const toggleCollapse = (index: number) => {
-	editors.value[index].collapsed = !editors.value[index].collapsed
-}
-
-const removeEditor = (index: number) => {
-	editors.value.splice(index, 1)
-}
 
 const showDiff = () => {
 	const selectedEditors = editors.value.filter((editor) => editor.selected)
@@ -126,38 +67,15 @@ const showDiff = () => {
 	}
 }
 
-const formatCode = async (index: number) => {
-	const editor = editors.value[index]
-	const input = editor.input
-
-	editor.input = input + "test"
-}
-const stripCode = (index: number) => {
-	let code = editors.value[index].input
-
-	code = code.replace(/--\[\[[\s\S]*?\]\]/g, "")
-	code = code.replace(/--.*$/gm, "")
-
-	// Remove empty lines
-	editors.value[index].input = code
-		.split("\n")
-		.filter((line) => line.trim() !== "")
-		.join("\n")
-}
-
 onMounted(async () => {
 	const response = await fetch("example.luau")
+	editorStore.addEditor()
 	editors.value[0].input = await response.text()
 })
 </script>
 
 <style scoped lang="scss">
-.editor {
-	width: 100%;
-	height: 60vh;
-}
-
-.v-btn-toggle {
+.v-btn-group {
 	display: flex;
 	justify-content: center;
 }
