@@ -18,7 +18,11 @@ const md = new MarkdownIt({
 		console.log(str, lang)
 		if (lang && hljs.getLanguage(lang)) {
 			try {
-				return hljs.highlight(str, { language: lang }).value
+				const highlighted = hljs.highlight(str, { language: lang }).value
+				const lines = highlighted
+					.split("\n")
+					.map((line, index) => `<span class="line-number">${index + 1}</span>${line}`)
+				return `<div class="code-block">${lines.join("\n")}</div>`
 			} catch (e) {
 				console.error(e)
 			}
@@ -36,5 +40,20 @@ const renderedMarkdown = computed(() => md.render(content?.value ?? ""))
 textarea {
 	width: 100%;
 	margin-bottom: 20px;
+}
+
+.code-block {
+	position: relative;
+	padding-left: 3em;
+}
+
+.line-number {
+	position: absolute;
+	left: 0;
+	width: 2em;
+	text-align: right;
+	padding-right: 0.5em;
+	user-select: none;
+	opacity: 0.5;
 }
 </style>

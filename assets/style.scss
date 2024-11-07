@@ -1,9 +1,13 @@
+@import url("highlight.js/styles/base16/solarized-dark.css") screen and (prefers-color-scheme: dark);
+@import url("highlight.js/styles/base16/solarized-light.css") screen and
+	(prefers-color-scheme: light);
+
 *,
 *::after,
 *::before {
-  box-sizing: border-box;
+	box-sizing: border-box;
 }
 
 html {
-  text-wrap: balance;
+	text-wrap: balance;
 }

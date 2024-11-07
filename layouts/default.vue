@@ -1,6 +1,15 @@
 <template>
 	<div class="container">
-		<header><v-switch color="primary" v-model="darkMode" label="Dark mode" /></header>
+		<header>
+			<v-toolbar>
+				<v-toolbar-title>Desktop Menu</v-toolbar-title>
+				<v-spacer></v-spacer>
+				<v-toolbar-items>
+					<v-btn :to="{ name: 'index' }">Home</v-btn>
+					<v-btn :to="{ name: 'reviews' }">Reviews</v-btn>
+				</v-toolbar-items>
+			</v-toolbar>
+		</header>
 		<main>
 			<slot />
 		</main>
