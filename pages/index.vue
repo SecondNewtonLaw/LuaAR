@@ -2,11 +2,7 @@
 	<v-container>
 		<v-row>
 			<v-col>
-				<h1>Home Page</h1>
-				<p>
-					This is the home page where you can input plain text in the textarea below. The content will be
-					rendered as code, allowing you to count lines and detect any issues with the code.
-				</p>
+				<CurrentReview />
 			</v-col>
 		</v-row>
 		<v-row>
@@ -23,6 +19,11 @@
 					<v-btn icon @click="showDiff">
 						<v-icon>mdi-file-compare</v-icon>
 						<v-tooltip activator="parent" location="bottom">Show Diff</v-tooltip>
+					</v-btn>
+					<!-- Save review -->
+					<v-btn icon @click="reviewStore.saveReview">
+						<v-icon>mdi-content-save</v-icon>
+						<v-tooltip activator="parent" location="bottom">Save Review</v-tooltip>
 					</v-btn>
 				</v-btn-group>
 			</v-col>
@@ -41,6 +42,7 @@
 
 <script lang="ts" setup>
 const editorStore = useEditorStore()
+const reviewStore = useReviewStore()
 const editors = computed(() => editorStore.editors)
 const diffVisible = ref(false)
 const originalContent = ref("")
@@ -60,10 +62,10 @@ const showDiff = () => {
 	}
 }
 
-onMounted(async () => {
-	const response = await fetch("example.luau")
-	editors.value[0].input = await response.text()
-})
+// onMounted(async () => {
+// 	const response = await fetch("example.luau")
+// 	editors.value[0].input = await response.text()
+// })
 </script>
 
 <style scoped lang="scss">

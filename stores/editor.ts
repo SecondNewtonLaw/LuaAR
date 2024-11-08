@@ -1,5 +1,11 @@
 import { invoke } from "@tauri-apps/api/core"
-import type { Editor } from "~/types"
+
+export interface Editor {
+	input: string
+	collapsed: boolean
+	selected: boolean
+}
+
 export const useEditorStore = defineStore("editors", () => {
 	const editors = ref<Editor[]>([
 		{

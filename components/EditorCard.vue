@@ -10,17 +10,9 @@
 
 			<VToolbar>
 				<v-btn-group>
-					<v-btn icon @click="editorStore.stripCode(index)">
-						<v-icon>mdi-format-align-left</v-icon>
-						<v-tooltip activator="parent" location="bottom">Strip Code</v-tooltip>
-					</v-btn>
-					<v-btn
-						icon
-						@click="editorStore.formatCode(index)"
-						:disabled="editor.input === '' || !tauri.isTauri"
-					>
-						<v-icon>mdi-format-align-left</v-icon>
-						<v-tooltip activator="parent" location="bottom">Format Code</v-tooltip>
+					<v-btn @click="editorStore.stripCode(index)"> Strip Code </v-btn>
+					<v-btn @click="editorStore.formatCode(index)" :disabled="editor.input === '' || !tauri.isTauri">
+						Format Code
 					</v-btn>
 					<!-- Lint -->
 					<v-btn icon @click="editorStore.lintCode(index)" :disabled="editor.input === '' || !tauri.isTauri">
@@ -72,12 +64,10 @@
 </template>
 
 <script lang="ts" setup>
-import type { Editor } from "~/types"
-
 const tauri = useTauri()
 const editorStore = useEditorStore()
 
-const props = defineProps<{
+defineProps<{
 	editor: Editor
 	index: number
 }>()
@@ -158,12 +148,6 @@ onMounted(async () => {
 .v-btn {
 	margin: 0 5px;
 	border-radius: 0;
-}
-
-.matched-class {
-	/* Add your styles for matched words here */
-	color: red;
-	font-weight: bold;
 }
 </style>
 
