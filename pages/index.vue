@@ -2,6 +2,8 @@
 	<v-container>
 		<v-row>
 			<v-col>
+				<v-btn color="primary" appendIcon="mdi-plus" @click="reviewStore.newReview">NEW REVIEW</v-btn>
+
 				<CurrentReview />
 			</v-col>
 		</v-row>

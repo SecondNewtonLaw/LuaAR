@@ -9,6 +9,7 @@ export interface Review {
 }
 export const useReviewStore = defineStore("reviews", () => {
 	const reviews = ref<Review[]>()
+	const editorStore = useEditorStore()
 	const currentReview = ref<Review>({
 		title: "",
 		created_at: "",
@@ -20,6 +21,17 @@ export const useReviewStore = defineStore("reviews", () => {
 	const basePath = "reviews"
 	const dirOptions = {
 		baseDir: BaseDirectory.AppData,
+	}
+
+	const newReview = () => {
+		currentReview.value = {
+			title: "",
+			created_at: "",
+			updated_at: "",
+			url: "",
+			user_id: "",
+		}
+		editorStore.resetEditors()
 	}
 	const makeReviewsDir = async () => {
 		const reviewsFolder = await exists(basePath, dirOptions)
@@ -48,6 +60,21 @@ export const useReviewStore = defineStore("reviews", () => {
 		)
 	}
 
+	const loadReview = async (review: Review) => {
+		//set currentReview, load editors
+		currentReview.value = review
+		const path = `${basePath}/${review.user_id}`
+		const editorsPath = `${path}/editors`
+		const editorsList = await readDir(editorsPath, dirOptions)
+		const editors = await Promise.all(
+			editorsList.map(async (editor) => {
+				const data = await readFile(`${editorsPath}/${editor.name}`, dirOptions)
+				return new TextDecoder().decode(data)
+			})
+		)
+		editorStore.editors = editors.map((editor) => ({ input: editor, selected: false, collapsed: true }))
+	}
+
 	const saveReview = async () => {
 		await makeReviewsDir()
 		currentReview.value.created_at = new Date().toISOString()
@@ -59,6 +86,18 @@ export const useReviewStore = defineStore("reviews", () => {
 		let encoder = new TextEncoder()
 		let data = encoder.encode(JSON.stringify(review))
 		await writeFile(`${path}/meta.json`, data, dirOptions)
+
+		// Get active editors from editorStore
+
+		const editors = editorStore.editors
+		const editorsPath = `${path}/editors`
+		await makeUserDir(editorsPath)
+
+		// Save each editor with their index as a .txt file
+		editors.forEach(async (editor, index) => {
+			let editorData = encoder.encode(editor.input)
+			await writeFile(`${editorsPath}/${index}.txt`, editorData, dirOptions)
+		})
 	}
 
 	const removeReview = async (review: Review) => {
@@ -71,7 +110,9 @@ export const useReviewStore = defineStore("reviews", () => {
 		currentReview,
 		reviews,
 		loadReviews,
+		loadReview,
 		saveReview,
 		removeReview,
+		newReview,
 	}
 })

@@ -35,7 +35,7 @@ const props = defineProps<{
 }>()
 
 function selectReview() {
-	reviewStore.currentReview = props.review
+	reviewStore.loadReview(props.review)
 	router.push("/")
 }
 
