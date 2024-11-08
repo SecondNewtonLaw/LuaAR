@@ -31,6 +31,11 @@
 						<v-icon>mdi-close</v-icon>
 						<v-tooltip activator="parent" location="bottom">Remove Editor</v-tooltip>
 					</v-btn>
+					<!-- Duplicate -->
+					<v-btn icon @click="duplicateEditor(index)">
+						<v-icon>mdi-content-copy</v-icon>
+						<v-tooltip activator="parent" location="bottom">Duplicate Editor</v-tooltip>
+					</v-btn>
 				</v-btn-group>
 			</VToolbar>
 		</v-card-title>
@@ -97,6 +102,14 @@ const applyRegexCheck = (container: HTMLElement) => {
 
 let debounceTimeout: ReturnType<typeof setTimeout> | null = null
 
+const duplicateEditor = (index: number) => {
+	editorStore.editors.push({
+		input: editorStore.editors[index].input,
+		selected: false,
+		collapsed: false,
+	})
+}
+
 onMounted(async () => {
 	onBeforeUnmount(() => {
 		observer.disconnect()
@@ -132,7 +145,7 @@ onMounted(async () => {
 <style scoped lang="scss">
 .editor {
 	width: 100%;
-	height: 60vh;
+	height: 75vh;
 }
 
 .title-content {

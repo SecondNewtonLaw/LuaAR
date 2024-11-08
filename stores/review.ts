@@ -6,6 +6,7 @@ export interface Review {
 	updated_at: string
 	url: string
 	user_id: string
+	id?: string
 }
 export const useReviewStore = defineStore("reviews", () => {
 	const reviews = ref<Review[]>()
@@ -43,27 +44,37 @@ export const useReviewStore = defineStore("reviews", () => {
 		}
 	}
 
-	const makeUserDir = async (path: string) => {
+	const makeReviewDir = async (path: string) => {
 		const userFolder = await exists(path, dirOptions)
 		if (!userFolder) {
-			await mkdir(path, dirOptions)
+			await mkdir(path, {
+				...dirOptions,
+				recursive: true,
+			})
 		}
 	}
 	const loadReviews = async () => {
 		await makeReviewsDir()
-		const reviewsList = await readDir(basePath, dirOptions)
-		reviews.value = await Promise.all(
-			reviewsList.map(async (review) => {
-				const data = await readFile(`${basePath}/${review.name}/meta.json`, dirOptions)
-				return JSON.parse(new TextDecoder().decode(data)) as Review
+		const usersList = await readDir(basePath, dirOptions)
+		const allReviews = await Promise.all(
+			usersList.map(async (user) => {
+				const userReviewsList = await readDir(`${basePath}/${user.name}`, dirOptions)
+				return Promise.all(
+					userReviewsList.map(async (review) => {
+						const data = await readFile(`${basePath}/${user.name}/${review.name}/meta.json`, dirOptions)
+						return JSON.parse(new TextDecoder().decode(data)) as Review
+					})
+				)
 			})
 		)
+		reviews.value = allReviews.flat()
 	}
 
 	const loadReview = async (review: Review) => {
 		//set currentReview, load editors
+		if (!review.id) return
 		currentReview.value = review
-		const path = `${basePath}/${review.user_id}`
+		const path = `${basePath}/${review.user_id}/${review.id}`
 		const editorsPath = `${path}/editors`
 		const editorsList = await readDir(editorsPath, dirOptions)
 		const editors = await Promise.all(
@@ -72,16 +83,19 @@ export const useReviewStore = defineStore("reviews", () => {
 				return new TextDecoder().decode(data)
 			})
 		)
-		editorStore.editors = editors.map((editor) => ({ input: editor, selected: false, collapsed: true }))
+		editorStore.editors = editors.map((editor) => JSON.parse(editor))
 	}
 
 	const saveReview = async () => {
 		await makeReviewsDir()
-		currentReview.value.created_at = new Date().toISOString()
-		currentReview.value.updated_at = new Date().toISOString()
 		const review = currentReview.value
-		const path = `${basePath}/${review.user_id}`
-		await makeUserDir(path)
+		if (!review.id) {
+			review.id = crypto.randomUUID()
+			review.created_at = new Date().toISOString()
+		}
+		review.updated_at = new Date().toISOString()
+		const path = `${basePath}/${review.user_id}/${review.id}`
+		await makeReviewDir(path)
 
 		let encoder = new TextEncoder()
 		let data = encoder.encode(JSON.stringify(review))
@@ -91,19 +105,26 @@ export const useReviewStore = defineStore("reviews", () => {
 
 		const editors = editorStore.editors
 		const editorsPath = `${path}/editors`
-		await makeUserDir(editorsPath)
+		await makeReviewDir(editorsPath)
 
 		// Save each editor with their index as a .txt file
 		editors.forEach(async (editor, index) => {
-			let editorData = encoder.encode(editor.input)
-			await writeFile(`${editorsPath}/${index}.txt`, editorData, dirOptions)
+			console.log(editor)
+			let editorData = encoder.encode(JSON.stringify(editor))
+
+			await writeFile(`${editorsPath}/${index}.json`, editorData, dirOptions)
 		})
 	}
 
 	const removeReview = async (review: Review) => {
 		await makeReviewsDir()
-		await makeUserDir(`${basePath}/${review.user_id}`)
-		await remove(`${basePath}/${review.user_id}`, dirOptions)
+		await remove(`${basePath}/${review.user_id}/${review.id}`, {
+			...dirOptions,
+			recursive: true,
+		})
+
+		// Reload reviews
+		loadReviews()
 	}
 
 	return {

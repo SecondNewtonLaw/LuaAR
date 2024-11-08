@@ -16,7 +16,7 @@
 					</v-btn>
 					<v-btn icon @click="editorStore.resetEditors">
 						<v-icon>mdi-refresh</v-icon>
-						<v-tooltip activator="parent" location="bottom">Reset Editors</v-tooltip>
+						<v-tooltip activator="parent" location="bottom" text="Reset Editors" />
 					</v-btn>
 					<v-btn icon @click="showDiff">
 						<v-icon>mdi-file-compare</v-icon>

@@ -22,11 +22,12 @@ pub fn run() {
 
 #[command]
 fn format_code(lua_code: String) -> Result<String, String> {
-    println!("Received Lua code for formatting: {}", lua_code);
-
     let stylua_path = std::path::Path::new("src/assets/stylua.exe");
+    let config_path = stylua_path.parent().unwrap().join("stylua.toml");
 
     let output = Command::new(stylua_path)
+        .arg("--config-path")
+        .arg(config_path)
         .arg("-")
         .stdin(std::process::Stdio::piped())
         .stdout(std::process::Stdio::piped())
@@ -42,7 +43,7 @@ fn format_code(lua_code: String) -> Result<String, String> {
     match output {
         Ok(output) if output.status.success() => {
             let formatted_code = String::from_utf8(output.stdout).map_err(|e| e.to_string())?;
-            println!("Formatted code: {}", formatted_code);
+
             Ok(formatted_code)
         }
         Ok(output) => {

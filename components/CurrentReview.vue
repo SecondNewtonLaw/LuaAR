@@ -1,5 +1,14 @@
 <template>
-	<h2>Current Review</h2>
+	<h2>
+		Current Review
+		<!-- Show adding or editing according to if id is set label with tooltip -->
+		<v-chip color="primary" label>
+			{{ reviewStore.currentReview.id ? "Editing" : "Adding" }}
+			<v-tooltip activator="parent" location="bottom" v-if="reviewStore.currentReview.id">
+				{{ reviewStore.currentReview.id }}
+			</v-tooltip>
+		</v-chip>
+	</h2>
 	<v-form>
 		<v-text-field
 			label="Title"
@@ -15,6 +24,7 @@
 				(v) => v.includes('hiddendevs.com') || 'URL must be from hiddendevs.com domain',
 			]"
 		></v-text-field>
+		<a :href="reviewStore.currentReview.url" target="_blank" v-if="reviewStore.currentReview.url"> Visit URL </a>
 		<v-text-field
 			label="User ID"
 			v-model="reviewStore.currentReview.user_id"
