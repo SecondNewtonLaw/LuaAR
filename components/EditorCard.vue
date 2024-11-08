@@ -8,7 +8,7 @@
 				</v-checkbox>
 			</div>
 
-			<VToolbar>
+			<VToolbar flat color="transparent">
 				<v-btn-group>
 					<v-btn @click="editorStore.stripCode(index)"> Strip Code </v-btn>
 					<v-btn @click="editorStore.formatCode(index)" :disabled="editor.input === '' || !tauri.isTauri">
@@ -32,7 +32,7 @@
 						<v-tooltip activator="parent" location="bottom">Remove Editor</v-tooltip>
 					</v-btn>
 					<!-- Duplicate -->
-					<v-btn icon @click="duplicateEditor(index)">
+					<v-btn icon @click="duplicateEditor($event, index)">
 						<v-icon>mdi-content-copy</v-icon>
 						<v-tooltip activator="parent" location="bottom">Duplicate Editor</v-tooltip>
 					</v-btn>
@@ -61,7 +61,7 @@
 					}"
 					lang="lua"
 					v-model="editor.input"
-					class="editor"
+					:class="['editor', 'editor-' + index]"
 				/>
 			</v-card-text>
 		</v-expand-transition>
@@ -72,7 +72,7 @@
 const tauri = useTauri()
 const editorStore = useEditorStore()
 
-defineProps<{
+const props = defineProps<{
 	editor: Editor
 	index: number
 }>()
@@ -91,7 +91,7 @@ const applyRegexCheck = (container: HTMLElement) => {
 			const matches = deprecatedAPI.value.some((regex) => regex.test(word))
 			if (matches) {
 				span.classList.add("matched-class")
-				console.log("Matched word:", word)
+
 				deprecatedCount.value++
 			} else {
 				span.classList.remove("matched-class")
@@ -102,7 +102,9 @@ const applyRegexCheck = (container: HTMLElement) => {
 
 let debounceTimeout: ReturnType<typeof setTimeout> | null = null
 
-const duplicateEditor = (index: number) => {
+const duplicateEditor = (event: MouseEvent, index: number) => {
+	if (event.ctrlKey) return navigator.clipboard.writeText(editorStore.editors[index].input)
+
 	editorStore.editors.push({
 		input: editorStore.editors[index].input,
 		selected: false,
@@ -118,7 +120,7 @@ onMounted(async () => {
 		}
 	})
 	await new Promise((resolve) => setTimeout(resolve, 1000))
-	const editorContainer = document.querySelector<HTMLElement>(".editor")
+	const editorContainer = document.querySelector<HTMLElement>(`.editor-${props.index}`)
 	if (!editorContainer) return
 
 	const observer = new MutationObserver((mutations) => {

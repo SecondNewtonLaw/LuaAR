@@ -1,7 +1,7 @@
 <template>
 	<v-container>
 		<v-row>
-			<v-col>
+			<v-col cols="12" class="flex-column d-flex ga-lg-3">
 				<v-btn color="primary" appendIcon="mdi-plus" @click="reviewStore.newReview">NEW REVIEW</v-btn>
 
 				<CurrentReview />
@@ -22,7 +22,6 @@
 						<v-icon>mdi-file-compare</v-icon>
 						<v-tooltip activator="parent" location="bottom">Show Diff</v-tooltip>
 					</v-btn>
-					<!-- Save review -->
 					<v-btn icon @click="reviewStore.saveReview">
 						<v-icon>mdi-content-save</v-icon>
 						<v-tooltip activator="parent" location="bottom">Save Review</v-tooltip>
