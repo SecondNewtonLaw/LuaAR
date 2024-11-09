@@ -6,6 +6,7 @@ export interface Review {
 	updated_at: string
 	url: string
 	user_id: string
+	review: string
 	id?: string
 }
 export const useReviewStore = defineStore("reviews", () => {
@@ -17,6 +18,7 @@ export const useReviewStore = defineStore("reviews", () => {
 		updated_at: "",
 		url: "",
 		user_id: "",
+		review: "",
 	})
 
 	const basePath = "reviews"
@@ -30,6 +32,7 @@ export const useReviewStore = defineStore("reviews", () => {
 			created_at: "",
 			updated_at: "",
 			url: "",
+			review: "",
 			user_id: "",
 		}
 		editorStore.resetEditors()
@@ -84,6 +87,7 @@ export const useReviewStore = defineStore("reviews", () => {
 			})
 		)
 		editorStore.editors = editors.map((editor) => JSON.parse(editor))
+		console.log(editorStore.editors)
 	}
 
 	const saveReview = async () => {
@@ -114,6 +118,9 @@ export const useReviewStore = defineStore("reviews", () => {
 
 			await writeFile(`${editorsPath}/${index}.json`, editorData, dirOptions)
 		})
+
+		// Reload reviews
+		loadReviews()
 	}
 
 	const removeReview = async (review: Review) => {

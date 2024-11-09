@@ -2,9 +2,9 @@
 	<v-container>
 		<v-row>
 			<v-col cols="12" class="flex-column d-flex ga-lg-3">
-				<v-btn color="primary" appendIcon="mdi-plus" @click="reviewStore.newReview">NEW REVIEW</v-btn>
+				<v-btn color="primary" appendIcon="mdi-plus" @click="newReview">NEW REVIEW</v-btn>
 
-				<CurrentReview />
+				<CurrentReview ref="form" />
 			</v-col>
 		</v-row>
 		<v-row>
@@ -48,7 +48,7 @@ const editors = computed(() => editorStore.editors)
 const diffVisible = ref(false)
 const originalContent = ref("")
 const modifiedContent = ref("")
-
+const form = ref<{ form: HTMLFormElement | null }>({ form: null })
 const showDiff = () => {
 	if (editors.value.length == 2) {
 		editors.value.forEach((editor) => (editor.selected = true))
@@ -61,6 +61,12 @@ const showDiff = () => {
 	} else {
 		alert("Please select exactly 2 editors to compare.")
 	}
+}
+
+const newReview = () => {
+	console.log(form.value.form)
+	form.value?.form?.reset()
+	reviewStore.newReview()
 }
 
 // onMounted(async () => {

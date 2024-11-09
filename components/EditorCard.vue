@@ -52,7 +52,9 @@
 						},
 						formatOnPaste: true,
 						formatOnType: true,
-
+						minimap: {
+							enabled: false,
+						},
 						autoIndent: 'full',
 						cursorBlinking: 'smooth',
 						cursorSmoothCaretAnimation: 'on',
@@ -113,16 +115,8 @@ const duplicateEditor = (event: MouseEvent, index: number) => {
 }
 
 onMounted(async () => {
-	onBeforeUnmount(() => {
-		observer.disconnect()
-		if (debounceTimeout) {
-			clearTimeout(debounceTimeout)
-		}
-	})
-	await new Promise((resolve) => setTimeout(resolve, 1000))
 	const editorContainer = document.querySelector<HTMLElement>(`.editor-${props.index}`)
 	if (!editorContainer) return
-
 	const observer = new MutationObserver((mutations) => {
 		if (debounceTimeout) {
 			clearTimeout(debounceTimeout)
@@ -136,6 +130,14 @@ onMounted(async () => {
 			})
 		}, 500)
 	})
+
+	onBeforeUnmount(() => {
+		observer.disconnect()
+		if (debounceTimeout) {
+			clearTimeout(debounceTimeout)
+		}
+	})
+	await new Promise((resolve) => setTimeout(resolve, 1000))
 
 	observer.observe(editorContainer, {
 		childList: true,
