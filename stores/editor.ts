@@ -16,8 +16,8 @@ export const useEditorStore = defineStore("editors", () => {
 	])
 	const tauri = useTauri()
 	const currentLanguage = ref<string>("lua")
-	const addEditor = () => {
-		editors.value.push({ input: "", collapsed: false, selected: false })
+	const addEditor = (editor?: Editor) => {
+		editors.value.push(editor ?? { input: "", collapsed: false, selected: false })
 	}
 
 	const resetEditors = () => {

@@ -14,6 +14,10 @@
 						<v-icon>mdi-plus</v-icon>
 						<v-tooltip activator="parent" location="bottom">Add Editor</v-tooltip>
 					</v-btn>
+					<v-btn icon v-if="reviewed" :disabled="!hasPreviousReview" @click="promptReviewChoice">
+						<v-icon>mdi-plus</v-icon>
+						<v-tooltip activator="parent" location="bottom">Add Editor from Review</v-tooltip>
+					</v-btn>
 					<v-btn icon @click="editorStore.resetEditors">
 						<v-icon>mdi-refresh</v-icon>
 						<v-tooltip activator="parent" location="bottom" text="Reset Editors" />
@@ -63,6 +67,31 @@ const showDiff = () => {
 	}
 }
 
+const reviewed = computed(() => reviewStore.currentReview.id)
+const hasPreviousReview = computed(
+	() =>
+		(reviewStore.reviews || []).filter((review) => review.user_id === reviewStore.currentReview.user_id).length > 1
+)
+
+const promptReviewChoice = () => {
+	const reviews = reviewStore.reviews?.filter((review) => review.user_id === reviewStore.currentReview.user_id)
+	if (reviews && reviews.length > 2) {
+		//show dialog with options
+	} else {
+		const review = reviews?.find((review) => review.id !== reviewStore.currentReview.id)
+		addEditorFromReview(review?.id || "")
+	}
+}
+const addEditorFromReview = (id: string) => {
+	const review = reviewStore.reviews?.find((review) => review.id === id)
+	if (review) {
+		editorStore.addEditor({
+			input: review.review,
+			collapsed: false,
+			selected: false,
+		})
+	}
+}
 const newReview = () => {
 	console.log(form.value.form)
 	form.value?.form?.reset()
