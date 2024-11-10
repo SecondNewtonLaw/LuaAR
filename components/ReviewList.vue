@@ -1,45 +1,77 @@
 <template>
-	<v-row>
-		<v-col cols="12" sm="6" md="4">
-			<v-text-field v-model="search" label="Search" hint="Search by userid, app id and title" persistent-hint />
-		</v-col>
-		<v-col cols="12" sm="6" md="4">
-			<!-- <v-date-picker v-model="startDate"></v-date-picker> -->
-		</v-col>
-		<v-col cols="12" sm="6" md="4">
-			<!-- <v-date-picker v-model="endDate"></v-date-picker> -->
-		</v-col>
-	</v-row>
-	<v-row v-if="filteredReviews.length">
-		<v-col v-for="review in filteredReviews" :key="review.url" cols="12" sm="6" md="4" class="review-card">
-			<ReviewCard :review="review" />
-		</v-col>
-	</v-row>
-	<v-alert v-else type="info"> No reviews found. </v-alert>
+	<v-card title="Reviews" flat>
+		<template v-slot:text>
+			<v-text-field
+				v-model="search"
+				label="Search"
+				prepend-inner-icon="mdi-magnify"
+				variant="outlined"
+				hide-details
+				single-line
+			></v-text-field>
+		</template>
+		<v-data-table
+			:headers="headers"
+			:items="reviews"
+			:search="search"
+			item-key="id"
+			class="elevation-1"
+			:sort-by="sortBy"
+			@click:row="selectReview"
+		/>
+	</v-card>
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from "vue"
-
+import { ref } from "vue"
+export interface Review {
+	title: string
+	created_at: string
+	updated_at: string
+	url: string
+	user_id: string
+	review: string
+	id?: string
+}
 const props = defineProps<{
 	reviews?: Review[]
 }>()
 
-const search = ref("")
-const startDate = ref("")
-const endDate = ref("")
-
-const filteredReviews = computed(() => {
-	if (!props.reviews) return []
-	return props.reviews.filter((review) => {
-		const matchesSearch = [review.user_id, review.title, review.url].some((field) =>
-			field.toLowerCase().includes(search.value.toLowerCase())
-		)
-		const matchesStartDate = !startDate.value || new Date(review.created_at) >= new Date(startDate.value)
-		const matchesEndDate = !endDate.value || new Date(review.created_at) <= new Date(endDate.value)
-		return matchesSearch && matchesStartDate && matchesEndDate
-	})
+const dateFormatter = new Intl.DateTimeFormat("en-US", {
+	year: "numeric",
+	month: "short",
+	day: "numeric",
+	hour: "numeric",
+	minute: "numeric",
+	second: "numeric",
 })
+
+const sortBy = ref([{ key: "created_at", order: "desc" as const }])
+const headers = ref([
+	{ title: "User ID", key: "user_id" },
+	{ title: "Title", key: "title" },
+	{ title: "URL", key: "url" },
+
+	{
+		title: "Created At",
+		key: "created_at",
+		sort: (a: string, b: string) => new Date(a).getTime() - new Date(b).getTime(),
+		value: (item: Record<string, any>) => dateFormatter.format(new Date(item.created_at)),
+	},
+	{
+		title: "Updated At",
+		key: "updated_at",
+		sort: (a: string, b: string) => new Date(a).getTime() - new Date(b).getTime(),
+		value: (item: Record<string, any>) => dateFormatter.format(new Date(item.updated_at)),
+	},
+])
+
+const selectReview = (_event: PointerEvent, row: any) => {
+	const review = row.item as Review
+	useReviewStore().loadReview(review.id)
+	useRouter().push({ name: "index" })
+}
+const search = ref("")
 </script>
 
 <style scoped>

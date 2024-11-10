@@ -73,9 +73,11 @@ export const useReviewStore = defineStore("reviews", () => {
 		reviews.value = allReviews.flat()
 	}
 
-	const loadReview = async (review: Review) => {
+	const loadReview = async (id?: string) => {
 		//set currentReview, load editors
-		if (!review.id) return
+		if (!id) return
+		const review = reviews.value?.find((review) => review.id === id)
+		if (!review) return
 		currentReview.value = review
 		const path = `${basePath}/${review.user_id}/${review.id}`
 		const editorsPath = `${path}/editors`
