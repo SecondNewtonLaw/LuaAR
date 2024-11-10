@@ -43,24 +43,39 @@
 			</v-col>
 		</v-row>
 
-		<VDialog :model-value="reviewsInDialog.length > 0" width="auto">
+		<VDialog :model-value="reviewsInDialog.length > 0" width="auto" @after-leave="reviewsInDialog = []">
 			<v-card
 				max-width="400"
 				prepend-icon="mdi-information"
 				text="Select a review to add as an editor"
-				title="Select Review"
-			>
+				title="Select Review">
 				<v-card-text>
 					<v-list>
 						<v-list-item
 							v-for="review in reviewsInDialog"
 							:key="review.id"
-							@click="addEditorFromReview(review.id || '')"
-						>
+							@click="addEditorFromReview(review.id || '')">
 							<v-list-item-title>{{ review.title }}</v-list-item-title>
 							<v-list-item-subtitle
 								>{{ new Date(review.created_at).toLocaleString() }} by {{ review.user_id }}
 							</v-list-item-subtitle>
+							<v-chip color="primary" small
+								>{{
+									Math.floor(
+										(new Date().getTime() - new Date(review.created_at).getTime()) /
+											(1000 * 60 * 60 * 24)
+									)
+								}}
+								days
+								{{
+									Math.floor(
+										((new Date().getTime() - new Date(review.created_at).getTime()) %
+											(1000 * 60 * 60 * 24)) /
+											(1000 * 60 * 60)
+									)
+								}}
+								hours ago</v-chip
+							>
 						</v-list-item>
 					</v-list>
 				</v-card-text>
@@ -110,7 +125,6 @@ const promptReviewChoice = () => {
 	}
 }
 const addEditorFromReview = async (id: string) => {
-	reviewsInDialog.value = []
 	const review = reviewStore.reviews?.find((review) => review.id === id)
 	if (review && review.id) {
 		editorStore.addEditor((await reviewStore.getEditorsFromReview(review.id))[0])

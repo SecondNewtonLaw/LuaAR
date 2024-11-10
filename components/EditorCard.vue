@@ -42,7 +42,7 @@
 		<v-expand-transition>
 			<v-card-text v-show="!editor.collapsed">
 				<!-- Deprecated -->
-				<div v-if="deprecatedCount > 0">Deprecated API found: {{ deprecatedCount }}</div>
+				<div v-if="deprecatedCount.length">Deprecated API found: {{ deprecatedCount }}</div>
 				<MonacoEditor
 					:options="{
 						theme: 'customTheme',
@@ -80,70 +80,18 @@ const props = defineProps<{
 }>()
 const deprecatedAPI = ref([
 	/^\s*wait\s*(\([^\)]*\))?\s*$/i, // Detects `wait`, `wait()`, and `wait(with param)`
+	/^\s*spawn\s*(\([^\)]*\))?\s*$/i, // Detects `spawn`, `spawn()`, and `spawn(with param)`
 ])
 
-const deprecatedCount = ref(0)
-const applyRegexCheck = (container: HTMLElement) => {
-	const viewLines = container.querySelectorAll<HTMLSpanElement>(".view-line span")
-	viewLines.forEach((line) => {
-		const words = line.textContent?.split(/\s+/).filter((word) => word.length > 0) || []
-		words.forEach((word, index) => {
-			const span = line.children[index] as HTMLElement
-			if (!span) return
-			const matches = deprecatedAPI.value.some((regex) => regex.test(word))
-			if (matches) {
-				span.classList.add("matched-class")
-
-				deprecatedCount.value++
-			} else {
-				span.classList.remove("matched-class")
-			}
-		})
-	})
-}
-
-let debounceTimeout: ReturnType<typeof setTimeout> | null = null
+const deprecatedCount = computed(() => {
+	return props.editor.input.split("\n").filter((line) => deprecatedAPI.value.some((regex) => regex.test(line)))
+})
 
 const duplicateEditor = (event: MouseEvent, index: number) => {
 	if (event.ctrlKey) return navigator.clipboard.writeText(editorStore.editors[index].input)
 
-	editorStore.editors.push({
-		input: editorStore.editors[index].input,
-		selected: false,
-		collapsed: false,
-	})
+	editorStore.editors.push({ ...editorStore.editors[index] })
 }
-
-onMounted(async () => {
-	const editorContainer = document.querySelector<HTMLElement>(`.editor-${props.index}`)
-	if (!editorContainer) return
-	const observer = new MutationObserver((mutations) => {
-		if (debounceTimeout) {
-			clearTimeout(debounceTimeout)
-		}
-		debounceTimeout = setTimeout(() => {
-			mutations.forEach((mutation) => {
-				if (mutation.type === "childList") {
-					deprecatedCount.value = 0
-					applyRegexCheck(editorContainer)
-				}
-			})
-		}, 200)
-	})
-
-	onBeforeUnmount(() => {
-		observer.disconnect()
-		if (debounceTimeout) {
-			clearTimeout(debounceTimeout)
-		}
-	})
-	await new Promise((resolve) => setTimeout(resolve, 1000))
-
-	observer.observe(editorContainer, {
-		childList: true,
-		subtree: true,
-	})
-})
 </script>
 
 <style scoped lang="scss">
