@@ -123,9 +123,9 @@ export const useReviewStore = defineStore("reviews", () => {
 		loadReviews()
 	}
 
-	const removeReview = async (review: Review) => {
+	const removeReview = async (id: string) => {
 		await makeReviewsDir()
-		await remove(`${basePath}/${review.user_id}/${review.id}`, {
+		await remove(`${basePath}/${id}`, {
 			...dirOptions,
 			recursive: true,
 		})

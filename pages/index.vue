@@ -10,15 +10,21 @@
 		<v-row>
 			<v-col>
 				<v-btn-group>
-					<v-btn icon @click="editorStore.addEditor">
+					<v-btn icon @click="editorStore.addEditor()">
 						<v-icon>mdi-plus</v-icon>
 						<v-tooltip activator="parent" location="bottom">Add Editor</v-tooltip>
 					</v-btn>
-					<v-btn icon v-if="reviewed" :disabled="!hasPreviousReview" @click="promptReviewChoice">
+					<v-btn
+						icon
+						width="56px"
+						v-if="reviewed"
+						:disabled="!hasPreviousReview"
+						@click="promptReviewChoice()">
 						<v-icon>mdi-plus</v-icon>
-						<v-tooltip activator="parent" location="bottom">Add Editor from Review</v-tooltip>
+						<v-icon>mdi-comment-text-outline</v-icon>
+						<v-tooltip activator="parent" location="bottom">Add Editor from other Review(s)</v-tooltip>
 					</v-btn>
-					<v-btn icon @click="editorStore.resetEditors">
+					<v-btn icon @click="editorStore.resetEditors()">
 						<v-icon>mdi-refresh</v-icon>
 						<v-tooltip activator="parent" location="bottom" text="Reset Editors" />
 					</v-btn>
@@ -26,8 +32,8 @@
 						<v-icon>mdi-file-compare</v-icon>
 						<v-tooltip activator="parent" location="bottom">Show Diff</v-tooltip>
 					</v-btn>
-					<v-btn icon @click="reviewStore.saveReview">
-						<v-icon>mdi-content-save</v-icon>
+					<v-btn icon @click="reviewStore.saveReview()">
+						<v-icon>mdi-content-save-outline</v-icon>
 						<v-tooltip activator="parent" location="bottom">Save Review</v-tooltip>
 					</v-btn>
 				</v-btn-group>
@@ -59,23 +65,7 @@
 							<v-list-item-subtitle
 								>{{ new Date(review.created_at).toLocaleString() }} by {{ review.user_id }}
 							</v-list-item-subtitle>
-							<v-chip color="primary" small
-								>{{
-									Math.floor(
-										(new Date().getTime() - new Date(review.created_at).getTime()) /
-											(1000 * 60 * 60 * 24)
-									)
-								}}
-								days
-								{{
-									Math.floor(
-										((new Date().getTime() - new Date(review.created_at).getTime()) %
-											(1000 * 60 * 60 * 24)) /
-											(1000 * 60 * 60)
-									)
-								}}
-								hours ago</v-chip
-							>
+							<v-chip color="primary" small>{{ formatTimeAgo(review.created_at) }} ago</v-chip>
 						</v-list-item>
 					</v-list>
 				</v-card-text>
@@ -136,10 +126,13 @@ const newReview = () => {
 	reviewStore.newReview()
 }
 
-// onMounted(async () => {
-// 	const response = await fetch("example.luau")
-// 	editors.value[0].input = await response.text()
-// })
+const formatTimeAgo = (date: string) => {
+	const now = new Date().getTime()
+	const createdAt = new Date(date).getTime()
+	const days = Math.floor((now - createdAt) / (1000 * 60 * 60 * 24))
+	const hours = Math.floor(((now - createdAt) % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
+	return `${days} days ${hours} hours`
+}
 </script>
 
 <style scoped lang="scss">

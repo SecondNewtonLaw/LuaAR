@@ -21,12 +21,12 @@ onMounted(async () => {
 </script>
 
 <style lang="scss" scoped>
-.container {
-	display: flex;
-	flex-direction: column;
-	min-height: 100vh;
-	max-width: 90rem;
-	margin: 0 auto;
-	padding: 0 1rem;
-}
+// .container {
+// 	display: flex;
+// 	flex-direction: column;
+// 	min-height: 100vh;
+// 	max-width: 90rem;
+// 	margin: 0 auto;
+// 	padding: 0 1rem;
+// }
 </style>
