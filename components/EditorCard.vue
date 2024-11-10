@@ -128,7 +128,7 @@ onMounted(async () => {
 					applyRegexCheck(editorContainer)
 				}
 			})
-		}, 500)
+		}, 200)
 	})
 
 	onBeforeUnmount(() => {

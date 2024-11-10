@@ -58,16 +58,11 @@ export const useReviewStore = defineStore("reviews", () => {
 	}
 	const loadReviews = async () => {
 		await makeReviewsDir()
-		const usersList = await readDir(basePath, dirOptions)
+		const reviewList = await readDir(basePath, dirOptions)
 		const allReviews = await Promise.all(
-			usersList.map(async (user) => {
-				const userReviewsList = await readDir(`${basePath}/${user.name}`, dirOptions)
-				return Promise.all(
-					userReviewsList.map(async (review) => {
-						const data = await readFile(`${basePath}/${user.name}/${review.name}/meta.json`, dirOptions)
-						return JSON.parse(new TextDecoder().decode(data)) as Review
-					})
-				)
+			reviewList.map(async (review) => {
+				const data = await readFile(`${basePath}/${review.name}/meta.json`, dirOptions)
+				return JSON.parse(new TextDecoder().decode(data)) as Review
 			})
 		)
 		reviews.value = allReviews.flat()
@@ -77,9 +72,14 @@ export const useReviewStore = defineStore("reviews", () => {
 		//set currentReview, load editors
 		if (!id) return
 		const review = reviews.value?.find((review) => review.id === id)
-		if (!review) return
+		if (!review || !review.id) return
 		currentReview.value = review
-		const path = `${basePath}/${review.user_id}/${review.id}`
+
+		editorStore.editors = await getEditorsFromReview(review.id)
+	}
+
+	const getEditorsFromReview = async (review_id: string) => {
+		const path = `${basePath}/${review_id}`
 		const editorsPath = `${path}/editors`
 		const editorsList = await readDir(editorsPath, dirOptions)
 		const editors = await Promise.all(
@@ -88,10 +88,8 @@ export const useReviewStore = defineStore("reviews", () => {
 				return new TextDecoder().decode(data)
 			})
 		)
-		editorStore.editors = editors.map((editor) => JSON.parse(editor))
-		console.log(editorStore.editors)
+		return editors.map((editor) => JSON.parse(editor))
 	}
-
 	const saveReview = async () => {
 		await makeReviewsDir()
 		const review = currentReview.value
@@ -100,7 +98,7 @@ export const useReviewStore = defineStore("reviews", () => {
 			review.created_at = new Date().toISOString()
 		}
 		review.updated_at = new Date().toISOString()
-		const path = `${basePath}/${review.user_id}/${review.id}`
+		const path = `${basePath}/${review.id}`
 		await makeReviewDir(path)
 
 		let encoder = new TextEncoder()
@@ -144,5 +142,6 @@ export const useReviewStore = defineStore("reviews", () => {
 		saveReview,
 		removeReview,
 		newReview,
+		getEditorsFromReview,
 	}
 })

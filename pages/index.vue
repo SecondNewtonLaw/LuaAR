@@ -42,6 +42,30 @@
 				<DiffViewer :originalContent="originalContent" v-model:modifiedContent="modifiedContent" />
 			</v-col>
 		</v-row>
+
+		<VDialog :model-value="reviewsInDialog.length > 0" width="auto">
+			<v-card
+				max-width="400"
+				prepend-icon="mdi-information"
+				text="Select a review to add as an editor"
+				title="Select Review"
+			>
+				<v-card-text>
+					<v-list>
+						<v-list-item
+							v-for="review in reviewsInDialog"
+							:key="review.id"
+							@click="addEditorFromReview(review.id || '')"
+						>
+							<v-list-item-title>{{ review.title }}</v-list-item-title>
+							<v-list-item-subtitle
+								>{{ new Date(review.created_at).toLocaleString() }} by {{ review.user_id }}
+							</v-list-item-subtitle>
+						</v-list-item>
+					</v-list>
+				</v-card-text>
+			</v-card>
+		</VDialog>
 	</v-container>
 </template>
 
@@ -68,28 +92,28 @@ const showDiff = () => {
 }
 
 const reviewed = computed(() => reviewStore.currentReview.id)
+const reviewsInDialog = ref<Review[]>([])
 const hasPreviousReview = computed(
 	() =>
 		(reviewStore.reviews || []).filter((review) => review.user_id === reviewStore.currentReview.user_id).length > 1
 )
 
 const promptReviewChoice = () => {
-	const reviews = reviewStore.reviews?.filter((review) => review.user_id === reviewStore.currentReview.user_id)
-	if (reviews && reviews.length > 2) {
-		//show dialog with options
+	const reviews = reviewStore.reviews?.filter(
+		(review) => review.user_id === reviewStore.currentReview.user_id && review.id !== reviewStore.currentReview.id
+	)
+	if (!reviews) return
+	if (reviews.length > 1) {
+		reviewsInDialog.value = reviews
 	} else {
-		const review = reviews?.find((review) => review.id !== reviewStore.currentReview.id)
-		addEditorFromReview(review?.id || "")
+		addEditorFromReview(reviews[0]?.id || "")
 	}
 }
-const addEditorFromReview = (id: string) => {
+const addEditorFromReview = async (id: string) => {
+	reviewsInDialog.value = []
 	const review = reviewStore.reviews?.find((review) => review.id === id)
-	if (review) {
-		editorStore.addEditor({
-			input: review.review,
-			collapsed: false,
-			selected: false,
-		})
+	if (review && review.id) {
+		editorStore.addEditor((await reviewStore.getEditorsFromReview(review.id))[0])
 	}
 }
 const newReview = () => {

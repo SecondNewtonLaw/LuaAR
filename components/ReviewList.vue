@@ -23,17 +23,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from "vue"
-export interface Review {
-	title: string
-	created_at: string
-	updated_at: string
-	url: string
-	user_id: string
-	review: string
-	id?: string
-}
-const props = defineProps<{
+defineProps<{
 	reviews?: Review[]
 }>()
 
@@ -74,8 +64,4 @@ const selectReview = (_event: PointerEvent, row: any) => {
 const search = ref("")
 </script>
 
-<style scoped>
-.review-card {
-	cursor: pointer;
-}
-</style>
+<style scoped></style>
