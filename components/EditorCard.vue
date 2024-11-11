@@ -2,7 +2,7 @@
 	<v-card>
 		<v-card-title>
 			<div class="title-content">
-				Editor {{ index + 1 }}
+				Editor
 				<v-checkbox v-model="editor.selected" density="compact" hide-details>
 					<v-tooltip activator="parent" location="bottom">Select Editor</v-tooltip>
 				</v-checkbox>
@@ -20,34 +20,34 @@
 
 			<VToolbar flat color="transparent">
 				<v-btn-group>
-					<v-btn @click="editorStore.stripCode(index)"> Strip Code </v-btn>
-					<v-btn @click="editorStore.formatCode(index)" :disabled="editor.input === '' || !tauri.isTauri">
+					<v-btn @click="editorStore.stripCode(editor)"> Strip Code </v-btn>
+					<v-btn @click="editorStore.formatCode(editor)" :disabled="editor.input === '' || !tauri.isTauri">
 						Format Code
 					</v-btn>
 					<!-- Remove logs -->
-					<v-btn @click="editorStore.removeLogs(index)">
+					<v-btn @click="editorStore.removeLogs(editor)">
 						Remove Logs
 						<v-tooltip activator="parent" location="bottom">Remove all prints, warns, and errors</v-tooltip>
 					</v-btn>
-					<!-- Lint -->
-					<v-btn icon @click="editorStore.lintCode(index)" :disabled="editor.input === '' || !tauri.isTauri">
+					<!-- Lint
+					<v-btn icon @click="editorStore.lintCode(editor)" :disabled="editor.input === '' || !tauri.isTauri">
 						<v-icon>mdi-alert-circle</v-icon>
 						<v-tooltip activator="parent" location="bottom">Lint Code</v-tooltip>
-					</v-btn>
+					</v-btn> -->
 				</v-btn-group>
 				<v-btn-group>
-					<v-btn icon @click="editorStore.toggleCollapse(index)">
+					<v-btn icon @click="editorStore.toggleCollapse(editor)">
 						<v-icon>{{ editor.collapsed ? "mdi-chevron-down" : "mdi-chevron-up" }}</v-icon>
 						<v-tooltip activator="parent" location="bottom">{{
 							editor.collapsed ? "Expand" : "Collapse"
 						}}</v-tooltip>
 					</v-btn>
-					<v-btn icon @click="editorStore.removeEditor(index)">
+					<v-btn icon @click="editorStore.removeEditor(editor)">
 						<v-icon>mdi-close</v-icon>
 						<v-tooltip activator="parent" location="bottom">Remove Editor</v-tooltip>
 					</v-btn>
 					<!-- Duplicate -->
-					<v-btn icon @click="duplicateEditor($event, index)">
+					<v-btn icon @click="duplicateEditor">
 						<v-icon>mdi-content-copy</v-icon>
 						<v-tooltip activator="parent" location="bottom">Duplicate Editor</v-tooltip>
 					</v-btn>
@@ -56,13 +56,36 @@
 		</v-card-title>
 		<v-expand-transition>
 			<v-card-text v-show="!editor.collapsed">
-				<!-- Deprecated -->
-				<div v-if="deprecatedCount.definitive.length > 0">
-					Deprecated API found: {{ deprecatedCount.definitive.length }}
-				</div>
-				<div v-if="deprecatedCount.warning.length > 0">
-					Warning: Deprecated API found: {{ deprecatedCount.warning.length }}
-				</div>
+				<v-chip v-if="codeInfoCount.definitive.length > 0" color="error" text-color="white">
+					Deprecated API found: {{ codeInfoCount.definitive.length }}
+					<v-tooltip activator="parent" location="bottom">
+						<v-list>
+							<v-list-item v-for="(line, index) in codeInfoCount.definitive" :key="index">
+								<VListItemTitle>{{ line }}</VListItemTitle>
+							</v-list-item>
+						</v-list>
+					</v-tooltip>
+				</v-chip>
+
+				<v-chip v-if="codeInfoCount.warning.length > 0" color="warning" text-color="white">
+					Warning: Deprecated API found: {{ codeInfoCount.warning.length }}
+					<v-tooltip activator="parent" location="bottom">
+						<v-list>
+							<v-list-item v-for="(line, index) in codeInfoCount.warning" :key="index">
+								<VListItemTitle>{{ line }}</VListItemTitle>
+							</v-list-item>
+						</v-list>
+					</v-tooltip>
+				</v-chip>
+
+				<v-chip
+					v-if="codeInfoCount.info.length > 0"
+					color="info"
+					text-color="white"
+					v-for="info in codeInfoCount.info">
+					{{ info }}
+				</v-chip>
+
 				<MonacoEditor
 					:options="{
 						theme: 'vs-dark',
@@ -83,7 +106,7 @@
 					}"
 					lang="lua"
 					v-model="editor.input"
-					:class="['editor', 'editor-' + index]" />
+					:class="['editor']" />
 			</v-card-text>
 		</v-expand-transition>
 	</v-card>
@@ -95,32 +118,37 @@ const editorStore = useEditorStore()
 
 const props = defineProps<{
 	editor: Editor
-	index: number
 }>()
 const deprecatedAPI = ref([
-	/^\s*wait\s*(\([^\)]*\))?\s*$/i, // Detects `wait`, `wait()`, and `wait(with param)`
-	/^\s*spawn\s*(\([^\)]*\))?\s*$/i, // Detects `spawn`, `spawn()`, and `spawn(with param)`
+	/^\s*wait\s*(\([^\)]*\))?\s*$/i,
+	/^\s*spawn\s*(\([^\)]*\))?\s*$/i,
+	/\bSetPrimaryPartCFrame\b/i,
 ])
 
 const warnDeprecatedAPI = ref([
-	/^\s*LoadAnimation\s*(\([^\)]*\))?\s*$/i, // Detects `LoadAnimation`, `LoadAnimation()`, and `LoadAnimation(with param)`
+	/^\s*LoadAnimation\s*(\([^\)]*\))?\s*$/i,
+	/\bBodyVelocity\b/i,
+	/\bBodyGyro\b/i,
+	/\bLoadAnimation\b/i,
 ])
 
-const deprecatedCount = computed(() => {
+const codeInfoCount = computed(() => {
+	const input = props.editor.input
 	return {
-		definitive: props.editor.input
-			.split("\n")
-			.filter((line) => deprecatedAPI.value.some((regex) => regex.test(line))),
-		warning: props.editor.input
-			.split("\n")
-			.filter((line) => warnDeprecatedAPI.value.some((regex) => regex.test(line))),
+		definitive: input.split("\n").filter((line) => deprecatedAPI.value.some((regex) => regex.test(line))),
+		warning: input.split("\n").filter((line) => warnDeprecatedAPI.value.some((regex) => regex.test(line))),
+		info: [
+			stripInput(input).split("\n").length < 200 ? "Code is less than 200 LOC" : null,
+			`Code has ${countWhitelines(input)} whitelines`,
+			`Code has ${countComments(input)} comments`,
+		].filter((_) => _),
 	}
 })
 
-const duplicateEditor = (event: MouseEvent, index: number) => {
-	if (event.ctrlKey) return navigator.clipboard.writeText(editorStore.editors[index].input)
+const duplicateEditor = (event: MouseEvent) => {
+	if (event.ctrlKey) return navigator.clipboard.writeText(props.editor.input)
 
-	editorStore.editors.push({ ...editorStore.editors[index] })
+	editorStore.editors.push({ ...props.editor })
 }
 </script>
 

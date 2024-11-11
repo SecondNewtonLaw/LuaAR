@@ -45,13 +45,15 @@ const props = defineProps<{
 const userReviewCounts = computed(() => {
 	const counts: Record<string, number> = {}
 	return (
-		props.reviews?.map((review) => {
-			if (!counts[review.user_id]) {
-				counts[review.user_id] = 0
-			}
-			counts[review.user_id]++
-			return { ...review, userReviewIndex: counts[review.user_id] }
-		}) || []
+		props.reviews
+			?.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
+			.map((review) => {
+				if (!counts[review.user_id]) {
+					counts[review.user_id] = 0
+				}
+				counts[review.user_id]++
+				return { ...review, userReviewIndex: counts[review.user_id] }
+			}) || []
 	)
 })
 

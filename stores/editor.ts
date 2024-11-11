@@ -25,62 +25,57 @@ export const useEditorStore = defineStore("editors", () => {
 		editors.value = [{ input: "", collapsed: false, selected: false }]
 	}
 
-	const toggleCollapse = (index: number) => {
-		editors.value[index].collapsed = !editors.value[index].collapsed
+	const toggleCollapse = (editor: Editor) => {
+		editor.collapsed = !editor.collapsed
 	}
 
-	const removeEditor = (index: number) => {
+	const removeEditor = (editor: Editor) => {
+		const index = editors.value.indexOf(editor)
 		editors.value.splice(index, 1)
+		if (editors.value.length === 0) {
+			addEditor()
+		}
 	}
 
-	const formatCode = async (index: number) => {
+	const formatCode = async (editor: Editor) => {
 		if (!tauri.isTauri) return
 
 		try {
-			const code = editors.value[index].input
+			const code = editor.input
 			const result = await invoke<string>("format_code", {
 				luaCode: code,
 			})
 
-			editors.value[index].input = result
+			editor.input = result
 		} catch (error) {
 			console.error("Error formatting code:", error)
 		}
 	}
 
-	const lintCode = async (index: number) => {
-		if (!tauri.isTauri) return
+	// const lintCode = async (index: number) => {
+	// 	if (!tauri.isTauri) return
 
-		try {
-			const code = editors.value[index].input
-			const result = await invoke<string>("lint_code", {
-				luaCode: code,
-			})
+	// 	try {
+	// 		const code = editors.value[index].input
+	// 		const result = await invoke<string>("lint_code", {
+	// 			luaCode: code,
+	// 		})
 
-			console.log(result)
-		} catch (error) {
-			console.error("Error linting code:", error)
-		}
+	// 		console.log(result)
+	// 	} catch (error) {
+	// 		console.error("Error linting code:", error)
+	// 	}
+	// }
+
+	const stripCode = (editor: Editor) => {
+		editor.input = stripInput(editor.input)
 	}
 
-	const stripCode = (index: number) => {
-		let code = editors.value[index].input
-
-		code = code.replace(/--\[\[[\s\S]*?\]\]/g, "")
-		code = code.replace(/--.*$/gm, "")
-
-		// Remove empty lines
-		editors.value[index].input = code
-			.split("\n")
-			.filter((line) => line.trim() !== "")
-			.join("\n")
-	}
-
-	const removeLogs = (index: number) => {
+	const removeLogs = (editor: Editor) => {
 		//remove all print, warn and error statements ^.*(print|warn|error)\(.*\).*\n?
-		let code = editors.value[index].input
+		let code = editor.input
 		code = code.replace(/^.*(print|warn|error)\(.*\).*\n?/gm, "")
-		editors.value[index].input = code
+		editor.input = code
 	}
 	return {
 		editors,
@@ -90,7 +85,7 @@ export const useEditorStore = defineStore("editors", () => {
 		toggleCollapse,
 		removeEditor,
 		formatCode,
-		lintCode,
+		// lintCode,
 		stripCode,
 		removeLogs,
 	}
