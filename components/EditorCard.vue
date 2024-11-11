@@ -14,6 +14,11 @@
 					<v-btn @click="editorStore.formatCode(index)" :disabled="editor.input === '' || !tauri.isTauri">
 						Format Code
 					</v-btn>
+					<!-- Remove logs -->
+					<v-btn @click="editorStore.removeLogs(index)">
+						Remove Logs
+						<v-tooltip activator="parent" location="bottom">Remove all prints, warns, and errors</v-tooltip>
+					</v-btn>
 					<!-- Lint -->
 					<v-btn icon @click="editorStore.lintCode(index)" :disabled="editor.input === '' || !tauri.isTauri">
 						<v-icon>mdi-alert-circle</v-icon>
@@ -45,7 +50,7 @@
 				<div v-if="deprecatedCount.length">Deprecated API found: {{ deprecatedCount }}</div>
 				<MonacoEditor
 					:options="{
-						theme: 'customTheme',
+						theme: 'vs-dark',
 						dropIntoEditor: {
 							enabled: true,
 							showDropSelector: 'afterDrop',
@@ -63,8 +68,7 @@
 					}"
 					lang="lua"
 					v-model="editor.input"
-					:class="['editor', 'editor-' + index]"
-				/>
+					:class="['editor', 'editor-' + index]" />
 			</v-card-text>
 		</v-expand-transition>
 	</v-card>

@@ -4,6 +4,7 @@ export interface Editor {
 	input: string
 	collapsed: boolean
 	selected: boolean
+	title?: string
 }
 
 export const useEditorStore = defineStore("editors", () => {
@@ -12,6 +13,7 @@ export const useEditorStore = defineStore("editors", () => {
 			input: "",
 			collapsed: false,
 			selected: false,
+			title: "Main",
 		},
 	])
 	const tauri = useTauri()

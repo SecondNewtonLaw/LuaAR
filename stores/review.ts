@@ -8,6 +8,7 @@ export interface Review {
 	user_id: string
 	review: string
 	id?: string
+	evidence: string[]
 }
 export const useReviewStore = defineStore("reviews", () => {
 	const reviews = ref<Review[]>()
@@ -19,7 +20,10 @@ export const useReviewStore = defineStore("reviews", () => {
 		url: "",
 		user_id: "",
 		review: "",
+		evidence: [],
 	})
+
+	const evidence = ref<File[]>([])
 
 	const basePath = "reviews"
 	const dirOptions = {
@@ -34,7 +38,9 @@ export const useReviewStore = defineStore("reviews", () => {
 			url: "",
 			review: "",
 			user_id: "",
+			evidence: [],
 		}
+		evidence.value = []
 		editorStore.resetEditors()
 	}
 	const makeReviewsDir = async () => {
@@ -62,7 +68,8 @@ export const useReviewStore = defineStore("reviews", () => {
 		const allReviews = await Promise.all(
 			reviewList.map(async (review) => {
 				const data = await readFile(`${basePath}/${review.name}/meta.json`, dirOptions)
-				return JSON.parse(new TextDecoder().decode(data)) as Review
+				const reviewData = JSON.parse(new TextDecoder().decode(data)) as Review
+				return reviewData
 			})
 		)
 		reviews.value = allReviews.flat()
@@ -113,7 +120,6 @@ export const useReviewStore = defineStore("reviews", () => {
 
 		// Save each editor with their index as a .txt file
 		editors.forEach(async (editor, index) => {
-			console.log(editor)
 			let editorData = encoder.encode(JSON.stringify(editor))
 
 			await writeFile(`${editorsPath}/${index}.json`, editorData, dirOptions)
@@ -134,8 +140,26 @@ export const useReviewStore = defineStore("reviews", () => {
 		loadReviews()
 	}
 
+	watchEffect(async () => {
+		//change evidence files to base64
+		const files = evidence.value
+		//use readAsDataURL to convert files to base64
+		const promises = files.map((file) => {
+			return new Promise((resolve, reject) => {
+				const reader = new FileReader()
+				reader.onload = () => {
+					resolve(reader.result)
+				}
+				reader.onerror = reject
+				reader.readAsDataURL(file)
+			})
+		})
+		const base64Files = await Promise.all(promises)
+		currentReview.value.evidence = base64Files as string[]
+	})
 	return {
 		currentReview,
+		evidence,
 		reviews,
 		loadReviews,
 		loadReview,

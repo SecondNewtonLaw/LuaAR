@@ -21,6 +21,13 @@
 				<v-chip color="primary" v-if="item.url" small :href="item.url" @click.stop>{{ item.url }}</v-chip>
 				<v-chip color="grey" v-else small>None</v-chip>
 			</template>
+			<template #item.evidence="{ item }">
+				<v-checkbox @click.stop readonly :model-value="!!item.evidence && item.evidence.length > 0">
+					<v-tooltip activator="parent" location="bottom">
+						{{ item.evidence ? `Evidence provided (${item.evidence.length})` : `No evidence provided` }}
+					</v-tooltip>
+				</v-checkbox>
+			</template>
 			<template #item.actions="{ item }">
 				<v-icon small @click.stop="removeReview(item)">mdi-trash-can</v-icon>
 			</template>
@@ -63,6 +70,7 @@ const headers = ref([
 
 	{ title: "Title", key: "title" },
 	{ title: "URL", key: "url" },
+	{ title: "Evidence", key: "evidence" },
 
 	{
 		title: "Created At",
