@@ -57,7 +57,12 @@
 		<v-expand-transition>
 			<v-card-text v-show="!editor.collapsed">
 				<!-- Deprecated -->
-				<div v-if="deprecatedCount.length">Deprecated API found: {{ deprecatedCount }}</div>
+				<div v-if="deprecatedCount.definitive.length > 0">
+					Deprecated API found: {{ deprecatedCount.definitive.length }}
+				</div>
+				<div v-if="deprecatedCount.warning.length > 0">
+					Warning: Deprecated API found: {{ deprecatedCount.warning.length }}
+				</div>
 				<MonacoEditor
 					:options="{
 						theme: 'vs-dark',
@@ -97,8 +102,19 @@ const deprecatedAPI = ref([
 	/^\s*spawn\s*(\([^\)]*\))?\s*$/i, // Detects `spawn`, `spawn()`, and `spawn(with param)`
 ])
 
+const warnDeprecatedAPI = ref([
+	/^\s*LoadAnimation\s*(\([^\)]*\))?\s*$/i, // Detects `LoadAnimation`, `LoadAnimation()`, and `LoadAnimation(with param)`
+])
+
 const deprecatedCount = computed(() => {
-	return props.editor.input.split("\n").filter((line) => deprecatedAPI.value.some((regex) => regex.test(line)))
+	return {
+		definitive: props.editor.input
+			.split("\n")
+			.filter((line) => deprecatedAPI.value.some((regex) => regex.test(line))),
+		warning: props.editor.input
+			.split("\n")
+			.filter((line) => warnDeprecatedAPI.value.some((regex) => regex.test(line))),
+	}
 })
 
 const duplicateEditor = (event: MouseEvent, index: number) => {

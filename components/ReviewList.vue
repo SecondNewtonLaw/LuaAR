@@ -28,6 +28,7 @@
 					</v-tooltip>
 				</v-checkbox>
 			</template>
+
 			<template #item.actions="{ item }">
 				<v-icon small @click.stop="removeReview(item)">mdi-trash-can</v-icon>
 			</template>
@@ -70,6 +71,7 @@ const headers = ref([
 
 	{ title: "Title", key: "title" },
 	{ title: "URL", key: "url" },
+
 	{ title: "Evidence", key: "evidence" },
 
 	{

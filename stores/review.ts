@@ -90,12 +90,12 @@ export const useReviewStore = defineStore("reviews", () => {
 		const editorsPath = `${path}/editors`
 		const editorsList = await readDir(editorsPath, dirOptions)
 		const editors = await Promise.all(
-			editorsList.map(async (editor) => {
-				const data = await readFile(`${editorsPath}/${editor.name}`, dirOptions)
-				return new TextDecoder().decode(data)
+			editorsList.map(async (editorFile) => {
+				const data = await readFile(`${editorsPath}/${editorFile.name}`, dirOptions)
+				return JSON.parse(new TextDecoder().decode(data)) as Editor
 			})
 		)
-		return editors.map((editor) => JSON.parse(editor))
+		return editors
 	}
 	const saveReview = async () => {
 		await makeReviewsDir()

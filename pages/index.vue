@@ -117,7 +117,9 @@ const promptReviewChoice = () => {
 const addEditorFromReview = async (id: string) => {
 	const review = reviewStore.reviews?.find((review) => review.id === id)
 	if (review && review.id) {
-		editorStore.addEditor((await reviewStore.getEditorsFromReview(review.id))[0])
+		const editor = (await reviewStore.getEditorsFromReview(review.id))[0]
+		editor.title = `From Review: #${review.id} | ${editor.title ?? "Editor 1"}`
+		editorStore.addEditor(editor)
 	}
 }
 const newReview = () => {
