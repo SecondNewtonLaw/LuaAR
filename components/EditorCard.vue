@@ -6,6 +6,16 @@
 				<v-checkbox v-model="editor.selected" density="compact" hide-details>
 					<v-tooltip activator="parent" location="bottom">Select Editor</v-tooltip>
 				</v-checkbox>
+				<!-- Title input -->
+				<v-text-field
+					v-model="editor.title"
+					variant="solo"
+					label="Title"
+					placeholder="Enter title"
+					density="compact"
+					prepend-inner-icon="mdi-text"
+					single-line
+					hide-details></v-text-field>
 			</div>
 
 			<VToolbar flat color="transparent">

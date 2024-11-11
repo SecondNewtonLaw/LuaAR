@@ -13,7 +13,6 @@ export const useEditorStore = defineStore("editors", () => {
 			input: "",
 			collapsed: false,
 			selected: false,
-			title: "Main",
 		},
 	])
 	const tauri = useTauri()
