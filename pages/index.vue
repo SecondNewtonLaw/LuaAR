@@ -45,7 +45,10 @@
 			</v-col>
 
 			<v-col v-if="diffVisible" cols="12">
-				<DiffViewer :originalContent="originalContent" v-model:modifiedContent="modifiedContent" />
+				<DiffViewer
+					:originalContent="originalContent"
+					:modifiedContent="modifiedContent"
+					v-model="diffVisible" />
 			</v-col>
 		</v-row>
 

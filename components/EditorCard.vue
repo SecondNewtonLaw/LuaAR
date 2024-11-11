@@ -56,36 +56,33 @@
 		</v-card-title>
 		<v-expand-transition>
 			<v-card-text v-show="!editor.collapsed">
-				<v-chip v-if="codeInfoCount.definitive.length > 0" color="error" text-color="white">
-					Deprecated API found: {{ codeInfoCount.definitive.length }}
-					<v-tooltip activator="parent" location="bottom">
-						<v-list>
-							<v-list-item v-for="(line, index) in codeInfoCount.definitive" :key="index">
-								<VListItemTitle>{{ line }}</VListItemTitle>
-							</v-list-item>
-						</v-list>
-					</v-tooltip>
-				</v-chip>
-
-				<v-chip v-if="codeInfoCount.warning.length > 0" color="warning" text-color="white">
-					Warning: Deprecated API found: {{ codeInfoCount.warning.length }}
-					<v-tooltip activator="parent" location="bottom">
-						<v-list>
-							<v-list-item v-for="(line, index) in codeInfoCount.warning" :key="index">
-								<VListItemTitle>{{ line }}</VListItemTitle>
-							</v-list-item>
-						</v-list>
-					</v-tooltip>
-				</v-chip>
-
-				<v-chip
-					v-if="codeInfoCount.info.length > 0"
-					color="info"
-					text-color="white"
-					v-for="info in codeInfoCount.info">
-					{{ info }}
-				</v-chip>
-
+				<div class="code-info-chips">
+					<CodeInfoChip
+						v-if="codeInfoCount.definitive.length > 0"
+						:count="codeInfoCount.definitive.length"
+						color="error"
+						text="Deprecated API found"
+						:details="codeInfoCount.definitive" />
+					<CodeInfoChip
+						v-if="codeInfoCount.warning.length > 0"
+						:count="codeInfoCount.warning.length"
+						color="warning"
+						text="Warning: Deprecated API found"
+						:details="codeInfoCount.warning" />
+					<CodeInfoChip
+						v-if="codeInfoCount.incorrect.length > 0"
+						:count="codeInfoCount.incorrect.length"
+						color="error"
+						text="Incorrect API usage"
+						:details="codeInfoCount.incorrect" />
+					<CodeInfoChip
+						v-if="codeInfoCount.info.length > 0"
+						v-for="(info, index) in codeInfoCount.info"
+						:key="index"
+						:count="null"
+						color="info"
+						:text="info" />
+				</div>
 				<MonacoEditor
 					:options="{
 						theme: 'vs-dark',
@@ -119,11 +116,7 @@ const editorStore = useEditorStore()
 const props = defineProps<{
 	editor: Editor
 }>()
-const deprecatedAPI = ref([
-	/^\s*wait\s*(\([^\)]*\))?\s*$/i,
-	/^\s*spawn\s*(\([^\)]*\))?\s*$/i,
-	/\bSetPrimaryPartCFrame\b/i,
-])
+const deprecatedAPI = ref([/^\s*(wait|delay|spawn)\s*(\([^\)]*\))?\s*$/i, /\bSetPrimaryPartCFrame\b/i])
 
 const warnDeprecatedAPI = ref([
 	/^\s*LoadAnimation\s*(\([^\)]*\))?\s*$/i,
@@ -132,16 +125,20 @@ const warnDeprecatedAPI = ref([
 	/\bLoadAnimation\b/i,
 ])
 
+const incorrectAPI = ref([/\bFindFirstChild\w*\s*\([^\)]*\)\s*:/i])
+
 const codeInfoCount = computed(() => {
 	const input = props.editor.input
 	return {
 		definitive: input.split("\n").filter((line) => deprecatedAPI.value.some((regex) => regex.test(line))),
 		warning: input.split("\n").filter((line) => warnDeprecatedAPI.value.some((regex) => regex.test(line))),
+		incorrect: input.split("\n").filter((line) => incorrectAPI.value.some((regex) => regex.test(line))),
 		info: [
-			stripInput(input).split("\n").length < 200 ? "Code is less than 200 LOC" : null,
+			stripLoggingStatements(stripInput(input)).split("\n").length < 200 ? "Code is less than 200 LOC" : null,
 			`Code has ${countWhitelines(input)} whitelines`,
 			`Code has ${countComments(input)} comments`,
-		].filter((_) => _),
+			`Code has ${countLogs(input)} logs`,
+		].filter((_) => _ !== null),
 	}
 })
 
@@ -171,6 +168,13 @@ const duplicateEditor = (event: MouseEvent) => {
 .v-btn {
 	margin: 0 5px;
 	border-radius: 0;
+}
+
+.code-info-chips {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+	margin-bottom: 0.5rem;
 }
 </style>
 

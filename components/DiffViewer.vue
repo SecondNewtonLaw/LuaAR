@@ -1,16 +1,21 @@
 <template>
 	<v-card>
-		<v-card-title>Diff Viewer</v-card-title>
+		<v-card-title>
+			Diff Viewer
+			<v-spacer></v-spacer>
+			<v-btn icon @click="visible = false">
+				<v-icon>mdi-close</v-icon>
+			</v-btn>
+		</v-card-title>
 		<v-card-text>
 			<MonacoDiffEditor
 				:original="originalContent"
-				v-model="modifiedContent"
+				:model-value="modifiedContent"
 				:options="{
 					theme: 'vs-dark',
 				}"
 				:lang="useEditorStore().currentLanguage"
-				class="editor"
-			/>
+				class="editor" />
 		</v-card-text>
 	</v-card>
 </template>
@@ -18,9 +23,10 @@
 <script lang="ts" setup>
 defineProps<{
 	originalContent: string
+	modifiedContent: string
 }>()
 
-const modifiedContent = defineModel<string>("modifiedContent")
+const visible = defineModel<boolean>()
 </script>
 
 <style scoped lang="scss">

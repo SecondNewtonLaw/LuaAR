@@ -48,7 +48,7 @@ export const useEditorStore = defineStore("editors", () => {
 
 			editor.input = result
 		} catch (error) {
-			console.error("Error formatting code:", error)
+			console.log("Error formatting code:", error)
 		}
 	}
 
@@ -72,10 +72,7 @@ export const useEditorStore = defineStore("editors", () => {
 	}
 
 	const removeLogs = (editor: Editor) => {
-		//remove all print, warn and error statements ^.*(print|warn|error)\(.*\).*\n?
-		let code = editor.input
-		code = code.replace(/^.*(print|warn|error)\(.*\).*\n?/gm, "")
-		editor.input = code
+		editor.input = stripLoggingStatements(editor.input)
 	}
 	return {
 		editors,

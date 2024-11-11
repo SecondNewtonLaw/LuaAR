@@ -16,6 +16,7 @@
 			item-key="id"
 			class="elevation-1"
 			:sort-by="sortBy"
+			:custom-filter="customFilter"
 			@click:row="selectReview">
 			<template #item.url="{ item }">
 				<v-chip color="primary" v-if="item.url" small :href="item.url" @click.stop>{{ item.url }}</v-chip>
@@ -100,10 +101,35 @@ const selectReview = (_event: PointerEvent, row: any) => {
 	useRouter().push({ name: "index" })
 }
 const search = ref("")
+const dates = ref(["", ""])
 
 const removeReview = (review: Review) => {
 	if (!review.id) return
 	reviewStore.removeReview(review.id)
+}
+
+interface InternalItem<T = any> {
+	value: any
+	raw: T
+}
+const customFilter = (
+	_value: string,
+	_query: string,
+	item?: InternalItem<Review>
+): boolean | number | [number, number] | [number, number][] => {
+	if (!search.value && !dates.value) return true
+	if (!item) return false
+
+	const review = item.raw as Review
+	const searchLower = search.value.toLowerCase()
+
+	const matchesSearch =
+		review.user_id.toLowerCase().includes(searchLower) ||
+		review.review.toLowerCase().includes(searchLower) ||
+		review.title.toLowerCase().includes(searchLower) ||
+		(!!review.url && review.url.toLowerCase().includes(searchLower))
+
+	return matchesSearch
 }
 </script>
 
