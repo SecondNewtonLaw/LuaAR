@@ -1,4 +1,5 @@
 import { BaseDirectory, exists, mkdir, readDir, readFile, remove, writeFile } from "@tauri-apps/plugin-fs"
+import { toast } from "vuetify-sonner"
 
 export interface Review {
 	title: string
@@ -100,6 +101,7 @@ export const useReviewStore = defineStore("reviews", () => {
 	const saveReview = async () => {
 		await makeReviewsDir()
 		const review = currentReview.value
+		const update = !!review.id
 		if (!review.id) {
 			review.id = crypto.randomUUID()
 			review.created_at = new Date().toISOString()
@@ -125,6 +127,7 @@ export const useReviewStore = defineStore("reviews", () => {
 			await writeFile(`${editorsPath}/${index}.json`, editorData, dirOptions)
 		})
 
+		toast.success(`Review ${update ? "updated" : "created"}`)
 		// Reload reviews
 		loadReviews()
 	}
@@ -136,6 +139,7 @@ export const useReviewStore = defineStore("reviews", () => {
 			recursive: true,
 		})
 
+		toast.info("Review removed")
 		// Reload reviews
 		loadReviews()
 	}

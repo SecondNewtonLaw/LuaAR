@@ -1,4 +1,5 @@
 import { invoke } from "@tauri-apps/api/core"
+import { toast } from "vuetify-sonner"
 
 export interface Editor {
 	input: string
@@ -19,10 +20,12 @@ export const useEditorStore = defineStore("editors", () => {
 	const currentLanguage = ref<string>("lua")
 	const addEditor = (editor?: Editor) => {
 		editors.value.push(editor ?? { input: "", collapsed: false, selected: false })
+		toast.success("New editor added")
 	}
 
 	const resetEditors = () => {
 		editors.value = [{ input: "", collapsed: false, selected: false }]
+		toast.info("Editors reset")
 	}
 
 	const toggleCollapse = (editor: Editor) => {
@@ -35,6 +38,8 @@ export const useEditorStore = defineStore("editors", () => {
 		if (editors.value.length === 0) {
 			addEditor()
 		}
+
+		toast.info("Editor removed")
 	}
 
 	const formatCode = async (editor: Editor) => {
@@ -47,8 +52,10 @@ export const useEditorStore = defineStore("editors", () => {
 			})
 
 			editor.input = result
+			toast.success("Code formatted")
 		} catch (error) {
 			console.log("Error formatting code:", error)
+			toast.error("Error formatting code")
 		}
 	}
 
@@ -69,10 +76,12 @@ export const useEditorStore = defineStore("editors", () => {
 
 	const stripCode = (editor: Editor) => {
 		editor.input = stripInput(editor.input)
+		toast.success("Stripped code")
 	}
 
 	const removeLogs = (editor: Editor) => {
 		editor.input = stripLoggingStatements(editor.input)
+		toast.success("Logs removed")
 	}
 	return {
 		editors,
