@@ -41,7 +41,7 @@
 		</v-row>
 		<v-row>
 			<v-col :cols="editors.length > 1 ? 6 : 12" v-for="(editor, index) in editors" :key="index">
-				<EditorCard :editor :index />
+				<EditorCard :editor />
 			</v-col>
 
 			<v-col v-if="diffVisible" cols="12">
@@ -66,7 +66,7 @@
 							@click="addEditorFromReview(review.id || '')">
 							<v-list-item-title>{{ review.title }}</v-list-item-title>
 							<v-list-item-subtitle
-								>{{ new Date(review.created_at).toLocaleString() }} by {{ review.user_id }}
+								>{{ new Date(review.created_at).toLocaleString() }}
 							</v-list-item-subtitle>
 							<v-chip color="primary" small>{{ formatTimeAgo(review.created_at) }} ago</v-chip>
 						</v-list-item>
@@ -78,6 +78,8 @@
 </template>
 
 <script lang="ts" setup>
+import { toast } from "vuetify-sonner"
+
 const editorStore = useEditorStore()
 const reviewStore = useReviewStore()
 const editors = computed(() => editorStore.editors)
@@ -107,9 +109,12 @@ const hasPreviousReview = computed(
 )
 
 const promptReviewChoice = () => {
-	const reviews = reviewStore.reviews?.filter(
-		(review) => review.user_id === reviewStore.currentReview.user_id && review.id !== reviewStore.currentReview.id
-	)
+	const reviews = reviewStore.reviews
+		?.filter(
+			(review) =>
+				review.user_id === reviewStore.currentReview.user_id && review.id !== reviewStore.currentReview.id
+		)
+		.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
 	if (!reviews) return
 	if (reviews.length > 1) {
 		reviewsInDialog.value = reviews
@@ -118,6 +123,7 @@ const promptReviewChoice = () => {
 	}
 }
 const addEditorFromReview = async (id: string) => {
+	reviewsInDialog.value = []
 	const review = reviewStore.reviews?.find((review) => review.id === id)
 	if (review && review.id) {
 		const editor = (await reviewStore.getEditorsFromReview(review.id))[0]
@@ -126,7 +132,7 @@ const addEditorFromReview = async (id: string) => {
 	}
 }
 const newReview = () => {
-	console.log(form.value.form)
+	toast.success("New Review Created")
 	form.value?.form?.reset()
 	reviewStore.newReview()
 }

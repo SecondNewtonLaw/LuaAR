@@ -125,7 +125,7 @@ const warnDeprecatedAPI = ref([
 	/\bLoadAnimation\b/i,
 ])
 
-const incorrectAPI = ref([/\bFindFirstChild\w*\s*\([^\)]*\)\s*:/i])
+const incorrectAPI = ref([/\bFindFirst\w*\s*\([^\)]*\)\s*:/i])
 
 const codeInfoCount = computed(() => {
 	const input = props.editor.input

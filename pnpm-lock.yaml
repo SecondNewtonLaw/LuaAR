@@ -47,6 +47,9 @@ importers:
       vuetify-nuxt-module:
         specifier: ^0.18.3
         version: 0.18.3(magicast@0.3.5)(rollup@4.24.4)(typescript@5.6.3)(vite@5.4.10(@types/node@22.9.0)(sass-embedded@1.80.6)(terser@5.36.0))(vue@3.5.12(typescript@5.6.3))
+      vuetify-sonner:
+        specifier: ^0.3.20
+        version: 0.3.20(vue@3.5.12(typescript@5.6.3))(vuetify@3.7.4)
     devDependencies:
       '@tauri-apps/cli':
         specifier: ^2.0.4
@@ -3579,6 +3582,9 @@ packages:
     peerDependencies:
       vue: ^3.2.0
 
+  vue-sonner@1.2.5:
+    resolution: {integrity: sha512-dAFCdq2cYxEwvW4gHuJhySCXklmxOWzjl5QwkNL9IIdkqyvSkdu+YnAbnJBdIAH/zo1bhXTuGG+m0Two4AX/KA==}
+
   vue@3.5.12:
     resolution: {integrity: sha512-CLVZtXtn2ItBIi/zHZ0Sg1Xkb7+PU32bJJ8Bmy7ts3jxXTcbfsEfBivFYYWz1Hur+lalqGAh65Coin0r+HRUfg==}
     peerDependencies:
@@ -3589,6 +3595,12 @@ packages:
 
   vuetify-nuxt-module@0.18.3:
     resolution: {integrity: sha512-Mv5mcqfqk5dR9oVJiITXn5p4NmDzp57AR2Txf/0iIoAjFlMsDWzTpUvn9ELTzDI3Z0LjiYVqptwxrOlMcju2Wg==}
+
+  vuetify-sonner@0.3.20:
+    resolution: {integrity: sha512-ym1Wng0PCPaABYTmlnn7ibvhmQJIGyXnJVaW/OfG+cH9MGF9FiSDxO2jTr4M/Y823GZVIEQDLGirSm0Xo2SKjA==}
+    peerDependencies:
+      vue: ^3.3.0
+      vuetify: ^3.3.0
 
   vuetify@3.7.4:
     resolution: {integrity: sha512-Y8UU5wUDQXC3oz2uumPb8IOdvB4XMCxtxnmqdOc+LihNuPlkSgxIwf92ndRzbOtJFKHsggFUxpyLqpQp+A+5kg==}
@@ -7491,6 +7503,8 @@ snapshots:
       '@vue/devtools-api': 6.6.4
       vue: 3.5.12(typescript@5.6.3)
 
+  vue-sonner@1.2.5: {}
+
   vue@3.5.12(typescript@5.6.3):
     dependencies:
       '@vue/compiler-dom': 3.5.12
@@ -7523,6 +7537,12 @@ snapshots:
       - vue
       - webpack-plugin-vuetify
       - webpack-sources
+
+  vuetify-sonner@0.3.20(vue@3.5.12(typescript@5.6.3))(vuetify@3.7.4):
+    dependencies:
+      vue: 3.5.12(typescript@5.6.3)
+      vue-sonner: 1.2.5
+      vuetify: 3.7.4(typescript@5.6.3)(vite-plugin-vuetify@2.0.4)(vue@3.5.12(typescript@5.6.3))
 
   vuetify@3.7.4(typescript@5.6.3)(vite-plugin-vuetify@2.0.4)(vue@3.5.12(typescript@5.6.3)):
     dependencies:

@@ -2,19 +2,13 @@
 	<NuxtLayout>
 		<NuxtPage />
 	</NuxtLayout>
+	<VSonner :duration="2500" position="bottom-right" />
 </template>
 
 <script setup lang="ts">
+import { VSonner } from "vuetify-sonner"
+import "vuetify-sonner/style.css"
 const reviewStore = useReviewStore()
-import * as monaco from "monaco-editor"
-
-// Define a custom theme
-monaco.editor.defineTheme("customTheme", {
-	base: "vs-dark",
-	inherit: true,
-	colors: {},
-	rules: [],
-})
 
 const title = "Lua Application Reader Copilot"
 useHead({
