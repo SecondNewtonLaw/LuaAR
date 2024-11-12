@@ -1,12 +1,8 @@
 <template>
 	<v-container>
-		<v-row>
-			<v-col cols="12" class="flex-column d-flex ga-lg-3">
-				<v-btn color="primary" appendIcon="mdi-plus" @click="newReview">NEW REVIEW</v-btn>
+		<v-btn color="primary" appendIcon="mdi-plus" class="mb-2" @click="newReview">NEW REVIEW</v-btn>
+		<CurrentReview class="mb-6" ref="form" />
 
-				<CurrentReview ref="form" />
-			</v-col>
-		</v-row>
 		<v-row>
 			<v-col>
 				<v-btn-group>

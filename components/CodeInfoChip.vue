@@ -1,5 +1,5 @@
 <template>
-	<v-chip :color="color" text-color="white">
+	<v-chip :color="color">
 		{{ text }} <template v-if="count">: {{ count }}</template>
 		<v-tooltip v-if="details?.length" activator="parent" location="bottom">
 			<v-list>

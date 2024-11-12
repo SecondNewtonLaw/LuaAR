@@ -18,4 +18,8 @@ useHead({
 })
 
 onMounted(reviewStore.loadReviews)
+
+await callOnce(async () => {
+	console.log("Hello from the server!")
+})
 </script>

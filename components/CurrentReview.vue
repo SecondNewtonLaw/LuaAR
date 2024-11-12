@@ -1,6 +1,7 @@
 <template>
 	<v-card ref="card">
 		<v-card-title>
+			<!-- Back icon to go to the previous review -->
 			Current Review
 			<!-- Show adding or editing according to if id is set label with tooltip -->
 			<v-chip color="primary" label>
@@ -10,59 +11,86 @@
 				</v-tooltip>
 			</v-chip>
 		</v-card-title>
+		<v-card-subtitle>
+			{{
+				reviewStore.currentReview.created_at
+					? `Created at: ${new Date(reviewStore.currentReview.created_at).toLocaleString()}`
+					: "New Review"
+			}}
+			<br />
+			{{
+				reviewStore.currentReview.updated_at
+					? `Updated at: ${new Date(reviewStore.currentReview.updated_at).toLocaleString()}`
+					: ""
+			}}
+		</v-card-subtitle>
 		<v-card-item>
 			<v-form validate-on="input lazy" ref="form">
 				<v-combobox
 					label="Title"
 					clearable
+					variant="solo-filled"
 					v-model="reviewStore.currentReview.title"
-					:rules="[(v) => !!v || 'Title is required']"
 					@update:search="titleSelected"
 					:items="existingTitles"></v-combobox>
 				<v-text-field
 					label="URL"
+					variant="solo-filled"
+					append-inner-icon="mdi-link"
+					placeholder="https://hiddendevs.com/applications/1"
 					clearable
 					v-model="reviewStore.currentReview.url"
 					:rules="[
-						(v) => !!v || 'URL is required',
-						(v) => /^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/i.test(v) || 'Must be a valid URL',
-						(v) => v.includes('hiddendevs.com') || 'URL must be from hiddendevs.com domain',
+						(v) => !v || /^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/i.test(v) || 'Must be a valid URL',
+						(v) => !v || v.includes('hiddendevs.com') || 'URL must be from hiddendevs.com domain',
 					]"></v-text-field>
 
 				<v-combobox
 					label="User ID"
 					clearable
+					variant="solo-filled"
 					v-model="reviewStore.currentReview.user_id"
 					@update:search="userIdSelected"
-					:items="existingUserIds"
-					:rules="[(v) => !!v || 'User ID is required']"></v-combobox>
+					:items="existingUserIds" />
 
-				<v-textarea
-					label="Review"
-					auto-grow
-					clearable
-					v-model="reviewStore.currentReview.review"
-					:rules="[(v) => !!v || 'Review is required']"></v-textarea>
+				<v-row>
+					<v-col>
+						<v-textarea
+							label="Review"
+							append-inner-icon="mdi-message-text"
+							variant="solo-filled"
+							auto-grow
+							v-model="reviewStore.currentReview.review">
+						</v-textarea>
+					</v-col>
+					<v-col v-if="previousReview" cols="4">
+						<v-textarea
+							label="Previous Review"
+							auto-grow
+							variant="solo-filled"
+							disabled
+							v-model="previousReview.review"
+							readonly></v-textarea>
+					</v-col>
+				</v-row>
 
 				<!-- evidence multiple images -->
 				<v-file-input
 					clearable
 					multiple
 					chips
+					variant="solo-filled"
+					prepend-icon=""
+					append-inner-icon="mdi-image-multiple"
 					counter
 					label="Evidence"
 					v-model="reviewStore.evidence"></v-file-input>
 
-				<div class="d-flex flex-row mb-6">
-					<v-img
-						:src="base64"
-						:max-height="200"
-						:max-width="200"
-						class="ma-2 pa-2"
-						v-for="base64 in reviewStore.currentReview.evidence"
-						:key="base64">
-					</v-img>
-				</div>
+				<v-row justify="start">
+					<v-col v-for="base64 in reviewStore.currentReview.evidence" :key="base64">
+						<v-img :src="base64" :max-height="300" class="ma-2 pa-2"> </v-img>
+					</v-col>
+				</v-row>
 			</v-form>
 		</v-card-item>
 	</v-card>
@@ -113,6 +141,15 @@ const handlePaste = (event: ClipboardEvent) => {
 		}
 	}
 }
+
+const previousReview = computed(
+	() =>
+		reviewStore.reviews
+			?.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+			.filter((review) => review.user_id === reviewStore.currentReview.user_id)[
+			reviewStore.currentReview.id ? 1 : 0
+		]
+)
 
 onMounted(() => {
 	if (!card.value) return

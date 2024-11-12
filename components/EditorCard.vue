@@ -116,7 +116,12 @@ const editorStore = useEditorStore()
 const props = defineProps<{
 	editor: Editor
 }>()
-const deprecatedAPI = ref([/^\s*(wait|delay|spawn)\s*(\([^\)]*\))?\s*$/i, /\bSetPrimaryPartCFrame\b/i])
+const deprecatedAPI = ref([
+	/^\s*(wait|delay|spawn)\s*(\([^\)]*\))?\s*$/i,
+	/\bSetPrimaryPartCFrame\b/i,
+	/\bgame\.Chat\b/i,
+	/\bGetService\s*\(\s*["']Chat["']\s*\)/i,
+])
 
 const warnDeprecatedAPI = ref([
 	/^\s*LoadAnimation\s*(\([^\)]*\))?\s*$/i,
