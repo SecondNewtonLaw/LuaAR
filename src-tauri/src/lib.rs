@@ -1,6 +1,8 @@
 use std::process::Command;
 use tauri::command;
-
+use tauri::path::BaseDirectory;
+use tauri::AppHandle;
+use tauri::Manager;
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -21,8 +23,9 @@ pub fn run() {
 }
 
 #[command]
-fn format_code(lua_code: String) -> Result<String, String> {
-    let stylua_path = std::path::Path::new("src/assets/stylua.exe");
+fn format_code(app_handle: AppHandle, lua_code: String) -> Result<String, String> {
+    let stylua_path = app_handle.path().resolve("assets/stylua.exe", BaseDirectory::Resource).map_err(|e| e.to_string())?;
+    println!("Stylua path: {:?}", stylua_path);
     let config_path = stylua_path.parent().unwrap().join("stylua.toml");
 
     let output = Command::new(stylua_path)

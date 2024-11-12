@@ -14,12 +14,14 @@
 			<v-form validate-on="input lazy" ref="form">
 				<v-combobox
 					label="Title"
+					clearable
 					v-model="reviewStore.currentReview.title"
 					:rules="[(v) => !!v || 'Title is required']"
 					@update:search="titleSelected"
 					:items="existingTitles"></v-combobox>
 				<v-text-field
 					label="URL"
+					clearable
 					v-model="reviewStore.currentReview.url"
 					:rules="[
 						(v) => !!v || 'URL is required',
@@ -29,6 +31,7 @@
 
 				<v-combobox
 					label="User ID"
+					clearable
 					v-model="reviewStore.currentReview.user_id"
 					@update:search="userIdSelected"
 					:items="existingUserIds"
@@ -37,11 +40,18 @@
 				<v-textarea
 					label="Review"
 					auto-grow
+					clearable
 					v-model="reviewStore.currentReview.review"
 					:rules="[(v) => !!v || 'Review is required']"></v-textarea>
 
 				<!-- evidence multiple images -->
-				<v-file-input multiple chips counter label="Evidence" v-model="reviewStore.evidence"></v-file-input>
+				<v-file-input
+					clearable
+					multiple
+					chips
+					counter
+					label="Evidence"
+					v-model="reviewStore.evidence"></v-file-input>
 
 				<div class="d-flex flex-row mb-6">
 					<v-img
