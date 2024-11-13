@@ -188,7 +188,7 @@ export const useReviewStore = defineStore("reviews", () => {
 		loadReviews()
 	}
 
-	const removeReview = async (id: string) => {
+	const removeReview = async (id: string, tried?: boolean) => {
 		try {
 			await makeReviewsDir()
 			await remove(`${basePath.value}/${id}`, {
@@ -197,8 +197,13 @@ export const useReviewStore = defineStore("reviews", () => {
 			})
 			toast.info("Review removed")
 		} catch (error) {
-			toast.error("Failed to remove review")
-			console.log(error)
+			if (!tried) return setTimeout(() => removeReview(id, true), 100)
+			if (!basePath.value.includes("G:")) {
+				toast.error("Failed to remove review")
+				console.log(error)
+			}
+		} finally {
+			if (tried) toast.info("Review removed")
 		}
 		// Reload reviews
 		loadReviews()
