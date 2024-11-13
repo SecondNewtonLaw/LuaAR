@@ -11,9 +11,6 @@
 <script lang="ts" setup>
 const reviewStore = useReviewStore()
 const reviews = computed(() => reviewStore.reviews)
-const refreshReviews = reviewStore.loadReviews
-
-onMounted(refreshReviews)
 </script>
 
 <style scoped>

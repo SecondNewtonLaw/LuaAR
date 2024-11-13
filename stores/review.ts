@@ -32,6 +32,7 @@ export const useReviewStore = defineStore("reviews", () => {
 		localStorage.getItem("chosenPath") ? localStorage.getItem("chosenPath") : null
 	)
 	watch(chosenPath, (path) => {
+		console.log("chosenPath changed")
 		if (path) {
 			localStorage.setItem("chosenPath", path)
 		} else {
@@ -52,6 +53,7 @@ export const useReviewStore = defineStore("reviews", () => {
 	watch(
 		currentReview,
 		() => {
+			console.log("currentReview changed")
 			if (silent.value) return
 			const newReview = currentReview.value
 			isTouched.value = JSON.stringify(newReview) !== oldReview
@@ -94,6 +96,7 @@ export const useReviewStore = defineStore("reviews", () => {
 	}
 	const loadReviews = async () => {
 		try {
+			console.log("loading reviews")
 			await makeReviewsDir()
 			const reviewList = await readDir(basePath.value, dirOptions.value)
 			const allReviews = await Promise.all(
@@ -202,6 +205,7 @@ export const useReviewStore = defineStore("reviews", () => {
 	}
 
 	watchEffect(async () => {
+		console.log("evidence changed")
 		//change evidence files to base64
 		const files = evidence.value
 		//use readAsDataURL to convert files to base64
@@ -220,6 +224,7 @@ export const useReviewStore = defineStore("reviews", () => {
 	})
 
 	watch(basePath, () => {
+		console.log("basePath changed")
 		loadReviews()
 	})
 

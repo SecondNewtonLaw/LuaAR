@@ -83,21 +83,34 @@ const props = defineProps<{
 	reviews?: Review[]
 }>()
 
+const counts = ref<Record<string, number>>({})
+
+watchEffect(() => {
+	if (!props.reviews) return
+
+	const newCounts: Record<string, number> = {}
+	props.reviews.forEach((review) => {
+		const id = review.user_id
+		if (!id) return
+		newCounts[id] = (newCounts[id] || 0) + 1
+	})
+	counts.value = newCounts
+})
 const userReviewCounts = computed(() => {
-	const counts: Record<string, number> = {}
-	return (
-		props.reviews
-			?.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
-			.map((review) => {
-				const id = review.user_id
-				if (!id) return { ...review, userReviewIndex: 0 }
-				if (!counts[id]) {
-					counts[id] = 0
-				}
-				counts[id]++
-				return { ...review, userReviewIndex: counts[id] }
-			}) || []
-	)
+	if (!props.reviews) return []
+
+	console.log("Sorting reviews")
+	return props.reviews
+		.slice() // Create a shallow copy to avoid mutating props
+		.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
+		.map((review) => {
+			const id = review.user_id
+			if (!id) return { ...review, userReviewIndex: 0 }
+			return {
+				...review,
+				userReviewIndex: counts.value[id] || 0,
+			}
+		})
 })
 
 const dateFormatter = new Intl.DateTimeFormat("en-US", {
