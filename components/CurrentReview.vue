@@ -90,7 +90,7 @@
 							auto-grow
 							variant="solo-filled"
 							disabled
-							v-model="previousReview.review"
+							:model-value="previousReview.review"
 							readonly></v-textarea>
 					</v-col>
 				</v-row>

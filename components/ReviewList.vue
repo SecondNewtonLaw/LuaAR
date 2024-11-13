@@ -103,7 +103,6 @@ watchEffect(() => {
 const userReviewCounts = computed(() => {
 	if (!props.reviews) return []
 
-	console.log("Sorting reviews")
 	return props.reviews
 		.slice() // Create a shallow copy to avoid mutating props
 		.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
