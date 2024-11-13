@@ -28,17 +28,30 @@ export const useReviewStore = defineStore("reviews", () => {
 
 	const evidence = ref<File[]>([])
 
-	const basePath = "reviews"
-	const dirOptions = {
-		baseDir: BaseDirectory.AppData,
-	}
+	const chosenPath = ref<string | null>(
+		localStorage.getItem("chosenPath") ? localStorage.getItem("chosenPath") : null
+	)
+	watch(chosenPath, (path) => {
+		if (path) {
+			localStorage.setItem("chosenPath", path)
+		} else {
+			localStorage.removeItem("chosenPath")
+		}
+	})
+	const basePath = computed(() => chosenPath.value ?? "reviews")
+	const dirOptions = computed(() =>
+		chosenPath.value
+			? undefined
+			: {
+					baseDir: BaseDirectory.AppData,
+			  }
+	)
 
 	const isTouched = ref(false)
 	const silent = ref(false)
 	watch(
 		currentReview,
 		() => {
-			console.log("watch", silent.value)
 			if (silent.value) return
 			const newReview = currentReview.value
 			isTouched.value = JSON.stringify(newReview) !== oldReview
@@ -61,35 +74,40 @@ export const useReviewStore = defineStore("reviews", () => {
 		editorStore.resetEditors()
 	}
 	const makeReviewsDir = async () => {
-		const reviewsFolder = await exists(basePath, dirOptions)
+		const reviewsFolder = await exists(basePath.value, dirOptions.value)
 		if (!reviewsFolder) {
-			await mkdir(basePath, {
-				...dirOptions,
+			await mkdir(basePath.value, {
+				...dirOptions.value,
 				recursive: true,
 			})
 		}
 	}
 
 	const makeReviewDir = async (path: string) => {
-		const userFolder = await exists(path, dirOptions)
+		const userFolder = await exists(path, dirOptions.value)
 		if (!userFolder) {
 			await mkdir(path, {
-				...dirOptions,
+				...dirOptions.value,
 				recursive: true,
 			})
 		}
 	}
 	const loadReviews = async () => {
-		await makeReviewsDir()
-		const reviewList = await readDir(basePath, dirOptions)
-		const allReviews = await Promise.all(
-			reviewList.map(async (review) => {
-				const data = await readFile(`${basePath}/${review.name}/meta.json`, dirOptions)
-				const reviewData = JSON.parse(new TextDecoder().decode(data)) as Review
-				return reviewData
-			})
-		)
-		reviews.value = allReviews.flat()
+		try {
+			await makeReviewsDir()
+			const reviewList = await readDir(basePath.value, dirOptions.value)
+			const allReviews = await Promise.all(
+				reviewList.map(async (review) => {
+					const data = await readFile(`${basePath.value}/${review.name}/meta.json`, dirOptions.value)
+					const reviewData = JSON.parse(new TextDecoder().decode(data)) as Review
+					return reviewData
+				})
+			)
+			reviews.value = allReviews.flat()
+		} catch (error) {
+			toast.error("Failed to load reviews")
+			console.log(error)
+		}
 	}
 
 	const loadReview = async (id?: string) => {
@@ -103,16 +121,22 @@ export const useReviewStore = defineStore("reviews", () => {
 	}
 
 	const getEditorsFromReview = async (review_id: string) => {
-		const path = `${basePath}/${review_id}`
-		const editorsPath = `${path}/editors`
-		const editorsList = await readDir(editorsPath, dirOptions)
-		const editors = await Promise.all(
-			editorsList.map(async (editorFile) => {
-				const data = await readFile(`${editorsPath}/${editorFile.name}`, dirOptions)
-				return JSON.parse(new TextDecoder().decode(data)) as Editor
-			})
-		)
-		return editors
+		try {
+			const path = `${basePath.value}/${review_id}`
+			const editorsPath = `${path}/editors`
+			const editorsList = await readDir(editorsPath, dirOptions.value)
+			const editors = await Promise.all(
+				editorsList.map(async (editorFile) => {
+					const data = await readFile(`${editorsPath}/${editorFile.name}`, dirOptions.value)
+					return JSON.parse(new TextDecoder().decode(data)) as Editor
+				})
+			)
+			return editors
+		} catch (error) {
+			toast.error("Failed to load editors")
+			console.log(error)
+			return []
+		}
 	}
 	const saveReview = async () => {
 		if (!isTouched.value) return toast.info("No changes to save")
@@ -125,12 +149,17 @@ export const useReviewStore = defineStore("reviews", () => {
 			review.created_at = new Date().toISOString()
 		}
 		review.updated_at = new Date().toISOString()
-		const path = `${basePath}/${review.id}`
+		const path = `${basePath.value}/${review.id}`
 		await makeReviewDir(path)
 
 		let encoder = new TextEncoder()
 		let data = encoder.encode(JSON.stringify(review))
-		await writeFile(`${path}/meta.json`, data, dirOptions)
+		try {
+			await writeFile(`${path}/meta.json`, data, { ...dirOptions.value })
+		} catch (error) {
+			toast.error("Failed to save review metadata")
+			console.log(error)
+		}
 
 		// Get active editors from editorStore
 
@@ -138,12 +167,16 @@ export const useReviewStore = defineStore("reviews", () => {
 		const editorsPath = `${path}/editors`
 		await makeReviewDir(editorsPath)
 
-		// Save each editor with their index as a .txt file
-		editors.forEach(async (editor, index) => {
-			let editorData = encoder.encode(JSON.stringify(editor))
-
-			await writeFile(`${editorsPath}/${index}.json`, editorData, dirOptions)
-		})
+		try {
+			const saveEditorsPromises = editors.map(async (editor, index) => {
+				let editorData = encoder.encode(JSON.stringify(editor))
+				await writeFile(`${editorsPath}/${index}.json`, editorData, dirOptions.value)
+			})
+			await Promise.all(saveEditorsPromises)
+		} catch (error) {
+			toast.error("Failed to save editors")
+			console.log(error)
+		}
 
 		toast.success(`Review ${update ? "updated" : "created"}`)
 		oldReview = JSON.stringify(currentReview.value)
@@ -153,13 +186,17 @@ export const useReviewStore = defineStore("reviews", () => {
 	}
 
 	const removeReview = async (id: string) => {
-		await makeReviewsDir()
-		await remove(`${basePath}/${id}`, {
-			...dirOptions,
-			recursive: true,
-		})
-
-		toast.info("Review removed")
+		try {
+			await makeReviewsDir()
+			await remove(`${basePath.value}/${id}`, {
+				...dirOptions.value,
+				recursive: true,
+			})
+			toast.info("Review removed")
+		} catch (error) {
+			toast.error("Failed to remove review")
+			console.log(error)
+		}
 		// Reload reviews
 		loadReviews()
 	}
@@ -181,11 +218,17 @@ export const useReviewStore = defineStore("reviews", () => {
 		const base64Files = await Promise.all(promises)
 		currentReview.value.evidence = base64Files as string[]
 	})
+
+	watch(basePath, () => {
+		loadReviews()
+	})
+
 	return {
 		currentReview,
 		isTouched,
 		evidence,
 		reviews,
+		chosenPath,
 		loadReviews,
 		loadReview,
 		saveReview,

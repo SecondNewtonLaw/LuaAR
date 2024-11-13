@@ -1,50 +1,99 @@
 {
-	"$schema": "../gen/schemas/desktop-schema.json",
-	"identifier": "default",
-	"description": "enables the default permissions",
-	"windows": ["main"],
-	"permissions": [
-		"core:default",
-		"fs:default",
-		{
-			"identifier": "fs:allow-exists",
-			"allow": [{ "path": "$APPDATA/*" }]
-		},
-		{
-			"identifier": "fs:allow-appdata-read-recursive",
-			"allow": [{ "path": "$APPDATA/**", "access": "read" }]
-		},
-		{
-			"identifier": "fs:allow-appdata-write-recursive",
-			"allow": [{ "path": "$APPDATA/**", "access": "write" }]
-		},
-		{
-			"identifier": "fs:allow-appdata-read",
-			"allow": [{ "path": "$APPDATA/*", "access": "read" }]
-		},
-		{
-			"identifier": "fs:allow-appdata-write",
-			"allow": [{ "path": "$APPDATA/*", "access": "write" }]
-		},
-		{
-			"identifier": "fs:allow-appdata-meta-recursive",
-			"allow": [{ "path": "$APPDATA/**", "access": "metadata" }]
-		},
-		{
-			"identifier": "fs:allow-appdata-meta",
-			"allow": [{ "path": "$APPDATA/*", "access": "metadata" }]
-		},
-		{
-			"identifier": "fs:scope-appdata-recursive",
-			"scope": [{ "path": "$APPDATA/**" }]
-		},
-		{
-			"identifier": "fs:scope-appdata",
-			"scope": [{ "path": "$APPDATA/*" }]
-		},
-		{
-			"identifier": "fs:scope-appdata-index",
-			"scope": [{ "path": "$APPDATA" }]
-		}
-	]
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "enables the default permissions",
+  "windows": [
+    "main"
+  ],
+  "permissions": [
+    "core:default",
+    "fs:default",
+    {
+      "identifier": "fs:allow-exists",
+      "allow": [
+        {
+          "path": "$APPDATA/*"
+        }
+      ]
+    },
+    {
+      "identifier": "fs:allow-appdata-read-recursive",
+      "allow": [
+        {
+          "path": "$APPDATA/**",
+          "access": "read"
+        }
+      ]
+    },
+    {
+      "identifier": "fs:allow-appdata-write-recursive",
+      "allow": [
+        {
+          "path": "$APPDATA/**",
+          "access": "write"
+        }
+      ]
+    },
+    {
+      "identifier": "fs:allow-appdata-read",
+      "allow": [
+        {
+          "path": "$APPDATA/*",
+          "access": "read"
+        }
+      ]
+    },
+    {
+      "identifier": "fs:allow-appdata-write",
+      "allow": [
+        {
+          "path": "$APPDATA/*",
+          "access": "write"
+        }
+      ]
+    },
+    {
+      "identifier": "fs:allow-appdata-meta-recursive",
+      "allow": [
+        {
+          "path": "$APPDATA/**",
+          "access": "metadata"
+        }
+      ]
+    },
+    {
+      "identifier": "fs:allow-appdata-meta",
+      "allow": [
+        {
+          "path": "$APPDATA/*",
+          "access": "metadata"
+        }
+      ]
+    },
+    {
+      "identifier": "fs:scope-appdata-recursive",
+      "scope": [
+        {
+          "path": "$APPDATA/**"
+        }
+      ]
+    },
+    {
+      "identifier": "fs:scope-appdata",
+      "scope": [
+        {
+          "path": "$APPDATA/*"
+        }
+      ]
+    },
+    {
+      "identifier": "fs:scope-appdata-index",
+      "scope": [
+        {
+          "path": "$APPDATA"
+        }
+      ]
+    },
+    "dialog:default"
+  ]
 }

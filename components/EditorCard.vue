@@ -134,12 +134,13 @@ const incorrectAPI = ref([/\bFindFirst\w*\s*\([^\)]*\)\s*:/i])
 
 const codeInfoCount = computed(() => {
 	const input = props.editor.input
+	const strippedInput = stripInput(input)
 	return {
-		definitive: input.split("\n").filter((line) => deprecatedAPI.value.some((regex) => regex.test(line))),
-		warning: input.split("\n").filter((line) => warnDeprecatedAPI.value.some((regex) => regex.test(line))),
-		incorrect: input.split("\n").filter((line) => incorrectAPI.value.some((regex) => regex.test(line))),
+		definitive: strippedInput.split("\n").filter((line) => deprecatedAPI.value.some((regex) => regex.test(line))),
+		warning: strippedInput.split("\n").filter((line) => warnDeprecatedAPI.value.some((regex) => regex.test(line))),
+		incorrect: strippedInput.split("\n").filter((line) => incorrectAPI.value.some((regex) => regex.test(line))),
 		info: [
-			stripLoggingStatements(stripInput(input)).split("\n").length < 200 ? "Code is less than 200 LOC" : null,
+			stripLoggingStatements(strippedInput).split("\n").length < 200 ? "Code is less than 200 LOC" : null,
 			`Code has ${countWhitelines(input)} whitelines`,
 			`Code has ${countComments(input)} comments`,
 			`Code has ${countLogs(input)} logs`,

@@ -1,18 +1,42 @@
 <template>
 	<v-card title="Reviews" flat>
 		<template v-slot:text>
-			<v-text-field
-				v-model="search"
-				label="Search"
-				prepend-inner-icon="mdi-magnify"
-				variant="outlined"
-				hide-details
-				single-line></v-text-field>
+			<v-row align="center" align-content="center">
+				<v-col>
+					<v-text-field
+						v-model="search"
+						label="Search"
+						density="compact"
+						prepend-inner-icon="mdi-magnify"
+						variant="outlined"
+						hide-details
+						single-line></v-text-field>
+				</v-col>
+
+				<v-col cols="auto">
+					<v-btn @click="chooseDirectory" density="default" color="primary" width="100%" outlined>
+						<v-icon icon="mdi-folder-open" class="mr-2"></v-icon>
+						Choose Directory
+						<v-tooltip activator="parent" location="bottom">
+							{{ reviewStore.chosenPath || "No directory chosen" }}
+						</v-tooltip>
+
+						<template v-slot:append v-if="reviewStore.chosenPath">
+							<v-btn
+								density="compact"
+								variant="flat"
+								icon="mdi-close"
+								@click.stop="reviewStore.chosenPath = null"></v-btn>
+						</template>
+					</v-btn>
+				</v-col>
+			</v-row>
 		</template>
 		<v-data-table
 			:headers="headers"
 			:items="userReviewCounts"
 			:search="search"
+			title=""
 			item-key="id"
 			class="elevation-1"
 			:sort-by="sortBy"
@@ -31,7 +55,9 @@
 			</template>
 
 			<template #item.actions="{ item }">
-				<v-icon small @click.stop="removeReview(item)">mdi-trash-can</v-icon>
+				<v-btn icon @click.stop="removeReview(item)">
+					<v-icon small color="red">mdi-delete</v-icon>
+				</v-btn>
 			</template>
 		</v-data-table>
 
@@ -51,6 +77,7 @@
 </template>
 
 <script lang="ts" setup>
+import { open } from "@tauri-apps/plugin-dialog"
 const reviewStore = useReviewStore()
 const props = defineProps<{
 	reviews?: Review[]
@@ -63,7 +90,7 @@ const userReviewCounts = computed(() => {
 			?.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
 			.map((review) => {
 				const id = review.user_id
-				if (!id) return review
+				if (!id) return { ...review, userReviewIndex: 0 }
 				if (!counts[id]) {
 					counts[id] = 0
 				}
@@ -109,6 +136,16 @@ const headers = ref([
 		key: "actions",
 	},
 ])
+
+const chooseDirectory = async () => {
+	const directory = await open({
+		directory: true,
+		recursive: true,
+	})
+
+	if (!directory) return
+	reviewStore.chosenPath = directory
+}
 
 const selectReview = (_event: PointerEvent, row: any) => {
 	const review = row.item as Review
