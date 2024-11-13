@@ -47,7 +47,11 @@
 				<v-chip color="grey" v-else small>None</v-chip>
 			</template>
 			<template #item.evidence="{ item }">
-				<v-checkbox @click.stop readonly :model-value="!!item.evidence && item.evidence.length > 0">
+				<v-checkbox
+					@click.stop
+					readonly
+					:model-value="!!item.evidence && item.evidence.length > 0"
+					hide-details>
 					<v-tooltip activator="parent" location="bottom">
 						{{ item.evidence ? `Evidence provided (${item.evidence.length})` : `No evidence provided` }}
 					</v-tooltip>
