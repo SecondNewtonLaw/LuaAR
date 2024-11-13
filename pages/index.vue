@@ -28,7 +28,7 @@
 						<v-icon>mdi-file-compare</v-icon>
 						<v-tooltip activator="parent" location="bottom">Show Diff</v-tooltip>
 					</v-btn>
-					<v-btn icon @click="reviewStore.saveReview()">
+					<v-btn icon @click="saveReview">
 						<v-icon>mdi-content-save-outline</v-icon>
 						<v-tooltip activator="parent" location="bottom">Save Review</v-tooltip>
 					</v-btn>
@@ -70,6 +70,19 @@
 				</v-card-text>
 			</v-card>
 		</VDialog>
+
+		<!-- Confirmation dialog -->
+		<VDialog v-model="newReviewConfirmationDialogVisible" width="400">
+			<v-card>
+				<v-card-title class="headline">Confirm New Review</v-card-title>
+				<v-card-text> You have unsaved changes. Are you sure you want to start a new review? </v-card-text>
+				<v-card-actions>
+					<v-spacer></v-spacer>
+					<v-btn color="primary" @click="confirmNewReview">Yes</v-btn>
+					<v-btn color="primary" @click="newReviewConfirmationDialogVisible = false">No</v-btn>
+				</v-card-actions>
+			</v-card>
+		</VDialog>
 	</v-container>
 </template>
 
@@ -83,6 +96,8 @@ const diffVisible = ref(false)
 const originalContent = ref("")
 const modifiedContent = ref("")
 const form = ref<{ form: HTMLFormElement | null }>({ form: null })
+const newReviewConfirmationDialogVisible = ref(false)
+
 const showDiff = () => {
 	if (editors.value.length == 2) {
 		editors.value.forEach((editor) => (editor.selected = true))
@@ -128,10 +143,30 @@ const addEditorFromReview = async (id: string) => {
 	}
 }
 const newReview = () => {
+	if (reviewStore.isTouched || isAnyEditorFilled.value) {
+		newReviewConfirmationDialogVisible.value = true
+	} else {
+		proceedWithNewReview()
+	}
+}
+
+const confirmNewReview = () => {
+	newReviewConfirmationDialogVisible.value = false
+
+	proceedWithNewReview()
+}
+
+const proceedWithNewReview = () => {
 	toast.success("New Review Created")
 	form.value?.form?.reset()
 	reviewStore.newReview()
 }
+
+const saveReview = async () => {
+	await reviewStore.saveReview()
+}
+
+const isAnyEditorFilled = computed(() => editors.value.some(({ input }) => input !== ""))
 
 const formatTimeAgo = (date: string) => {
 	const now = new Date().getTime()

@@ -34,6 +34,19 @@
 				<v-icon small @click.stop="removeReview(item)">mdi-trash-can</v-icon>
 			</template>
 		</v-data-table>
+
+		<!-- Confirmation Dialog -->
+		<v-dialog v-model="isDialogOpen" max-width="500">
+			<v-card>
+				<v-card-title class="headline">Confirm Deletion</v-card-title>
+				<v-card-text> Are you sure you want to remove this review? </v-card-text>
+				<v-card-actions>
+					<v-spacer></v-spacer>
+					<v-btn @click="isDialogOpen = false">Cancel</v-btn>
+					<v-btn color="red" @click="confirmRemoveReview">Delete</v-btn>
+				</v-card-actions>
+			</v-card>
+		</v-dialog>
 	</v-card>
 </template>
 
@@ -49,11 +62,13 @@ const userReviewCounts = computed(() => {
 		props.reviews
 			?.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
 			.map((review) => {
-				if (!counts[review.user_id]) {
-					counts[review.user_id] = 0
+				const id = review.user_id
+				if (!id) return review
+				if (!counts[id]) {
+					counts[id] = 0
 				}
-				counts[review.user_id]++
-				return { ...review, userReviewIndex: counts[review.user_id] }
+				counts[id]++
+				return { ...review, userReviewIndex: counts[id] }
 			}) || []
 	)
 })
@@ -103,9 +118,20 @@ const selectReview = (_event: PointerEvent, row: any) => {
 const search = ref("")
 const dates = ref(["", ""])
 
+const isDialogOpen = ref(false)
+const reviewToRemove = ref<Review | null>(null)
+
 const removeReview = (review: Review) => {
-	if (!review.id) return
-	reviewStore.removeReview(review.id)
+	reviewToRemove.value = review
+	isDialogOpen.value = true
+}
+
+const confirmRemoveReview = () => {
+	if (reviewToRemove.value && reviewToRemove.value.id) {
+		reviewStore.removeReview(reviewToRemove.value.id)
+	}
+	isDialogOpen.value = false
+	reviewToRemove.value = null
 }
 
 interface InternalItem<T = any> {
@@ -124,9 +150,9 @@ const customFilter = (
 	const searchLower = search.value.toLowerCase()
 
 	const matchesSearch =
-		review.user_id.toLowerCase().includes(searchLower) ||
-		review.review.toLowerCase().includes(searchLower) ||
-		review.title.toLowerCase().includes(searchLower) ||
+		review.user_id?.toLowerCase().includes(searchLower) ||
+		review.review?.toLowerCase().includes(searchLower) ||
+		review.title?.toLowerCase().includes(searchLower) ||
 		(!!review.url && review.url.toLowerCase().includes(searchLower))
 
 	return matchesSearch

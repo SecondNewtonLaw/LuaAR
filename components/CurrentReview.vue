@@ -2,7 +2,7 @@
 	<v-card ref="card">
 		<v-card-title>
 			<!-- Back icon to go to the previous review -->
-			Current Review
+			Current Review {{ reviewStore.isTouched ? "*" : "" }}
 			<!-- Show adding or editing according to if id is set label with tooltip -->
 			<v-chip color="primary" label>
 				{{ reviewStore.currentReview.id ? "Editing" : "Adding" }}
@@ -54,7 +54,7 @@
 						<v-tooltip location="bottom">
 							<template v-slot:activator="{ props }">
 								<div v-bind="props" class="d-inline-block mr-2">
-									<v-btn disabled>Scrape</v-btn>
+									<v-btn @click="scrape(reviewStore.currentReview.url)" disabled>Scrape</v-btn>
 								</div>
 							</template>
 							<span>
@@ -103,13 +103,12 @@
 					variant="solo-filled"
 					prepend-icon=""
 					append-inner-icon="mdi-image-multiple"
-					counter
 					label="Evidence"
 					v-model="reviewStore.evidence"></v-file-input>
 
-				<v-row justify="start">
+				<v-row justify="start" class="mt-0">
 					<v-col v-for="base64 in reviewStore.currentReview.evidence" :key="base64">
-						<v-img :src="base64" :max-height="300" class="ma-2 pa-2"> </v-img>
+						<v-img :src="base64" width="auto" :style="{ width: 'auto' }" height="200"></v-img>
 					</v-col>
 				</v-row>
 			</v-form>
@@ -118,6 +117,7 @@
 </template>
 
 <script lang="ts" setup>
+const { scrape } = useScrape()
 const reviewStore = useReviewStore()
 const existingUserIds = computed(() => [...new Set(reviewStore.reviews?.map((review) => review.user_id) || [])])
 const existingTitles = computed(() => [...new Set(reviewStore.reviews?.map((review) => review.title) || [])])
@@ -125,17 +125,13 @@ const form = ref<HTMLFormElement | null>(null)
 
 defineExpose({ form })
 const userIdSelected = () => {
-	const userId = reviewStore.currentReview.user_id
-	if (!userId) return
-	const review = reviewStore.reviews?.find((review) => review.user_id === userId)
+	const review = reviewStore.reviews?.find((review) => review.user_id === reviewStore.currentReview.user_id)
 	if (review) {
 		reviewStore.currentReview.title = review.title
 	}
 }
 const titleSelected = () => {
-	const title = reviewStore.currentReview.title
-	if (!title) return
-	const review = reviewStore.reviews?.find((review) => review.title === title)
+	const review = reviewStore.reviews?.find((review) => review.title === reviewStore.currentReview.title)
 	if (review) {
 		reviewStore.currentReview.user_id = review.user_id
 	}
@@ -173,16 +169,10 @@ const previousReview = computed(
 )
 
 onMounted(() => {
-	if (!card.value) return
-	const element = card.value.$el
-	if (!element) return
-	element.addEventListener("paste", handlePaste)
+	card.value?.$el?.addEventListener("paste", handlePaste)
 })
 
 onUnmounted(() => {
-	if (!card.value) return
-	const element = card.value.$el
-	if (!element) return
-	element.removeEventListener("paste", handlePaste)
+	card.value?.$el?.removeEventListener("paste", handlePaste)
 })
 </script>

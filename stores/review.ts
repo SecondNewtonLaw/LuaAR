@@ -2,12 +2,12 @@ import { BaseDirectory, exists, mkdir, readDir, readFile, remove, writeFile } fr
 import { toast } from "vuetify-sonner"
 
 export interface Review {
-	title: string
+	title: string | null
 	created_at: string
 	updated_at: string
-	url: string
-	user_id: string
-	review: string
+	url: string | null
+	user_id: string | null
+	review: string | null
 	id?: string
 	evidence: string[]
 }
@@ -15,14 +15,16 @@ export const useReviewStore = defineStore("reviews", () => {
 	const reviews = ref<Review[]>()
 	const editorStore = useEditorStore()
 	const currentReview = ref<Review>({
-		title: "",
+		title: null,
 		created_at: "",
 		updated_at: "",
-		url: "",
-		user_id: "",
-		review: "",
+		url: null,
+		user_id: null,
+		review: null,
 		evidence: [],
 	})
+
+	let oldReview = JSON.stringify(currentReview.value)
 
 	const evidence = ref<File[]>([])
 
@@ -30,6 +32,19 @@ export const useReviewStore = defineStore("reviews", () => {
 	const dirOptions = {
 		baseDir: BaseDirectory.AppData,
 	}
+
+	const isTouched = ref(false)
+	const silent = ref(false)
+	watch(
+		currentReview,
+		() => {
+			console.log("watch", silent.value)
+			if (silent.value) return
+			const newReview = currentReview.value
+			isTouched.value = JSON.stringify(newReview) !== oldReview
+		},
+		{ deep: true }
+	)
 
 	const newReview = () => {
 		currentReview.value = {
@@ -41,6 +56,7 @@ export const useReviewStore = defineStore("reviews", () => {
 			user_id: "",
 			evidence: [],
 		}
+		oldReview = JSON.stringify(currentReview.value)
 		evidence.value = []
 		editorStore.resetEditors()
 	}
@@ -99,7 +115,9 @@ export const useReviewStore = defineStore("reviews", () => {
 		return editors
 	}
 	const saveReview = async () => {
+		if (!isTouched.value) return toast.info("No changes to save")
 		await makeReviewsDir()
+		silent.value = true
 		const review = currentReview.value
 		const update = !!review.id
 		if (!review.id) {
@@ -128,7 +146,9 @@ export const useReviewStore = defineStore("reviews", () => {
 		})
 
 		toast.success(`Review ${update ? "updated" : "created"}`)
-		// Reload reviews
+		oldReview = JSON.stringify(currentReview.value)
+		isTouched.value = false
+		silent.value = false
 		loadReviews()
 	}
 
@@ -163,6 +183,7 @@ export const useReviewStore = defineStore("reviews", () => {
 	})
 	return {
 		currentReview,
+		isTouched,
 		evidence,
 		reviews,
 		loadReviews,
