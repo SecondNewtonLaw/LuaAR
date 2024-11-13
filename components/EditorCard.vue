@@ -20,12 +20,12 @@
 
 			<VToolbar flat color="transparent">
 				<v-btn-group>
-					<v-btn @click="editorStore.stripCode(editor)"> Strip Code </v-btn>
+					<v-btn @click="editorStore.stripCode(editor)" :disabled="editor.input === ''"> Strip Code </v-btn>
 					<v-btn @click="editorStore.formatCode(editor)" :disabled="editor.input === '' || !tauri.isTauri">
 						Format Code
 					</v-btn>
 					<!-- Remove logs -->
-					<v-btn @click="editorStore.removeLogs(editor)">
+					<v-btn @click="editorStore.removeLogs(editor)" :disabled="editor.input === ''">
 						Remove Logs
 						<v-tooltip activator="parent" location="bottom">Remove all prints, warns, and errors</v-tooltip>
 					</v-btn>
