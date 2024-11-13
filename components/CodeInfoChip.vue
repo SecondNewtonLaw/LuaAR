@@ -2,9 +2,9 @@
 	<v-chip :color="color">
 		{{ text }} <template v-if="count">: {{ count }}</template>
 		<v-tooltip v-if="details?.length" activator="parent" location="bottom">
-			<v-list>
+			<v-list rounded select-strategy="single-leaf" border>
 				<v-list-item v-for="(line, index) in details" :key="index">
-					<VListItemTitle>{{ line }}</VListItemTitle>
+					<VListItemTitle>{{ index + 1 }}. {{ line }}</VListItemTitle>
 				</v-list-item>
 			</v-list>
 		</v-tooltip>
@@ -21,5 +21,8 @@ defineProps<{
 </script>
 
 <style scoped lang="scss">
-/* Add any specific styles for CodeInfoChip here */
+:deep(.v-overlay__content) {
+	--v-theme-surface-variant: transparent;
+	--v-theme-on-surface-variant: 0, 0, 0;
+}
 </style>
