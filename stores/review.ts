@@ -115,7 +115,7 @@ export const useReviewStore = defineStore("reviews", () => {
 		if (!id) return
 		const review = reviews.value?.find((review) => review.id === id)
 		if (!review || !review.id) return
-		currentReview.value = review
+		currentReview.value = { ...review }
 
 		editorStore.editors = await getEditorsFromReview(review.id)
 	}
