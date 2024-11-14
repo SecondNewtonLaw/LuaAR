@@ -1,7 +1,7 @@
 <template>
 	<v-card title="Reviews" flat>
 		<template v-slot:text>
-			<v-row align="center" align-content="center">
+			<v-row align="center" align-content="center" dense>
 				<v-col>
 					<v-text-field
 						v-model="search"
@@ -14,7 +14,7 @@
 				</v-col>
 
 				<v-col cols="auto">
-					<v-btn @click="chooseDirectory" density="default" color="primary" width="100%" outlined>
+					<v-btn @click="chooseDirectory" color="primary" outlined>
 						<v-icon icon="mdi-folder-open" class="mr-2"></v-icon>
 						Choose Directory
 						<v-tooltip activator="parent" location="bottom">
@@ -30,14 +30,33 @@
 						</template>
 					</v-btn>
 				</v-col>
+
+				<v-col cols="auto">
+					<v-btn
+						rounded="lg"
+						variant="text"
+						icon="mdi-refresh"
+						@click="reviewStore.loadReviews"
+						color="primary"
+						outlined />
+				</v-col>
+				<v-col cols="auto" v-if="selected.length > 0">
+					<v-btn variant="text" icon="mdi-delete" @click="isDialogOpen = true" color="red" outlined />
+				</v-col>
 			</v-row>
 		</template>
+
 		<v-data-table
+			v-model="selected"
 			:headers="headers"
 			:items="userReviewCounts"
 			:search="search"
 			title=""
+			select-strategy="page"
+			density="compact"
+			show-select
 			item-key="id"
+			:items-per-page-options="[5, 10, 15, 20]"
 			class="elevation-1"
 			:sort-by="sortBy"
 			:custom-filter="customFilter"
@@ -57,19 +76,14 @@
 					</v-tooltip>
 				</v-checkbox>
 			</template>
-
-			<template #item.actions="{ item }">
-				<v-btn icon @click.stop="removeReview(item)">
-					<v-icon small color="red">mdi-delete</v-icon>
-				</v-btn>
-			</template>
 		</v-data-table>
 
-		<!-- Confirmation Dialog -->
 		<v-dialog v-model="isDialogOpen" max-width="500">
 			<v-card>
 				<v-card-title class="headline">Confirm Deletion</v-card-title>
-				<v-card-text> Are you sure you want to remove this review? </v-card-text>
+				<v-card-text>
+					Are you sure you want to remove the selected review{{ selected.length > 1 ? "s" : "" }}?
+				</v-card-text>
 				<v-card-actions>
 					<v-spacer></v-spacer>
 					<v-btn @click="isDialogOpen = false">Cancel</v-btn>
@@ -88,7 +102,7 @@ const props = defineProps<{
 }>()
 
 const counts = ref<Record<string, number>>({})
-
+const selected = ref<string[]>([])
 watchEffect(() => {
 	if (!props.reviews) return
 
@@ -147,10 +161,10 @@ const headers = ref([
 		sort: (a: string, b: string) => new Date(a).getTime() - new Date(b).getTime(),
 		value: (item: Record<string, any>) => dateFormatter.format(new Date(item.updated_at)),
 	},
-	{
-		title: "Actions",
-		key: "actions",
-	},
+	// {
+	// 	title: "Actions",
+	// 	key: "actions",
+	// },
 ])
 
 const chooseDirectory = async () => {
@@ -172,19 +186,13 @@ const search = ref("")
 const dates = ref(["", ""])
 
 const isDialogOpen = ref(false)
-const reviewToRemove = ref<Review | null>(null)
-
-const removeReview = (review: Review) => {
-	reviewToRemove.value = review
-	isDialogOpen.value = true
-}
-
 const confirmRemoveReview = () => {
-	if (reviewToRemove.value && reviewToRemove.value.id) {
-		reviewStore.removeReview(reviewToRemove.value.id)
-	}
+	selected.value.forEach((id) => {
+		reviewStore.removeReview(id)
+	})
+
+	selected.value = []
 	isDialogOpen.value = false
-	reviewToRemove.value = null
 }
 
 interface InternalItem<T = any> {
