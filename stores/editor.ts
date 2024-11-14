@@ -59,21 +59,22 @@ export const useEditorStore = defineStore("editors", () => {
 		}
 	}
 
-	// const lintCode = async (index: number) => {
-	// 	if (!tauri.isTauri) return
+	const lintCode = async (editor: Editor) => {
+		if (!tauri.isTauri) return
 
-	// 	try {
-	// 		const code = editors.value[index].input
-	// 		const result = await invoke<string>("lint_code", {
-	// 			luaCode: code,
-	// 		})
+		try {
+			const code = editor.input
+			const result = await invoke<string>("lint_code", {
+				luaCode: code,
+			})
 
-	// 		console.log(result)
-	// 	} catch (error) {
-	// 		console.error("Error linting code:", error)
-	// 	}
-	// }
-
+			addEditor({ input: result, collapsed: false, selected: false, title: "Linted Result" })
+			toast.success("Code linted")
+		} catch (error) {
+			console.log("Error linting code:", error)
+			toast.error("Error linting code")
+		}
+	}
 	const stripCode = (editor: Editor) => {
 		editor.input = stripInput(editor.input)
 		toast.success("Stripped code")
@@ -91,7 +92,7 @@ export const useEditorStore = defineStore("editors", () => {
 		toggleCollapse,
 		removeEditor,
 		formatCode,
-		// lintCode,
+		lintCode,
 		stripCode,
 		removeLogs,
 	}

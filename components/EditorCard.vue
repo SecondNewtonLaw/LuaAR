@@ -29,11 +29,11 @@
 						Remove Logs
 						<v-tooltip activator="parent" location="bottom">Remove all prints, warns, and errors</v-tooltip>
 					</v-btn>
-					<!-- Lint
+					<!-- Lint -->
 					<v-btn icon @click="editorStore.lintCode(editor)" :disabled="editor.input === '' || !tauri.isTauri">
 						<v-icon>mdi-alert-circle</v-icon>
 						<v-tooltip activator="parent" location="bottom">Lint Code</v-tooltip>
-					</v-btn> -->
+					</v-btn>
 				</v-btn-group>
 				<v-btn-group>
 					<v-btn icon @click="editorStore.toggleCollapse(editor)">

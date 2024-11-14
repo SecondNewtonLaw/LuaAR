@@ -71,16 +71,24 @@ fn format_code(app_handle: AppHandle, lua_code: String) -> Result<String, String
 }
 
 #[command]
-fn lint_code(lua_code: String) -> Result<String, String> {
-    println!("Received Lua code for linting: {}", lua_code);
-
-    let selene_path = std::path::Path::new("src/assets/selene.exe");
+fn lint_code(app_handle: AppHandle, lua_code: String) -> Result<String, String> {
+    let selene_path = app_handle
+        .path()
+        .resolve("assets/selene.exe", BaseDirectory::Resource)
+        .map_err(|e| e.to_string())?;
+    
+    let config_path = selene_path.parent().unwrap().join("selene.toml");
+    println!("Selene config path: {:?}", config_path);
 
     let output = Command::new(selene_path)
+        .arg("--config")
+        .arg(config_path)
         .arg("--display-style=Rich")
-        .arg("-")
+
+        .arg("-")  // Read from stdin
         .stdin(std::process::Stdio::piped())
         .stdout(std::process::Stdio::piped())
+        .stderr(std::process::Stdio::piped())
         .spawn()
         .and_then(|mut child| {
             use std::io::Write;
@@ -91,15 +99,18 @@ fn lint_code(lua_code: String) -> Result<String, String> {
         });
 
     match output {
-        Ok(output) if output.status.success() => {
-            let lint_output = String::from_utf8(output.stdout).map_err(|e| e.to_string())?;
-            println!("Lint output: {}", lint_output);
-            Ok(lint_output)
-        }
         Ok(output) => {
-            let error_message = String::from_utf8_lossy(&output.stderr).to_string();
-            println!("Linting error: {}", error_message);
-            Err(error_message)
+            // Selene returns non-zero exit code for lint warnings
+            // so we always want to capture the output
+            let stdout = String::from_utf8(output.stdout).map_err(|e| e.to_string())?;
+            let stderr = String::from_utf8(output.stderr).map_err(|e| e.to_string())?;
+            
+            if !stderr.is_empty() {
+                println!("Linting stderr: {}", stderr);
+                return Err(stderr);
+            }
+            
+            Ok(stdout)
         }
         Err(e) => {
             println!("Command execution error: {}", e);
