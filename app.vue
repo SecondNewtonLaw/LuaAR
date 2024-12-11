@@ -10,7 +10,7 @@ import { VSonner } from "vuetify-sonner"
 import "vuetify-sonner/style.css"
 const reviewStore = useReviewStore()
 
-const title = "Lua Application Reader Copilot"
+const title = "AR Atlas"
 useHead({
 	titleTemplate: (titleChunk) => {
 		return titleChunk ? `${titleChunk} - ${title}` : title

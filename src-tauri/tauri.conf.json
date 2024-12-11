@@ -1,6 +1,6 @@
 {
 	"$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
-	"productName": "Lua AR",
+	"productName": "AR Atlas",
 	"version": "0.1.0",
 	"identifier": "com.tauri.ar",
 	"build": {
@@ -14,7 +14,7 @@
 		"windows": [
 			{
 				"label": "main",
-				"title": "Lua Application Readers Copilot",
+				"title": "AR Atlas",
 				"width": 1000,
 				"height": 600,
 				"resizable": true,

@@ -1,4 +1,29 @@
-const stripInput = (input: string): string => {
+const syntaxConfig: Record<
+	string,
+	{
+		singleLineComment: string
+		multiLineCommentStart?: string
+		multiLineCommentEnd?: string
+		stringDelimiters: string[]
+	}
+> = {
+	lua: {
+		singleLineComment: "--",
+		multiLineCommentStart: "--[[",
+		multiLineCommentEnd: "]]",
+		stringDelimiters: ['"', "'", "`"],
+	},
+	typescript: {
+		singleLineComment: "//",
+		multiLineCommentStart: "/*",
+		multiLineCommentEnd: "*/",
+		stringDelimiters: ['"', "'", "`"],
+	},
+}
+
+const stripInput = (editor: Editor): string => {
+	const config = syntaxConfig[editor.lang || "lua"]
+	const input = editor.input
 	let result = ""
 	let inString = false
 	let stringDelimiter = ""
@@ -10,18 +35,26 @@ const stripInput = (input: string): string => {
 		const nextChar = input[i + 1]
 
 		// Start of a comment
-		if (!inString && !inComment && currentChar === "-" && nextChar === "-") {
+		if (
+			!inString &&
+			!inComment &&
+			currentChar === config.singleLineComment[0] &&
+			nextChar === config.singleLineComment[1]
+		) {
 			// Check if it's a multi-line comment
-			if (input.slice(i + 2, i + 4) === "[[") {
+			if (
+				config.multiLineCommentStart &&
+				input.slice(i, i + config.multiLineCommentStart.length) === config.multiLineCommentStart
+			) {
 				inComment = true
 				inLongComment = true
-				i += 3 // Skip "--[["
+				i += config.multiLineCommentStart.length - 1 // Skip multi-line comment start
 				continue
 			} else {
 				// It's a single-line comment
 				inComment = true
 				inLongComment = false
-				i += 1 // Skip "--"
+				i += config.singleLineComment.length - 1 // Skip single-line comment start
 				continue
 			}
 		}
@@ -30,10 +63,13 @@ const stripInput = (input: string): string => {
 		if (inComment) {
 			if (inLongComment) {
 				// End of multi-line comment
-				if (currentChar === "]" && nextChar === "]") {
+				if (
+					config.multiLineCommentEnd &&
+					input.slice(i, i + config.multiLineCommentEnd.length) === config.multiLineCommentEnd
+				) {
 					inComment = false
 					inLongComment = false
-					i += 1 // Skip "]]"
+					i += config.multiLineCommentEnd.length - 1 // Skip multi-line comment end
 				}
 			} else {
 				// End of single-line comment
@@ -47,7 +83,7 @@ const stripInput = (input: string): string => {
 
 		// Handle entering and exiting strings
 		if (!inString) {
-			if (currentChar === '"' || currentChar === "'" || currentChar === "`") {
+			if (config.stringDelimiters.includes(currentChar)) {
 				inString = true
 				stringDelimiter = currentChar
 				result += currentChar
@@ -88,9 +124,26 @@ const stripInput = (input: string): string => {
 		.join("\n")
 }
 
-const stripLoggingStatements = (input: string) => input.replace(/^.*(print|warn|error)\(.*\).*\n?/gm, "")
-const countWhitelines = (input: string) => input.split("\n").filter((line) => line.trim() === "").length
-const countComments = (input: string) => {
+const logFunctions: Record<string, string[]> = {
+	lua: ["print", "warn", "error"],
+	typescript: ["console.log", "console.warn", "console.error"],
+}
+
+const getLogRegex = (lang: string = "lua") => {
+	const functions = logFunctions[lang]
+	return new RegExp(`^.*(${functions.join("|")})\\(.*\\).*\n?`, "gm")
+}
+
+const stripLoggingStatements = (input: string, lang: string = "lua") => {
+	const regex = getLogRegex(lang)
+	return input.replace(regex, "")
+}
+
+const countWhitelines = (editor: Editor) => editor.input.split("\n").filter((line) => line.trim() === "").length
+
+const countComments = (editor: Editor) => {
+	const config = syntaxConfig[editor.lang || "lua"]
+	const input = editor.input
 	let inString = false
 	let stringDelimiter = ""
 	let inLongString = false
@@ -105,28 +158,39 @@ const countComments = (input: string) => {
 		if (
 			!inString &&
 			!inLongString &&
-			currentChar === "-" &&
-			nextChar === "-" &&
-			input.slice(i + 2, i + 4) === "[["
+			currentChar === config.singleLineComment[0] &&
+			nextChar === config.singleLineComment[1] &&
+			config.multiLineCommentStart &&
+			input.slice(i, i + config.multiLineCommentStart.length) === config.multiLineCommentStart
 		) {
 			inComment = true
 			commentCount++
-			i += 3 // Skip ahead to avoid counting nested or adjacent comments
+			i += config.multiLineCommentStart.length - 1 // Skip ahead to avoid counting nested or adjacent comments
 			continue
 		}
 
 		// End of a long comment
-		if (inComment && input.slice(i, i + 2) === "]]") {
+		if (
+			inComment &&
+			config.multiLineCommentEnd &&
+			input.slice(i, i + config.multiLineCommentEnd.length) === config.multiLineCommentEnd
+		) {
 			inComment = false
-			i += 1
+			i += config.multiLineCommentEnd.length - 1
 			continue
 		}
 
 		// Start of a single-line comment
-		if (!inString && !inLongString && !inComment && currentChar === "-" && nextChar === "-") {
+		if (
+			!inString &&
+			!inLongString &&
+			!inComment &&
+			currentChar === config.singleLineComment[0] &&
+			nextChar === config.singleLineComment[1]
+		) {
 			inComment = true
 			commentCount++
-			i += 1 // Skip the next dash to avoid counting it twice
+			i += config.singleLineComment.length - 1 // Skip the next dash to avoid counting it twice
 			continue
 		}
 
@@ -138,7 +202,7 @@ const countComments = (input: string) => {
 
 		// Handle entering and exiting strings
 		if (!inComment && !inLongString) {
-			if (!inString && (currentChar === '"' || currentChar === "'" || currentChar === "`")) {
+			if (!inString && config.stringDelimiters.includes(currentChar)) {
 				inString = true
 				stringDelimiter = currentChar
 			} else if (inString && currentChar === stringDelimiter) {
@@ -159,5 +223,9 @@ const countComments = (input: string) => {
 	return commentCount
 }
 
-const countLogs = (input: string) => input.match(/^.*(print|warn|error)\(.*\).*\n?/gm)?.length || 0
+const countLogs = (editor: Editor) => {
+	const regex = getLogRegex(editor.lang)
+	return editor.input.match(regex)?.length || 0
+}
+
 export { countComments, countLogs, countWhitelines, stripInput, stripLoggingStatements }

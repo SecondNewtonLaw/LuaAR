@@ -2,7 +2,7 @@
 	<header>
 		<v-container>
 			<v-toolbar color="transparent" floating elevation="10">
-				<v-toolbar-title class="text-h6 font-weight-bold"> Lua Application Reader Copilot </v-toolbar-title>
+				<v-toolbar-title class="text-h6 font-weight-bold"> AR Atlas </v-toolbar-title>
 				<v-spacer></v-spacer>
 				<v-toolbar-items>
 					<v-btn icon="mdi-home-outline" :to="{ name: 'index' }" />

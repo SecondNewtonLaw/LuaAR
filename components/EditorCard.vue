@@ -16,12 +16,27 @@
 					prepend-inner-icon="mdi-text"
 					single-line
 					hide-details></v-text-field>
+				<!-- Language select -->
+				<v-select
+					:model-value="editor.lang || 'lua'"
+					@update:model-value="editor.lang = $event"
+					:items="langOpts"
+					label="Language"
+					variant="solo"
+					single-line
+					width="12rem"
+					class="flex-xl-0-0"
+					density="compact"
+					prepend-inner-icon="mdi-code-tags"
+					hide-details></v-select>
 			</div>
 
 			<VToolbar flat color="transparent">
 				<v-btn-group>
 					<v-btn @click="editorStore.stripCode(editor)" :disabled="editor.input === ''"> Strip Code </v-btn>
-					<v-btn @click="editorStore.formatCode(editor)" :disabled="editor.input === '' || !tauri.isTauri">
+					<v-btn
+						@click="editorStore.formatCode(editor)"
+						:disabled="editor.input === '' || !tauri.isTauri || editor.lang !== 'lua'">
 						Format Code
 					</v-btn>
 					<!-- Remove logs -->
@@ -30,7 +45,10 @@
 						<v-tooltip activator="parent" location="bottom">Remove all prints, warns, and errors</v-tooltip>
 					</v-btn>
 					<!-- Lint -->
-					<v-btn icon @click="editorStore.lintCode(editor)" :disabled="editor.input === '' || !tauri.isTauri">
+					<v-btn
+						icon
+						@click="editorStore.lintCode(editor)"
+						:disabled="editor.input === '' || !tauri.isTauri || editor.lang !== 'lua'">
 						<v-icon>mdi-alert-circle</v-icon>
 						<v-tooltip activator="parent" location="bottom">Lint Code</v-tooltip>
 					</v-btn>
@@ -93,6 +111,7 @@
 						color="info"
 						:text="info" />
 				</div>
+
 				<MonacoEditor
 					:options="{
 						theme: 'vs-dark',
@@ -111,7 +130,7 @@
 						lineNumbers: 'on',
 						mouseWheelZoom: true,
 					}"
-					lang="lua"
+					:lang="editor.lang || 'lua'"
 					v-model="editor.input"
 					:class="['editor']" />
 			</v-card-text>
@@ -120,6 +139,7 @@
 </template>
 
 <script lang="ts" setup>
+const langOpts = ref(["lua", "typescript"])
 const tauri = useTauri()
 const editorStore = useEditorStore()
 const settingsStore = useSettingsStore()
@@ -147,19 +167,19 @@ const warnDeprecatedAPI = ref([
 
 const incorrectAPI = ref([/\bFindFirst\w*\s*\([^\)]*\)\s*[:.]/i, /Instance\.new\s*\(\s*[^,]+,\s*[^)]+\s*\)/i])
 
-const loc = computed(() => stripLoggingStatements(stripInput(props.editor.input)).split("\n").length)
-const comments = computed(() => countComments(props.editor.input))
+const loc = computed(() => stripLoggingStatements(stripInput(props.editor), props.editor.lang).split("\n").length)
+const comments = computed(() => countComments(props.editor))
 const codeInfoCount = computed(() => {
-	const input = props.editor.input
-	const strippedInput = stripInput(input)
+	const strippedInput = stripInput(props.editor)
 
 	return {
 		definitive: strippedInput.split("\n").filter((line) => deprecatedAPI.value.some((regex) => regex.test(line))),
 		warning: strippedInput.split("\n").filter((line) => warnDeprecatedAPI.value.some((regex) => regex.test(line))),
 		incorrect: strippedInput.split("\n").filter((line) => incorrectAPI.value.some((regex) => regex.test(line))),
-		info: [`Code has ${countWhitelines(input)} whitelines`, `Code has ${countLogs(input)} logs`].filter(
-			(_) => _ !== null
-		),
+		info: [
+			`Code has ${countWhitelines(props.editor)} whitelines`,
+			`Code has ${countLogs(props.editor)} logs`,
+		].filter((_) => _ !== null),
 	}
 })
 

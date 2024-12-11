@@ -14,7 +14,7 @@
 				:options="{
 					theme: 'vs-dark',
 				}"
-				:lang="useEditorStore().currentLanguage"
+				lang="lua"
 				class="editor" />
 		</v-card-text>
 	</v-card>

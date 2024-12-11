@@ -6,6 +6,7 @@ export interface Editor {
 	collapsed: boolean
 	selected: boolean
 	title?: string
+	lang?: string
 }
 
 export const useEditorStore = defineStore("editors", () => {
@@ -14,10 +15,11 @@ export const useEditorStore = defineStore("editors", () => {
 			input: "",
 			collapsed: false,
 			selected: false,
+			lang: "lua",
 		},
 	])
 	const tauri = useTauri()
-	const currentLanguage = ref<string>("lua")
+
 	const addEditor = (editor?: Editor) => {
 		editors.value.push(editor ?? { input: "", collapsed: false, selected: false })
 		toast.success("New editor added")
@@ -76,17 +78,17 @@ export const useEditorStore = defineStore("editors", () => {
 		}
 	}
 	const stripCode = (editor: Editor) => {
-		editor.input = stripInput(editor.input)
+		editor.input = stripInput(editor)
 		toast.success("Stripped code")
 	}
 
 	const removeLogs = (editor: Editor) => {
-		editor.input = stripLoggingStatements(editor.input)
+		editor.input = stripLoggingStatements(editor.input, editor.lang)
 		toast.success("Logs removed")
 	}
 	return {
 		editors,
-		currentLanguage,
+
 		addEditor,
 		resetEditors,
 		toggleCollapse,
