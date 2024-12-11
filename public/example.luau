@@ -7,3 +7,8 @@ task.wait()
 task.wait
 task.wait(5)
 event:Wait()
+
+--[[
+    Hello
+    
+]]

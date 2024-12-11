@@ -77,10 +77,13 @@
 						:details="codeInfoCount.incorrect" />
 
 					<!-- LOC -->
+					<CodeInfoChip :count="loc" :color="loc < settingsStore.loc ? 'warning' : 'success'" text="LOC" />
+
+					<!-- Comments -->
 					<CodeInfoChip
-						:count="null"
-						:color="loc < settingsStore.loc ? 'warning' : 'success'"
-						:text="`LOC: ${loc}`" />
+						:count="comments"
+						:color="comments <= 30 ? 'error' : comments <= 50 ? 'warning' : 'success'"
+						text="Comments" />
 
 					<CodeInfoChip
 						v-if="codeInfoCount.info.length > 0"
@@ -135,11 +138,17 @@ const warnDeprecatedAPI = ref([
 	/^\s*LoadAnimation\s*(\([^\)]*\))?\s*$/i,
 	/\bBodyVelocity\b/i,
 	/\bBodyGyro\b/i,
+	/\bBodyPosition\b/i,
+	/\bBodyAngularVelocity\b/i,
+	/\bBodyThrust\b/i,
+	/\bBodyForce\b/i,
 	/\bLoadAnimation\b/i,
 ])
 
-const incorrectAPI = ref([/\bFindFirst\w*\s*\([^\)]*\)\s*:/i])
+const incorrectAPI = ref([/\bFindFirst\w*\s*\([^\)]*\)\s*[:.]/i, /Instance\.new\s*\(\s*[^,]+,\s*[^)]+\s*\)/i])
+
 const loc = computed(() => stripLoggingStatements(stripInput(props.editor.input)).split("\n").length)
+const comments = computed(() => countComments(props.editor.input))
 const codeInfoCount = computed(() => {
 	const input = props.editor.input
 	const strippedInput = stripInput(input)
@@ -148,11 +157,9 @@ const codeInfoCount = computed(() => {
 		definitive: strippedInput.split("\n").filter((line) => deprecatedAPI.value.some((regex) => regex.test(line))),
 		warning: strippedInput.split("\n").filter((line) => warnDeprecatedAPI.value.some((regex) => regex.test(line))),
 		incorrect: strippedInput.split("\n").filter((line) => incorrectAPI.value.some((regex) => regex.test(line))),
-		info: [
-			`Code has ${countWhitelines(input)} whitelines`,
-			`Code has ${countComments(input)} comments`,
-			`Code has ${countLogs(input)} logs`,
-		].filter((_) => _ !== null),
+		info: [`Code has ${countWhitelines(input)} whitelines`, `Code has ${countLogs(input)} logs`].filter(
+			(_) => _ !== null
+		),
 	}
 })
 

@@ -1,11 +1,9 @@
 <template>
-	<v-container>
-		<v-row>
-			<v-col cols="12">
-				<ReviewList :reviews="reviews" />
-			</v-col>
-		</v-row>
-	</v-container>
+	<v-row>
+		<v-col cols="12">
+			<ReviewList :reviews="reviews" />
+		</v-col>
+	</v-row>
 </template>
 
 <script lang="ts" setup>
@@ -13,11 +11,4 @@ const reviewStore = useReviewStore()
 const reviews = computed(() => reviewStore.reviews)
 </script>
 
-<style scoped>
-.v-container {
-	margin-top: 20px;
-}
-.review-card {
-	cursor: pointer;
-}
-</style>
+<style scoped></style>

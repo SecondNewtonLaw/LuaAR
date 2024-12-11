@@ -1,6 +1,6 @@
 <template>
 	<v-chip :color="color">
-		{{ text }} <template v-if="count">: {{ count }}</template>
+		{{ text }}<template v-if="count !== null">: {{ count }}</template>
 		<v-tooltip v-if="details?.length" activator="parent" location="bottom">
 			<v-list rounded select-strategy="single-leaf" border>
 				<v-list-item v-for="(line, index) in details" :key="index">

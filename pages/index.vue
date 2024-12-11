@@ -1,89 +1,77 @@
 <template>
-	<v-container>
-		<v-btn color="primary" appendIcon="mdi-plus" class="mb-2" @click="newReview">NEW REVIEW</v-btn>
-		<CurrentReview class="mb-6" ref="form" />
+	<v-btn color="primary" appendIcon="mdi-plus" class="mb-2" @click="newReview">NEW REVIEW</v-btn>
+	<CurrentReview class="mb-6" ref="form" />
 
-		<v-row>
-			<v-col>
-				<v-btn-group>
-					<v-btn icon @click="editorStore.addEditor()">
-						<v-icon>mdi-plus</v-icon>
-						<v-tooltip activator="parent" location="bottom">Add Editor</v-tooltip>
-					</v-btn>
-					<v-btn
-						icon
-						width="56px"
-						v-if="reviewed"
-						:disabled="!hasPreviousReview"
-						@click="promptReviewChoice()">
-						<v-icon>mdi-plus</v-icon>
-						<v-icon>mdi-comment-text-outline</v-icon>
-						<v-tooltip activator="parent" location="bottom">Add Editor from other Review(s)</v-tooltip>
-					</v-btn>
-					<v-btn icon @click="editorStore.resetEditors()">
-						<v-icon>mdi-refresh</v-icon>
-						<v-tooltip activator="parent" location="bottom" text="Reset Editors" />
-					</v-btn>
-					<v-btn icon @click="showDiff">
-						<v-icon>mdi-file-compare</v-icon>
-						<v-tooltip activator="parent" location="bottom">Show Diff</v-tooltip>
-					</v-btn>
-					<v-btn icon @click="saveReview">
-						<v-icon>mdi-content-save-outline</v-icon>
-						<v-tooltip activator="parent" location="bottom">Save Review</v-tooltip>
-					</v-btn>
-				</v-btn-group>
-			</v-col>
-		</v-row>
-		<v-row>
-			<v-col :cols="editors.length > 1 ? 6 : 12" v-for="(editor, index) in editors" :key="index">
-				<EditorCard :editor />
-			</v-col>
+	<v-row>
+		<v-col>
+			<v-btn-group>
+				<v-btn icon @click="editorStore.addEditor()">
+					<v-icon>mdi-plus</v-icon>
+					<v-tooltip activator="parent" location="bottom">Add Editor</v-tooltip>
+				</v-btn>
+				<v-btn icon width="56px" v-if="reviewed" :disabled="!hasPreviousReview" @click="promptReviewChoice()">
+					<v-icon>mdi-plus</v-icon>
+					<v-icon>mdi-comment-text-outline</v-icon>
+					<v-tooltip activator="parent" location="bottom">Add Editor from other Review(s)</v-tooltip>
+				</v-btn>
+				<v-btn icon @click="editorStore.resetEditors()">
+					<v-icon>mdi-refresh</v-icon>
+					<v-tooltip activator="parent" location="bottom" text="Reset Editors" />
+				</v-btn>
+				<v-btn icon @click="showDiff">
+					<v-icon>mdi-file-compare</v-icon>
+					<v-tooltip activator="parent" location="bottom">Show Diff</v-tooltip>
+				</v-btn>
+				<v-btn icon @click="saveReview">
+					<v-icon>mdi-content-save-outline</v-icon>
+					<v-tooltip activator="parent" location="bottom">Save Review</v-tooltip>
+				</v-btn>
+			</v-btn-group>
+		</v-col>
+	</v-row>
+	<v-row>
+		<v-col :cols="editors.length > 1 ? 6 : 12" v-for="(editor, index) in editors" :key="index">
+			<EditorCard :editor />
+		</v-col>
 
-			<v-col v-if="diffVisible" cols="12">
-				<DiffViewer
-					:originalContent="originalContent"
-					:modifiedContent="modifiedContent"
-					v-model="diffVisible" />
-			</v-col>
-		</v-row>
+		<v-col v-if="diffVisible" cols="12">
+			<DiffViewer :originalContent="originalContent" :modifiedContent="modifiedContent" v-model="diffVisible" />
+		</v-col>
+	</v-row>
 
-		<VDialog :model-value="reviewsInDialog.length > 0" width="auto" @after-leave="reviewsInDialog = []">
-			<v-card
-				max-width="400"
-				prepend-icon="mdi-information"
-				text="Select a review to add as an editor"
-				title="Select Review">
-				<v-card-text>
-					<v-list>
-						<v-list-item
-							v-for="review in reviewsInDialog"
-							:key="review.id"
-							@click="addEditorFromReview(review.id || '')">
-							<v-list-item-title>{{ review.title }}</v-list-item-title>
-							<v-list-item-subtitle
-								>{{ new Date(review.created_at).toLocaleString() }}
-							</v-list-item-subtitle>
-							<v-chip color="primary" small>{{ formatTimeAgo(review.created_at) }} ago</v-chip>
-						</v-list-item>
-					</v-list>
-				</v-card-text>
-			</v-card>
-		</VDialog>
+	<VDialog :model-value="reviewsInDialog.length > 0" width="auto" @after-leave="reviewsInDialog = []">
+		<v-card
+			max-width="400"
+			prepend-icon="mdi-information"
+			text="Select a review to add as an editor"
+			title="Select Review">
+			<v-card-text>
+				<v-list>
+					<v-list-item
+						v-for="review in reviewsInDialog"
+						:key="review.id"
+						@click="addEditorFromReview(review.id || '')">
+						<v-list-item-title>{{ review.title }}</v-list-item-title>
+						<v-list-item-subtitle>{{ new Date(review.created_at).toLocaleString() }} </v-list-item-subtitle>
+						<v-chip color="primary" small>{{ formatTimeAgo(review.created_at) }} ago</v-chip>
+					</v-list-item>
+				</v-list>
+			</v-card-text>
+		</v-card>
+	</VDialog>
 
-		<!-- Confirmation dialog -->
-		<VDialog v-model="newReviewConfirmationDialogVisible" width="400">
-			<v-card>
-				<v-card-title class="headline">Confirm New Review</v-card-title>
-				<v-card-text> You have unsaved changes. Are you sure you want to start a new review? </v-card-text>
-				<v-card-actions>
-					<v-spacer></v-spacer>
-					<v-btn color="primary" @click="confirmNewReview">Yes</v-btn>
-					<v-btn color="primary" @click="newReviewConfirmationDialogVisible = false">No</v-btn>
-				</v-card-actions>
-			</v-card>
-		</VDialog>
-	</v-container>
+	<!-- Confirmation dialog -->
+	<VDialog v-model="newReviewConfirmationDialogVisible" width="400">
+		<v-card>
+			<v-card-title class="headline">Confirm New Review</v-card-title>
+			<v-card-text> You have unsaved changes. Are you sure you want to start a new review? </v-card-text>
+			<v-card-actions>
+				<v-spacer></v-spacer>
+				<v-btn color="primary" @click="confirmNewReview">Yes</v-btn>
+				<v-btn color="primary" @click="newReviewConfirmationDialogVisible = false">No</v-btn>
+			</v-card-actions>
+		</v-card>
+	</VDialog>
 </template>
 
 <script lang="ts" setup>

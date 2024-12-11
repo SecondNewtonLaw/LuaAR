@@ -5,12 +5,9 @@
 				<v-toolbar-title class="text-h6 font-weight-bold"> Lua Application Reader Copilot </v-toolbar-title>
 				<v-spacer></v-spacer>
 				<v-toolbar-items>
-					<v-btn icon :to="{ name: 'index' }">
-						<v-icon>mdi-home-outline</v-icon>
-					</v-btn>
-					<v-btn icon :to="{ name: 'reviews' }">
-						<v-icon>mdi-comment-text-outline</v-icon>
-					</v-btn>
+					<v-btn icon="mdi-home-outline" :to="{ name: 'index' }" />
+					<v-btn icon="mdi-comment-text-outline" :to="{ name: 'reviews' }" />
+					<!-- <v-btn icon="mdi-file-document-outline" :to="{ name: 'HD' }" /> -->
 					<v-btn icon="mdi-cog" @click="openSettings = true" />
 				</v-toolbar-items>
 			</v-toolbar>
