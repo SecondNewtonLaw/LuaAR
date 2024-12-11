@@ -11,12 +11,40 @@
 					<v-btn icon :to="{ name: 'reviews' }">
 						<v-icon>mdi-comment-text-outline</v-icon>
 					</v-btn>
+					<v-btn icon="mdi-cog" @click="openSettings = true" />
 				</v-toolbar-items>
 			</v-toolbar>
 		</v-container>
+
+		<v-dialog v-model="openSettings" max-width="500">
+			<v-card>
+				<v-card-title class="headline">Settings</v-card-title>
+				<v-card-text>
+					<v-row>
+						<v-col cols="12">
+							<v-text-field
+								label="Minimum LOC"
+								v-model="settingsStore.loc"
+								type="number"
+								:rules="[
+									(v) => !!v || 'Value is required',
+									(v) => v >= 0 || 'Value must be greater than or equal to 0',
+								]" />
+						</v-col>
+					</v-row>
+				</v-card-text>
+				<v-card-actions>
+					<v-spacer></v-spacer>
+					<v-btn @click="openSettings = false">Close</v-btn>
+				</v-card-actions>
+			</v-card>
+		</v-dialog>
 	</header>
 </template>
 
-<script lang="ts" setup></script>
+<script lang="ts" setup>
+const openSettings = ref(false)
+const settingsStore = useSettingsStore()
+</script>
 
 <style scoped></style>

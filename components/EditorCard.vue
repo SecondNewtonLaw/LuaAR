@@ -75,6 +75,13 @@
 						color="error"
 						text="Incorrect API usage"
 						:details="codeInfoCount.incorrect" />
+
+					<!-- LOC -->
+					<CodeInfoChip
+						:count="null"
+						:color="loc < settingsStore.loc ? 'warning' : 'success'"
+						:text="`LOC: ${loc}`" />
+
 					<CodeInfoChip
 						v-if="codeInfoCount.info.length > 0"
 						v-for="(info, index) in codeInfoCount.info"
@@ -112,6 +119,7 @@
 <script lang="ts" setup>
 const tauri = useTauri()
 const editorStore = useEditorStore()
+const settingsStore = useSettingsStore()
 
 const props = defineProps<{
 	editor: Editor
@@ -131,16 +139,16 @@ const warnDeprecatedAPI = ref([
 ])
 
 const incorrectAPI = ref([/\bFindFirst\w*\s*\([^\)]*\)\s*:/i])
-
+const loc = computed(() => stripLoggingStatements(stripInput(props.editor.input)).split("\n").length)
 const codeInfoCount = computed(() => {
 	const input = props.editor.input
 	const strippedInput = stripInput(input)
+
 	return {
 		definitive: strippedInput.split("\n").filter((line) => deprecatedAPI.value.some((regex) => regex.test(line))),
 		warning: strippedInput.split("\n").filter((line) => warnDeprecatedAPI.value.some((regex) => regex.test(line))),
 		incorrect: strippedInput.split("\n").filter((line) => incorrectAPI.value.some((regex) => regex.test(line))),
 		info: [
-			stripLoggingStatements(strippedInput).split("\n").length < 200 ? "Code is less than 200 LOC" : null,
 			`Code has ${countWhitelines(input)} whitelines`,
 			`Code has ${countComments(input)} comments`,
 			`Code has ${countLogs(input)} logs`,

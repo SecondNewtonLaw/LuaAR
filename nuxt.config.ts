@@ -36,7 +36,13 @@ export default defineNuxtConfig({
 	},
 
 	css: ["@/assets/style.scss"],
-	modules: ["vuetify-nuxt-module", "@nuxt/fonts", "nuxt-monaco-editor", "@pinia/nuxt"],
+	modules: [
+		"vuetify-nuxt-module",
+		"@nuxt/fonts",
+		"nuxt-monaco-editor",
+		"@pinia/nuxt",
+		"@pinia-plugin-persistedstate/nuxt",
+	],
 
 	vuetify: {
 		moduleOptions: {

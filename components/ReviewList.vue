@@ -101,31 +101,23 @@ const props = defineProps<{
 	reviews?: Review[]
 }>()
 
-const counts = ref<Record<string, number>>({})
 const selected = ref<string[]>([])
-watchEffect(() => {
-	if (!props.reviews) return
 
-	const newCounts: Record<string, number> = {}
-	props.reviews.forEach((review) => {
-		const id = review.user_id
-		if (!id) return
-		newCounts[id] = (newCounts[id] || 0) + 1
-	})
-	counts.value = newCounts
-})
 const userReviewCounts = computed(() => {
 	if (!props.reviews) return []
 
+	const counts = new Map<string, number>()
 	return props.reviews
 		.slice() // Create a shallow copy to avoid mutating props
 		.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
 		.map((review) => {
 			const id = review.user_id
 			if (!id) return { ...review, userReviewIndex: 0 }
+			const count = counts.get(id) || 0
+			counts.set(id, count + 1)
 			return {
 				...review,
-				userReviewIndex: counts.value[id] || 0,
+				userReviewIndex: count + 1,
 			}
 		})
 })
