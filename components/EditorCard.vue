@@ -29,7 +29,6 @@
 					density="compact"
 					prepend-inner-icon="mdi-code-tags"
 					hide-details></v-select>
-				{{ editor.lang }}
 			</div>
 
 			<VToolbar flat color="transparent">

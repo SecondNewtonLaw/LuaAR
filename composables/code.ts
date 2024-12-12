@@ -239,6 +239,7 @@ const countComments = (editor: Editor) => {
 
 const countLogs = (editor: Editor) => {
 	const regex = getLogRegex(editor.lang)
+	if (!regex) return 0
 	return editor.input.match(regex)?.length || 0
 }
 
