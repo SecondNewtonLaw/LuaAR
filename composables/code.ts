@@ -19,6 +19,18 @@ const syntaxConfig: Record<
 		multiLineCommentEnd: "*/",
 		stringDelimiters: ['"', "'", "`"],
 	},
+	html: {
+		singleLineComment: "",
+		multiLineCommentStart: "<!--",
+		multiLineCommentEnd: "-->",
+		stringDelimiters: ['"', "'"],
+	},
+	css: {
+		singleLineComment: "",
+		multiLineCommentStart: "/*",
+		multiLineCommentEnd: "*/",
+		stringDelimiters: ['"', "'"],
+	},
 }
 
 const stripInput = (editor: Editor): string => {
@@ -131,11 +143,13 @@ const logFunctions: Record<string, string[]> = {
 
 const getLogRegex = (lang: string = "lua") => {
 	const functions = logFunctions[lang]
+	if (!functions) return
 	return new RegExp(`^.*(${functions.join("|")})\\(.*\\).*\n?`, "gm")
 }
 
 const stripLoggingStatements = (input: string, lang: string = "lua") => {
 	const regex = getLogRegex(lang)
+	if (!regex) return input
 	return input.replace(regex, "")
 }
 

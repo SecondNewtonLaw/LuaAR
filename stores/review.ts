@@ -12,6 +12,7 @@ export interface Review {
 	evidence: string[]
 }
 export const useReviewStore = defineStore("reviews", () => {
+	const settingsStore = useSettingsStore()
 	const reviews = ref<Review[]>()
 	const editorStore = useEditorStore()
 	const currentReview = ref<Review>({
@@ -131,7 +132,7 @@ export const useReviewStore = defineStore("reviews", () => {
 				editorsList.map(async (editorFile) => {
 					const data = await readFile(`${editorsPath}/${editorFile.name}`, dirOptions.value)
 					const editor = JSON.parse(new TextDecoder().decode(data)) as Editor
-					editor.lang ??= "lua"
+					editor.lang ??= settingsStore.defaultLanguage
 					return editor
 				})
 			)

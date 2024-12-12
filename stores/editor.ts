@@ -1,28 +1,30 @@
 import { invoke } from "@tauri-apps/api/core"
 import { toast } from "vuetify-sonner"
+import type { CodeLanguage } from "./settings"
 
 export interface Editor {
 	input: string
 	collapsed: boolean
 	selected: boolean
 	title?: string
-	lang?: string
+	lang?: CodeLanguage
 }
 
 export const useEditorStore = defineStore("editors", () => {
+	const settingsStore = useSettingsStore()
 	const editors = ref<Editor[]>([
 		{
 			input: "",
 			collapsed: false,
 			selected: false,
-			lang: "lua",
+			lang: settingsStore.defaultLanguage,
 		},
 	])
 
 	const tauri = isTauri()
 
 	const addEditor = (editor: Editor = { input: "", collapsed: false, selected: false }) => {
-		editor.lang ??= "lua"
+		editor.lang ??= settingsStore.defaultLanguage
 		editors.value.push(editor)
 	}
 

@@ -18,9 +18,9 @@
 					hide-details></v-text-field>
 				<!-- Language select -->
 				<v-select
-					:model-value="editor.lang || 'lua'"
+					:model-value="editor.lang || settingsStore.defaultLanguage"
 					@update:model-value="editor.lang = $event"
-					:items="langOpts"
+					:items="settingsStore.languages"
 					label="Language"
 					variant="solo"
 					single-line
@@ -29,16 +29,13 @@
 					density="compact"
 					prepend-inner-icon="mdi-code-tags"
 					hide-details></v-select>
+				{{ editor.lang }}
 			</div>
 
 			<VToolbar flat color="transparent">
 				<v-btn-group>
 					<v-btn @click="editorStore.stripCode(editor)" :disabled="editor.input === ''"> Strip Code </v-btn>
-					<v-btn
-						@click="editorStore.formatCode(editor)"
-						:disabled="editor.input === '' || !tauri || editor.lang !== 'lua'">
-						Format Code
-					</v-btn>
+					<v-btn @click="formatCode(editor)" :disabled="editor.input === ''"> Format Code </v-btn>
 					<!-- Remove logs -->
 					<v-btn @click="editorStore.removeLogs(editor)" :disabled="editor.input === ''">
 						Remove Logs
@@ -113,6 +110,7 @@
 				</div>
 
 				<MonacoEditor
+					ref="monacoEditor"
 					:options="{
 						theme: 'vs-dark',
 						dropIntoEditor: {
@@ -130,7 +128,7 @@
 						lineNumbers: 'on',
 						mouseWheelZoom: true,
 					}"
-					:lang="editor.lang || 'lua'"
+					:lang="editor.lang || settingsStore.defaultLanguage"
 					v-model="editor.input"
 					:class="['editor']" />
 			</v-card-text>
@@ -139,10 +137,12 @@
 </template>
 
 <script lang="ts" setup>
-const langOpts = ref(["lua", "typescript"])
+import { toast } from "vuetify-sonner"
+
 const tauri = isTauri()
 const editorStore = useEditorStore()
 const settingsStore = useSettingsStore()
+const monacoEditor = useTemplateRef("monacoEditor")
 
 const props = defineProps<{
 	editor: Editor
@@ -187,6 +187,14 @@ const duplicateEditor = (event: MouseEvent) => {
 	if (event.ctrlKey) return navigator.clipboard.writeText(props.editor.input)
 
 	editorStore.editors.push({ ...props.editor })
+}
+
+const formatCode = async (editor: Editor) => {
+	monacoEditor.value?.$editor?.getAction("editor.action.formatDocument")?.run()
+	if (editor.lang !== "lua") return
+	if (!tauri) return toast.error("Could not format code")
+
+	editorStore.formatCode(editor)
 }
 </script>
 

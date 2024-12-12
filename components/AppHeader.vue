@@ -28,6 +28,14 @@
 									(v) => v >= 0 || 'Value must be greater than or equal to 0',
 								]" />
 						</v-col>
+
+						<v-col cols="12">
+							<v-select
+								v-model="settingsStore.defaultLanguage"
+								:items="settingsStore.languages"
+								label="Default Language"
+								:rules="[(v) => !!v || 'Value is required']" />
+						</v-col>
 					</v-row>
 				</v-card-text>
 				<v-card-actions>

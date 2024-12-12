@@ -14,13 +14,14 @@
 				:options="{
 					theme: 'vs-dark',
 				}"
-				lang="lua"
+				:lang="settingsStore.defaultLanguage"
 				class="editor" />
 		</v-card-text>
 	</v-card>
 </template>
 
 <script lang="ts" setup>
+const settingsStore = useSettingsStore()
 defineProps<{
 	originalContent: string
 	modifiedContent: string
