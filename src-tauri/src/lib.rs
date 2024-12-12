@@ -7,6 +7,7 @@ use tauri::Window;
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_fs::init())
         .setup(|app| {
@@ -76,7 +77,7 @@ fn lint_code(app_handle: AppHandle, lua_code: String) -> Result<String, String> 
         .path()
         .resolve("assets/selene.exe", BaseDirectory::Resource)
         .map_err(|e| e.to_string())?;
-    
+
     let config_path = selene_path.parent().unwrap().join("selene.toml");
     println!("Selene config path: {:?}", config_path);
 
@@ -84,8 +85,7 @@ fn lint_code(app_handle: AppHandle, lua_code: String) -> Result<String, String> 
         .arg("--config")
         .arg(config_path)
         .arg("--display-style=Rich")
-
-        .arg("-")  // Read from stdin
+        .arg("-") // Read from stdin
         .stdin(std::process::Stdio::piped())
         .stdout(std::process::Stdio::piped())
         .stderr(std::process::Stdio::piped())
@@ -104,12 +104,12 @@ fn lint_code(app_handle: AppHandle, lua_code: String) -> Result<String, String> 
             // so we always want to capture the output
             let stdout = String::from_utf8(output.stdout).map_err(|e| e.to_string())?;
             let stderr = String::from_utf8(output.stderr).map_err(|e| e.to_string())?;
-            
+
             if !stderr.is_empty() {
                 println!("Linting stderr: {}", stderr);
                 return Err(stderr);
             }
-            
+
             Ok(stdout)
         }
         Err(e) => {

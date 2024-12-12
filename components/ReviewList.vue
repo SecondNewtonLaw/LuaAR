@@ -62,7 +62,14 @@
 			:custom-filter="customFilter"
 			@click:row="selectReview">
 			<template #item.url="{ item }">
-				<v-chip color="primary" v-if="item.url" small :href="item.url" @click.stop>{{ item.url }}</v-chip>
+				<v-chip
+					color="primary"
+					v-if="item.url"
+					small
+					:href="item.url"
+					@click.stop.prevent="openLink(item.url)"
+					>{{ item.url }}</v-chip
+				>
 				<v-chip color="grey" v-else small>None</v-chip>
 			</template>
 			<template #item.evidence="{ item }">
@@ -75,6 +82,16 @@
 						{{ item.evidence ? `Evidence provided (${item.evidence.length})` : `No evidence provided` }}
 					</v-tooltip>
 				</v-checkbox>
+			</template>
+
+			<template #item.actions="{ item }">
+				<v-btn
+					icon="mdi-shield-account"
+					small
+					density="comfortable"
+					color="primary"
+					@click.stop="openLink(`https://hiddendevs.com/admin/useredit?userid=${item.user_id}`)"
+					title="View User" />
 			</template>
 		</v-data-table>
 
@@ -96,11 +113,12 @@
 
 <script lang="ts" setup>
 import { open } from "@tauri-apps/plugin-dialog"
+import * as shell from "@tauri-apps/plugin-shell"
+import { toast } from "vuetify-sonner"
 const reviewStore = useReviewStore()
 const props = defineProps<{
 	reviews?: Review[]
 }>()
-
 const selected = ref<string[]>([])
 
 const userReviewCounts = computed(() => {
@@ -153,10 +171,12 @@ const headers = ref([
 		sort: (a: string, b: string) => new Date(a).getTime() - new Date(b).getTime(),
 		value: (item: Record<string, any>) => dateFormatter.format(new Date(item.updated_at)),
 	},
-	// {
-	// 	title: "Actions",
-	// 	key: "actions",
-	// },
+	{
+		title: "Actions",
+		key: "actions",
+		align: "center" as const,
+		sortable: false,
+	},
 ])
 
 const chooseDirectory = async () => {
@@ -168,11 +188,28 @@ const chooseDirectory = async () => {
 	if (!directory) return
 	reviewStore.chosenPath = directory
 }
+let clickTimeout: number | null = null
 
-const selectReview = (_event: PointerEvent, row: any) => {
+const selectReview = (event: PointerEvent, row: any) => {
 	const review = row.item as Review
-	reviewStore.loadReview(review.id)
-	useRouter().push({ name: "index" })
+
+	if (clickTimeout) {
+		clearTimeout(clickTimeout)
+		clickTimeout = null
+	}
+
+	if (event.detail === 1) {
+		clickTimeout = window.setTimeout(() => {
+			const target = event.target as HTMLElement
+			const text = target.textContent || ""
+			navigator.clipboard.writeText(text)
+			toast.success("Copied to clipboard")
+		}, 300) // Adjust the timeout duration as needed
+	} else if (event.detail === 2) {
+		// Double click: select review
+		reviewStore.loadReview(review.id)
+		useRouter().push({ name: "index" })
+	}
 }
 const search = ref("")
 const dates = ref(["", ""])
@@ -209,6 +246,10 @@ const customFilter = (
 		(!!review.url && review.url.toLowerCase().includes(searchLower))
 
 	return matchesSearch
+}
+
+const openLink = (link: string) => {
+	shell.open(link)
 }
 </script>
 

@@ -130,7 +130,9 @@ export const useReviewStore = defineStore("reviews", () => {
 			const editors = await Promise.all(
 				editorsList.map(async (editorFile) => {
 					const data = await readFile(`${editorsPath}/${editorFile.name}`, dirOptions.value)
-					return JSON.parse(new TextDecoder().decode(data)) as Editor
+					const editor = JSON.parse(new TextDecoder().decode(data)) as Editor
+					editor.lang ??= "lua"
+					return editor
 				})
 			)
 			return editors
