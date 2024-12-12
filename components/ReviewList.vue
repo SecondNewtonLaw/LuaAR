@@ -61,25 +61,22 @@
 			:sort-by="sortBy"
 			:custom-filter="customFilter"
 			@click:row="selectReview">
-			<template #item.url="{ item }">
-				<v-chip
-					color="primary"
-					v-if="item.url"
-					small
-					:href="item.url"
-					@click.stop.prevent="openLink(item.url)"
-					>{{ item.url }}</v-chip
-				>
+			<template #item.url="{ value }">
+				<v-chip color="primary" v-if="value" small :href="value" @click.stop.prevent="openLink(value)">{{
+					value
+				}}</v-chip>
 				<v-chip color="grey" v-else small>None</v-chip>
 			</template>
-			<template #item.evidence="{ item }">
+			<template #item.evidence="{ value }">
 				<v-checkbox
 					@click.stop
 					readonly
-					:model-value="!!item.evidence && item.evidence.length > 0"
-					hide-details>
+					:model-value="!!value && value.length > 0"
+					hide-details
+					class="d-inline-flex"
+					dense>
 					<v-tooltip activator="parent" location="bottom">
-						{{ item.evidence ? `Evidence provided (${item.evidence.length})` : `No evidence provided` }}
+						{{ value ? `Evidence provided (${value.length})` : `No evidence provided` }}
 					</v-tooltip>
 				</v-checkbox>
 			</template>
@@ -152,24 +149,47 @@ const dateFormatter = new Intl.DateTimeFormat("en-US", {
 const sortBy = ref([{ key: "created_at", order: "desc" as const }])
 const headers = ref([
 	{ title: "User ID", key: "user_id" },
-	{ title: "Review Index", key: "userReviewIndex", value: (item: Record<string, any>) => `#${item.userReviewIndex}` },
+	{
+		title: "Review Index",
+		key: "userReviewIndex",
+		value: (item: Review & { userReviewIndex: number }) => `#${item.userReviewIndex}`,
+	},
 
 	{ title: "Title", key: "title" },
-	{ title: "URL", key: "url" },
+	{
+		title: "URL",
+		key: "url",
+		value: (item: Review) => {
+			if (!item.url) return
+			try {
+				const url = new URL(item.url)
+				url.searchParams.delete("offset")
 
-	{ title: "Evidence", key: "evidence" },
+				//remove www
+				if (url.hostname.startsWith("www.")) {
+					url.hostname = url.hostname.slice(4)
+				}
+
+				return url.toString()
+			} catch {
+				return item.url
+			}
+		},
+	},
+
+	{ title: "Evidence", key: "evidence", sortable: false, align: "center" as const },
 
 	{
 		title: "Created At",
 		key: "created_at",
 		sort: (a: string, b: string) => new Date(a).getTime() - new Date(b).getTime(),
-		value: (item: Record<string, any>) => dateFormatter.format(new Date(item.created_at)),
+		value: (item: Review) => dateFormatter.format(new Date(item.created_at)),
 	},
 	{
 		title: "Updated At",
 		key: "updated_at",
 		sort: (a: string, b: string) => new Date(a).getTime() - new Date(b).getTime(),
-		value: (item: Record<string, any>) => dateFormatter.format(new Date(item.updated_at)),
+		value: (item: Review) => dateFormatter.format(new Date(item.updated_at)),
 	},
 	{
 		title: "Actions",
