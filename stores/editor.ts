@@ -18,16 +18,17 @@ export const useEditorStore = defineStore("editors", () => {
 			lang: "lua",
 		},
 	])
-	const tauri = useTauri()
 
-	const addEditor = (editor?: Editor) => {
-		editors.value.push(editor ?? { input: "", collapsed: false, selected: false })
-		toast.success("New editor added")
+	const tauri = isTauri()
+
+	const addEditor = (editor: Editor = { input: "", collapsed: false, selected: false }) => {
+		editor.lang ??= "lua"
+		editors.value.push(editor)
 	}
 
 	const resetEditors = () => {
-		editors.value = [{ input: "", collapsed: false, selected: false }]
-		toast.info("Editors reset")
+		editors.value = []
+		addEditor()
 	}
 
 	const toggleCollapse = (editor: Editor) => {
@@ -37,15 +38,12 @@ export const useEditorStore = defineStore("editors", () => {
 	const removeEditor = (editor: Editor) => {
 		const index = editors.value.indexOf(editor)
 		editors.value.splice(index, 1)
-		if (editors.value.length === 0) {
-			addEditor()
-		}
 
 		toast.info("Editor removed")
 	}
 
 	const formatCode = async (editor: Editor) => {
-		if (!tauri.isTauri) return
+		if (!tauri) return
 
 		try {
 			const code = editor.input
@@ -62,7 +60,7 @@ export const useEditorStore = defineStore("editors", () => {
 	}
 
 	const lintCode = async (editor: Editor) => {
-		if (!tauri.isTauri) return
+		if (!tauri) return
 
 		try {
 			const code = editor.input

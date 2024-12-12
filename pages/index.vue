@@ -127,11 +127,12 @@ const addEditorFromReview = async (id: string) => {
 	if (review && review.id) {
 		const editor = (await reviewStore.getEditorsFromReview(review.id))[0]
 		editor.title = `From Review: #${review.id} | ${editor.title ?? "Editor 1"}`
+
 		editorStore.addEditor(editor)
 	}
 }
 const newReview = () => {
-	if (reviewStore.isTouched || isAnyEditorFilled.value) {
+	if (reviewStore.isTouched) {
 		newReviewConfirmationDialogVisible.value = true
 	} else {
 		proceedWithNewReview()
@@ -153,8 +154,6 @@ const proceedWithNewReview = () => {
 const saveReview = async () => {
 	await reviewStore.saveReview()
 }
-
-const isAnyEditorFilled = computed(() => editors.value.some(({ input }) => input !== ""))
 
 const formatTimeAgo = (date: string) => {
 	const now = new Date().getTime()

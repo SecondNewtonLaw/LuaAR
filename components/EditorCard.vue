@@ -36,7 +36,7 @@
 					<v-btn @click="editorStore.stripCode(editor)" :disabled="editor.input === ''"> Strip Code </v-btn>
 					<v-btn
 						@click="editorStore.formatCode(editor)"
-						:disabled="editor.input === '' || !tauri.isTauri || editor.lang !== 'lua'">
+						:disabled="editor.input === '' || !tauri || editor.lang !== 'lua'">
 						Format Code
 					</v-btn>
 					<!-- Remove logs -->
@@ -48,7 +48,7 @@
 					<v-btn
 						icon
 						@click="editorStore.lintCode(editor)"
-						:disabled="editor.input === '' || !tauri.isTauri || editor.lang !== 'lua'">
+						:disabled="editor.input === '' || !tauri || editor.lang !== 'lua'">
 						<v-icon>mdi-alert-circle</v-icon>
 						<v-tooltip activator="parent" location="bottom">Lint Code</v-tooltip>
 					</v-btn>
@@ -140,7 +140,7 @@
 
 <script lang="ts" setup>
 const langOpts = ref(["lua", "typescript"])
-const tauri = useTauri()
+const tauri = isTauri()
 const editorStore = useEditorStore()
 const settingsStore = useSettingsStore()
 

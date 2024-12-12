@@ -118,6 +118,8 @@ export const useReviewStore = defineStore("reviews", () => {
 		currentReview.value = { ...review }
 
 		editorStore.editors = await getEditorsFromReview(review.id)
+		isTouched.value = false
+		oldReview = JSON.stringify(currentReview.value)
 	}
 
 	const getEditorsFromReview = async (review_id: string) => {

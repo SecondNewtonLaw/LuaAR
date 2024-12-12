@@ -4,10 +4,4 @@ declare global {
 	}
 }
 
-export const useTauri = () => {
-	const isTauri = window.__TAURI__ !== undefined
-
-	return {
-		isTauri,
-	}
-}
+export const isTauri = () => window.__TAURI__ !== undefined
