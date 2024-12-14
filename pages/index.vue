@@ -83,7 +83,7 @@ const editors = computed(() => editorStore.editors)
 const diffVisible = ref(false)
 const originalContent = ref("")
 const modifiedContent = ref("")
-const form = ref<{ form: HTMLFormElement | null }>({ form: null })
+const form = useTemplateRef("form")
 const newReviewConfirmationDialogVisible = ref(false)
 
 const showDiff = () => {
@@ -152,6 +152,9 @@ const proceedWithNewReview = () => {
 }
 
 const saveReview = async () => {
+	const validate = await form.value?.form?.validate()
+	if (!validate) return
+
 	await reviewStore.saveReview()
 }
 

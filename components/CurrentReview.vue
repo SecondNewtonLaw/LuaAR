@@ -126,7 +126,7 @@ const reviewStore = useReviewStore()
 const reviewArea = useTemplateRef("review-area")
 const existingUserIds = computed(() => [...new Set(reviewStore.reviews?.map((review) => review.user_id) || [])])
 const existingTitles = computed(() => [...new Set(reviewStore.reviews?.map((review) => review.title) || [])])
-const form = ref<HTMLFormElement | null>(null)
+const form = useTemplateRef("form")
 
 defineExpose({ form })
 const userIdSelected = () => {
@@ -142,9 +142,7 @@ const titleSelected = () => {
 	}
 }
 
-const card = ref<{
-	$el: HTMLDivElement
-} | null>(null)
+const card = useTemplateRef("card")
 
 const handlePaste = (event: ClipboardEvent) => {
 	const items = event.clipboardData?.items
