@@ -30,12 +30,12 @@
 		</v-col>
 	</v-row>
 	<v-row>
-		<v-col :cols="editors.length > 1 ? 6 : 12" v-for="(editor, index) in editors" :key="index">
+		<v-col v-for="(editor, index) in editors" :key="index">
 			<EditorCard :editor />
 		</v-col>
 
 		<v-col v-if="diffVisible" cols="12">
-			<DiffViewer :originalContent="originalContent" :modifiedContent="modifiedContent" v-model="diffVisible" />
+			<DiffViewer :originalContent="modifiedContent" :modifiedContent="originalContent" v-model="diffVisible" />
 		</v-col>
 	</v-row>
 

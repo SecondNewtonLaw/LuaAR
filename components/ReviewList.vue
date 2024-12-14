@@ -52,6 +52,7 @@
 			:items="userReviewCounts"
 			:search="search"
 			title=""
+			hover
 			select-strategy="page"
 			density="compact"
 			show-select
@@ -143,7 +144,6 @@ const dateFormatter = new Intl.DateTimeFormat("en-US", {
 	day: "numeric",
 	hour: "numeric",
 	minute: "numeric",
-	second: "numeric",
 })
 
 const sortBy = ref([{ key: "created_at", order: "desc" as const }])

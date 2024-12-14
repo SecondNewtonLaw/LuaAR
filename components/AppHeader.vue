@@ -1,17 +1,16 @@
 <template>
-	<header>
-		<v-container>
-			<v-toolbar color="transparent" floating elevation="10">
-				<v-toolbar-title class="text-h6 font-weight-bold"> AR Atlas </v-toolbar-title>
-				<v-spacer></v-spacer>
-				<v-toolbar-items>
-					<v-btn icon="mdi-home-outline" :to="{ name: 'index' }" />
-					<v-btn icon="mdi-comment-text-outline" :to="{ name: 'reviews' }" />
-					<!-- <v-btn icon="mdi-file-document-outline" :to="{ name: 'HD' }" /> -->
-					<v-btn icon="mdi-cog" @click="openSettings = true" />
-				</v-toolbar-items>
-			</v-toolbar>
-		</v-container>
+	<header class="mb-4">
+		<v-toolbar color="transparent" floating elevation="10">
+			<v-toolbar-title class="text-h6 font-weight-bold"> AR Atlas </v-toolbar-title>
+			<v-spacer></v-spacer>
+			<v-toolbar-items>
+				<v-btn icon="mdi-home-outline" :to="{ name: 'index' }" />
+				<v-btn icon="mdi-comment-text-outline" :to="{ name: 'reviews' }" />
+				<!-- <v-btn icon="mdi-file-document-outline" :to="{ name: 'HD' }" /> -->
+				<v-btn icon="mdi-shield-account-outline" :to="{ name: 'moderation' }" />
+				<v-btn icon="mdi-cog" @click="openSettings = true" />
+			</v-toolbar-items>
+		</v-toolbar>
 
 		<v-dialog v-model="openSettings" max-width="500">
 			<v-card>

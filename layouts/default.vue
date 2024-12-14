@@ -1,13 +1,11 @@
 <template>
-	<div class="container">
+	<v-container fluid>
 		<AppHeader />
 		<main>
-			<v-container>
-				<slot />
-			</v-container>
+			<slot />
 		</main>
 		<footer></footer>
-	</div>
+	</v-container>
 </template>
 
 <script lang="ts" setup>

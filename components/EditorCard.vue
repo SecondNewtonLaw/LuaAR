@@ -15,7 +15,7 @@
 					density="compact"
 					prepend-inner-icon="mdi-text"
 					single-line
-					hide-details></v-text-field>
+					hide-details />
 				<!-- Language select -->
 				<v-select
 					:model-value="editor.lang || settingsStore.defaultLanguage"
@@ -24,11 +24,11 @@
 					label="Language"
 					variant="solo"
 					single-line
-					width="12rem"
+					max-width="12rem"
 					class="flex-xl-0-0"
 					density="compact"
 					prepend-inner-icon="mdi-code-tags"
-					hide-details></v-select>
+					hide-details />
 			</div>
 
 			<VToolbar flat color="transparent">
