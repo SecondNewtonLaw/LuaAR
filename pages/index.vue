@@ -72,14 +72,16 @@
 		</VDialog>
 
 		<!-- Confirmation dialog -->
-		<VDialog v-model="newReviewConfirmationDialogVisible" width="400">
+		<VDialog v-model="newReviewConfirmationDialogVisible" width="400" @keydown.enter="confirmNewReview">
 			<v-card>
 				<v-card-title class="headline">Confirm New Review</v-card-title>
 				<v-card-text> You have unsaved changes. Are you sure you want to start a new review? </v-card-text>
 				<v-card-actions>
 					<v-spacer></v-spacer>
-					<v-btn color="primary" @click="confirmNewReview">Yes</v-btn>
-					<v-btn color="primary" @click="newReviewConfirmationDialogVisible = false">No</v-btn>
+					<v-btn color="primary" @keydown.stop v-auto-focus @click.stop="confirmNewReview">Yes</v-btn>
+					<v-btn color="primary" @keydown.stop @click.stop="newReviewConfirmationDialogVisible = false"
+						>No</v-btn
+					>
 				</v-card-actions>
 			</v-card>
 		</VDialog>
@@ -182,10 +184,17 @@ const formatTimeAgo = (date: string) => {
 	return `${days} days ${hours} hours`
 }
 
+const keyActions: { [key: string]: () => void } = {
+	s: saveReview,
+	n: newReview,
+}
+
 const handleKeydown = (event: KeyboardEvent) => {
-	if (event.ctrlKey && event.key === "s") {
+	if (!event.ctrlKey) return
+	const action = keyActions[event.key.toLowerCase()]
+	if (action) {
 		event.preventDefault()
-		saveReview()
+		action()
 	}
 }
 
