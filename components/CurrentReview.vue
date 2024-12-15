@@ -88,7 +88,7 @@
 						</v-col>
 						<v-col v-if="previousReview" cols="4">
 							<v-textarea
-								label="Previous Review"
+								:label="`Previous Review (${new Date(previousReview.created_at).toLocaleString()})`"
 								auto-grow
 								variant="solo-filled"
 								disabled
