@@ -16,13 +16,18 @@
 <script lang="ts" setup>
 const modelValue = defineModel<string | null>()
 const draggable = useTemplateRef("draggable")
-const initialPosition = localStorage.getItem("position")
-	? JSON.parse(localStorage.getItem("position")!)
-	: { x: 50, y: 50 }
+const MARGIN = 20
 
-// Ensure initial positions are within 10% to 90%
-initialPosition.x = Math.min(90, Math.max(10, initialPosition.x))
-initialPosition.y = Math.min(90, Math.max(10, initialPosition.y))
+const getInitialPosition = () => {
+	const storedPosition = localStorage.getItem("position")
+	return storedPosition ? JSON.parse(storedPosition) : { x: 50, y: 50 }
+}
+
+let initialPosition = getInitialPosition()
+
+// Ensure initial positions are at least MARGIN px from the screen borders
+initialPosition.x = Math.max(MARGIN, initialPosition.x)
+initialPosition.y = Math.max(MARGIN, initialPosition.y)
 
 const position = reactive(initialPosition)
 
@@ -31,25 +36,27 @@ let offset = { x: 0, y: 0 }
 
 const onMouseDown = (event: MouseEvent) => {
 	isDragging = true
-	const currentX = (position.x / 100) * window.innerWidth
-	const currentY = (position.y / 100) * window.innerHeight
+	const currentX = position.x
+	const currentY = position.y
 	offset.x = event.clientX - currentX
 	offset.y = event.clientY - currentY
 	document.addEventListener("mousemove", onMouseMove)
 	document.addEventListener("mouseup", onMouseUp)
 }
 
+const constrainPosition = () => {
+	if (!draggable.value) return
+	position.x = Math.min(window.innerWidth - draggable.value.offsetWidth - MARGIN, Math.max(MARGIN, position.x))
+	position.y = Math.min(window.innerHeight - draggable.value.offsetHeight - MARGIN, Math.max(MARGIN, position.y))
+	draggable.value.style.left = `${position.x}px`
+	draggable.value.style.top = `${position.y}px`
+}
+
 const onMouseMove = (event: MouseEvent) => {
 	if (!(isDragging && draggable.value)) return
-	const newX = event.clientX - offset.x
-	const newY = event.clientY - offset.y
-	let xPercent = (newX / window.innerWidth) * 100
-	let yPercent = (newY / window.innerHeight) * 100
-	// Constrain positions to 10% - 90% for both x and y
-	position.x = Math.min(90, Math.max(10, xPercent))
-	position.y = Math.min(90, Math.max(10, yPercent))
-	draggable.value.style.left = `${position.x}%`
-	draggable.value.style.top = `${position.y}%`
+	position.x = event.clientX - offset.x
+	position.y = event.clientY - offset.y
+	constrainPosition()
 }
 
 const onMouseUp = () => {
@@ -65,10 +72,13 @@ const close = () => {
 
 onMounted(() => {
 	if (!draggable.value) return
-	const currentX = (position.x / 100) * window.innerWidth
-	const currentY = (position.y / 100) * window.innerHeight
-	draggable.value.style.left = `${currentX}px`
-	draggable.value.style.top = `${currentY}px`
+	draggable.value.style.left = `${position.x}px`
+	draggable.value.style.top = `${position.y}px`
+	window.addEventListener("resize", constrainPosition)
+})
+
+onUnmounted(() => {
+	window.removeEventListener("resize", constrainPosition)
 })
 </script>
 
@@ -77,7 +87,6 @@ onMounted(() => {
 	position: fixed;
 	padding: 1px;
 	border: 1px solid rgba(255, 255, 255, 0.12);
-	transform: translate(-50%, -50%);
 	z-index: 2;
 	cursor: move;
 }

@@ -12,17 +12,12 @@ jobs:
         steps:
             - uses: actions/checkout@v4
 
-    install-pnpm:
+    install-dependencies:
         runs-on: windows-latest
         needs: checkout
         steps:
             - name: Install pnpm
               run: npm install -g pnpm
-
-    install-dependencies:
-        runs-on: windows-latest
-        needs: install-pnpm
-        steps:
             - name: Set up Node.js
               uses: actions/setup-node@v4
               with:
