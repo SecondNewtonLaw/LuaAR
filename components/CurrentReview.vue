@@ -108,11 +108,7 @@
 						label="Evidence"
 						v-model="reviewStore.evidence"></v-file-input>
 
-					<v-row justify="start" class="mt-0">
-						<v-col v-for="base64 in reviewStore.currentReview.evidence" :key="base64">
-							<v-img :src="base64" width="auto" :style="{ width: 'auto' }" height="200"></v-img>
-						</v-col>
-					</v-row>
+					<ImageSlider v-model="reviewStore.currentReview.evidence" />
 				</v-form>
 			</v-card-item>
 		</v-card>
