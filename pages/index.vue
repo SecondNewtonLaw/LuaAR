@@ -164,8 +164,12 @@ const proceedWithNewReview = () => {
 }
 
 const saveReview = async () => {
-	const validate = await form.value?.form?.validate()
-	if (!validate) return
+	const validationObject = await form.value?.form?.validate()
+	console.log("validate", validationObject)
+	if (!validationObject?.valid) {
+		toast.error("Please fix the errors before saving the review.")
+		return
+	}
 
 	await reviewStore.saveReview()
 }

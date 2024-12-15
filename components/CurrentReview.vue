@@ -71,6 +71,10 @@
 						label="User ID"
 						clearable
 						variant="solo-filled"
+						:rules="[
+							(v) => !!v || 'User ID is required',
+							(v) => !isNaN(Number(v)) || 'User ID must be a number',
+						]"
 						v-model="reviewStore.currentReview.user_id"
 						@update:search="userIdSelected"
 						:items="existingUserIds" />
