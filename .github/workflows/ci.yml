@@ -21,6 +21,9 @@ jobs:
         steps:
             - uses: actions/checkout@v4
 
+            - name: Install pnpm
+              run: npm install -g pnpm
+
             - name: Install dependencies (Ubuntu only)
               if: ${{ matrix.platform == 'ubuntu-22.04' }}
               run: |
