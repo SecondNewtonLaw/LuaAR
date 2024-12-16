@@ -8,7 +8,7 @@ export interface LintSummary {
 }
 
 export interface LintDetailItem {
-	type: string
+	type: "error" | "warning" | "parse_error"
 	message: string
 	lineNumber: number | null
 	code: string | null
@@ -20,18 +20,26 @@ export interface LintDetails {
 	parseErrors: LintDetailItem[]
 }
 
+export interface LintSummary {
+	errors: number
+	warnings: number
+	parseErrors: number
+}
+
 export interface LintResult {
 	summary: LintSummary
 	details: LintDetails
 }
-const parseLintResult = (result: string) => {
-	const errors = []
-	const warnings = []
-	const parseErrors = []
+
+const parseLintResult = (result: string): LintResult => {
+	const errors: LintDetailItem[] = []
+	const warnings: LintDetailItem[] = []
+	const parseErrors: LintDetailItem[] = []
 
 	const lines = result.split("\n")
-
+	console.log(result)
 	let currentError: LintDetailItem | null = null
+
 	for (let i = 0; i < lines.length; i++) {
 		const line = lines[i]
 
@@ -49,19 +57,21 @@ const parseLintResult = (result: string) => {
 				lineNumber: null,
 				code: null,
 			}
-		} else if (line.startsWith("  ┌─")) {
-			const match = line.match(/:(\d+):(\d+)/)
+		} else if (line.includes("┌─")) {
+			// Extract line number and column (e.g., -:29:7)
+			const match = line.match(/-:(\d+):(\d+)/)
 			if (match && currentError) {
-				currentError.lineNumber = parseInt(match[1], 10)
+				currentError.lineNumber = parseInt(match[1], 10) // Get the line number
 			}
-		} else if (line.startsWith("  │")) {
-			const codeLineMatch = lines[i + 1]?.match(/^\d+\s\│\s(.*)/)
+		} else if (line.includes("│") && i + 1 < lines.length) {
+			// Look ahead to the next line for the actual code
+			const codeLineMatch = lines[i + 1].match(/^\d+\s\│\s(.*)/)
 			if (codeLineMatch && currentError) {
-				currentError.code = codeLineMatch[1]
-				i++ // Skip the next line as it's processed here
+				currentError.code = codeLineMatch[1].trim() // Extract and trim the code
+				i++ // Skip the next line since it's already processed
 			}
 		} else if (currentError) {
-			// Decide where to push the parsed error
+			// Push the current error or warning to the respective array
 			if (currentError.type === "error") {
 				errors.push(currentError)
 			} else if (currentError.type === "warning") {
@@ -74,12 +84,10 @@ const parseLintResult = (result: string) => {
 		}
 	}
 
-	// Collect summary
-	const summaryLine = lines.find((line) => line.startsWith("Results:"))
-	const summary = {
-		errors: parseInt(summaryLine?.match(/(\d+) errors/)?.[1] || "0", 10),
-		warnings: parseInt(summaryLine?.match(/(\d+) warnings/)?.[1] || "0", 10),
-		parseErrors: parseInt(summaryLine?.match(/(\d+) parse errors/)?.[1] || "0", 10),
+	const summary: LintSummary = {
+		errors: errors.length,
+		warnings: warnings.length,
+		parseErrors: parseErrors.length,
 	}
 
 	return {

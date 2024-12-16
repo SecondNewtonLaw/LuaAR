@@ -94,6 +94,16 @@
 					<!-- LOC -->
 					<CodeInfoChip :count="loc" :color="loc < settingsStore.loc ? 'warning' : 'success'" text="LOC" />
 
+					<!-- LINT -->
+					<CodeInfoChip
+						v-if="lintResult"
+						:count="Object.values(lintResult?.summary).reduce((a, b) => a + b, 0)"
+						:color="
+							Object.values(lintResult?.summary).reduce((a, b) => a + b, 0) === 0 ? 'success' : 'warning'
+						"
+						:details="lintResultMessages"
+						text="Lint" />
+
 					<!-- Comments -->
 					<CodeInfoChip
 						:count="comments"
@@ -170,6 +180,14 @@ const warnDeprecatedAPI = ref([
 const incorrectAPI = ref([/\bFindFirst\w*\s*\([^\)]*\)\s*[:.]/i, /Instance\.new\s*\(\s*[^,]+,\s*[^)]+\s*\)/i])
 
 const loc = computed(() => stripLoggingStatements(stripInput(props.editor), props.editor.lang).split("\n").length)
+const lintResult = ref<LintResult | null>(null)
+const lintResultMessages = computed(() => {
+	if (!lintResult.value) return []
+	//LintResult .details has record of string, {message: string}, show all messages
+	return Object.values(lintResult.value.details)
+		.map((detail) => detail.flatMap((d) => `${d.lineNumber}: ${d.message}`))
+		.flat()
+})
 const comments = computed(() => countComments(props.editor))
 const codeInfoCount = computed(() => {
 	const strippedInput = stripInput(props.editor)
@@ -199,14 +217,19 @@ const formatCode = async (editor: Editor) => {
 	editorStore.formatCode(editor)
 }
 
-onMounted(() => {
-	monacoEditor.value?.$editor?.onDidPaste(() => {
-		if (props.editor.lang !== "lua") return
-		if (!tauri) return toast.error("Could not format code")
+const onInit = async () => {
+	await nextTick()
+	if (props.editor.lang !== "lua") return
+	if (!tauri) return toast.error("Could not format code")
 
-		editorStore.formatCode(props.editor)
-		editorStore.lintCode(props.editor)
-	})
+	await editorStore.formatCode(props.editor)
+	const result = await processLintResult(props.editor)
+	console.log(result)
+	lintResult.value = result
+}
+onMounted(() => {
+	monacoEditor.value?.$editor?.onDidPaste(onInit)
+	onInit()
 })
 </script>
 

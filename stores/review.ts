@@ -35,6 +35,7 @@ export const useReviewStore = defineStore("reviews", () => {
 	watch(chosenPath, (path) => {
 		if (path) {
 			localStorage.setItem("chosenPath", path)
+			loadReviews()
 		} else {
 			localStorage.removeItem("chosenPath")
 		}
