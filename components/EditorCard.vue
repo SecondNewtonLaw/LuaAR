@@ -2,13 +2,12 @@
 	<v-card>
 		<v-card-title>
 			<div class="title-content">
-				Editor
-				<v-checkbox v-model="editor.selected" density="compact" hide-details>
-					<v-tooltip activator="parent" location="bottom">Select Editor</v-tooltip>
-				</v-checkbox>
 				<!-- Title input -->
 				<v-text-field
+					prefix="Editor"
+					persistent-placeholder
 					v-model="editor.title"
+					:readonly="isLintResult"
 					variant="solo"
 					label="Title"
 					placeholder="Enter title"
@@ -29,10 +28,13 @@
 					density="compact"
 					prepend-inner-icon="mdi-code-tags"
 					hide-details />
+				<v-checkbox v-model="editor.selected" density="compact" hide-details>
+					<v-tooltip activator="parent" location="bottom">Select Editor</v-tooltip>
+				</v-checkbox>
 			</div>
 
 			<VToolbar flat color="transparent">
-				<v-btn-group>
+				<v-btn-group variant="tonal" color="primary" v-if="!isLintResult">
 					<v-btn @click="editorStore.stripCode(editor)" :disabled="editor.input === ''"> Strip Code </v-btn>
 					<v-btn @click="formatCode(editor)" :disabled="editor.input === ''"> Format Code </v-btn>
 					<!-- Remove logs -->
@@ -42,14 +44,13 @@
 					</v-btn>
 					<!-- Lint -->
 					<v-btn
-						icon
 						@click="editorStore.lintCode(editor)"
 						:disabled="editor.input === '' || !tauri || editor.lang !== 'lua'">
-						<v-icon>mdi-alert-circle</v-icon>
-						<v-tooltip activator="parent" location="bottom">Lint Code</v-tooltip>
+						Lint Code
 					</v-btn>
 				</v-btn-group>
-				<v-btn-group>
+				<v-spacer />
+				<v-btn-group variant="elevated">
 					<v-btn icon @click="editorStore.toggleCollapse(editor)">
 						<v-icon>{{ editor.collapsed ? "mdi-chevron-down" : "mdi-chevron-up" }}</v-icon>
 						<v-tooltip activator="parent" location="bottom">{{
@@ -69,8 +70,8 @@
 			</VToolbar>
 		</v-card-title>
 		<v-expand-transition>
-			<v-card-text v-show="!editor.collapsed">
-				<div class="code-info-chips">
+			<v-card-text v-show="!editor.collapsed" class="fill-height">
+				<div class="code-info-chips" v-if="!isLintResult">
 					<CodeInfoChip
 						v-if="codeInfoCount.definitive.length > 0"
 						:count="codeInfoCount.definitive.length"
@@ -92,6 +93,16 @@
 
 					<!-- LOC -->
 					<CodeInfoChip :count="loc" :color="loc < settingsStore.loc ? 'warning' : 'success'" text="LOC" />
+
+					<!-- LINT -->
+					<CodeInfoChip
+						v-if="lintResult"
+						:count="Object.values(lintResult?.summary).reduce((a, b) => a + b, 0)"
+						:color="
+							Object.values(lintResult?.summary).reduce((a, b) => a + b, 0) === 0 ? 'success' : 'warning'
+						"
+						:details="lintResultMessages"
+						text="Lint" />
 
 					<!-- Comments -->
 					<CodeInfoChip
@@ -129,7 +140,7 @@
 					}"
 					:lang="editor.lang || settingsStore.defaultLanguage"
 					v-model="editor.input"
-					:class="['editor']" />
+					class="editor" />
 			</v-card-text>
 		</v-expand-transition>
 	</v-card>
@@ -146,6 +157,8 @@ const monacoEditor = useTemplateRef("monacoEditor")
 const props = defineProps<{
 	editor: Editor
 }>()
+
+const isLintResult = computed(() => props.editor.title?.toLowerCase().includes("lint"))
 const deprecatedAPI = ref([
 	/^\s*(wait|delay|spawn)\s*(\([^\)]*\))?\s*$/i,
 	/\bSetPrimaryPartCFrame\b/i,
@@ -167,6 +180,14 @@ const warnDeprecatedAPI = ref([
 const incorrectAPI = ref([/\bFindFirst\w*\s*\([^\)]*\)\s*[:.]/i, /Instance\.new\s*\(\s*[^,]+,\s*[^)]+\s*\)/i])
 
 const loc = computed(() => stripLoggingStatements(stripInput(props.editor), props.editor.lang).split("\n").length)
+const lintResult = ref<LintResult | null>(null)
+const lintResultMessages = computed(() => {
+	if (!lintResult.value) return []
+	//LintResult .details has record of string, {message: string}, show all messages
+	return Object.values(lintResult.value.details)
+		.map((detail) => detail.flatMap((d) => `${d.lineNumber}: ${d.message}`))
+		.flat()
+})
 const comments = computed(() => countComments(props.editor))
 const codeInfoCount = computed(() => {
 	const strippedInput = stripInput(props.editor)
@@ -195,12 +216,30 @@ const formatCode = async (editor: Editor) => {
 
 	editorStore.formatCode(editor)
 }
+
+const onInit = async () => {
+	await nextTick()
+	if (props.editor.lang !== "lua") return
+	if (!tauri) return toast.error("Could not format code")
+
+	await editorStore.formatCode(props.editor)
+	const result = await processLintResult(props.editor)
+	console.log(result)
+	lintResult.value = result
+}
+onMounted(() => {
+	monacoEditor.value?.$editor?.onDidPaste(onInit)
+	onInit()
+})
 </script>
 
 <style scoped lang="scss">
+.v-card {
+	height: 85vh;
+}
 .editor {
 	width: 100%;
-	height: 75vh;
+	height: 100%;
 }
 
 .title-content {
@@ -223,13 +262,5 @@ const formatCode = async (editor: Editor) => {
 	flex-wrap: wrap;
 	gap: 0.5rem;
 	margin-bottom: 0.5rem;
-}
-</style>
-
-<style lang="scss">
-.matched-class {
-	/* Add your styles for matched words here */
-	color: red !important;
-	font-weight: bold;
 }
 </style>

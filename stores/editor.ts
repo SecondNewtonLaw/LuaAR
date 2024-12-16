@@ -62,20 +62,18 @@ export const useEditorStore = defineStore("editors", () => {
 	}
 
 	const lintCode = async (editor: Editor) => {
-		if (!tauri) return
+		const parsedResult = await processLintResult(editor)
+		if (!parsedResult) return
 
-		try {
-			const code = editor.input
-			const result = await invoke<string>("lint_code", {
-				luaCode: code,
-			})
-
-			addEditor({ input: result, collapsed: false, selected: false, title: "Linted Result" })
-			toast.success("Code linted")
-		} catch (error) {
-			console.log("Error linting code:", error)
-			toast.error("Error linting code")
-		}
+		const { details, summary } = parsedResult
+		console.log("Lint Results:", details, summary)
+		addEditor({
+			input: JSON.stringify(details, null, 2),
+			collapsed: false,
+			selected: false,
+			lang: "json",
+			title: `Lint Results: ${summary.errors} errors, ${summary.warnings} warnings`,
+		})
 	}
 	const stripCode = (editor: Editor) => {
 		editor.input = stripInput(editor)

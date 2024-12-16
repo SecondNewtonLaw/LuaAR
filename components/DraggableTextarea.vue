@@ -1,14 +1,21 @@
 <template>
 	<div class="draggable-container rounded" ref="draggable" @mousedown.stop="onMouseDown">
-		<v-btn icon="mdi-close" class="close-button" density="comfortable" @click="close"></v-btn>
+		<v-btn
+			:icon="isLocked ? 'mdi-pin' : 'mdi-pin-outline'"
+			class="pin-button"
+			density="compact"
+			variant="text"
+			@click="toggleLock"></v-btn>
+		<v-btn icon="mdi-close" class="close-button" density="compact" @click="close"></v-btn>
 		<v-card class="pa-1">
 			<v-textarea
+				v-auto-focus
 				variant="solo"
 				hide-details
 				label="Review"
 				v-model="modelValue"
 				auto-grow
-				min-width="20rem"></v-textarea>
+				min-width="20rem" />
 		</v-card>
 	</div>
 </template>
@@ -34,7 +41,10 @@ const position = reactive(initialPosition)
 let isDragging = false
 let offset = { x: 0, y: 0 }
 
+const isLocked = ref(false)
+
 const onMouseDown = (event: MouseEvent) => {
+	if (isLocked.value) return
 	isDragging = true
 	const currentX = position.x
 	const currentY = position.y
@@ -70,6 +80,10 @@ const close = () => {
 	draggable.value?.style.setProperty("display", "none")
 }
 
+const toggleLock = () => {
+	isLocked.value = !isLocked.value
+}
+
 onMounted(() => {
 	if (!draggable.value) return
 	draggable.value.style.left = `${position.x}px`
@@ -82,12 +96,15 @@ onUnmounted(() => {
 })
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .draggable-container {
 	position: fixed;
 	padding: 1px;
 	border: 1px solid rgba(255, 255, 255, 0.12);
 	z-index: 2;
+}
+
+.cursor {
 	cursor: move;
 }
 
@@ -96,5 +113,12 @@ onUnmounted(() => {
 	top: -0.5rem;
 	z-index: 3;
 	right: -0.5rem;
+}
+
+.pin-button {
+	position: absolute;
+	top: -0.5rem;
+	right: 1.5rem;
+	z-index: 3;
 }
 </style>
