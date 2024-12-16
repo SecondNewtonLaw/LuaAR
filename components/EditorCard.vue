@@ -221,21 +221,21 @@ const formatCode = async (editor: Editor) => {
 const init = ref(true)
 const onInit = async () => {
 	console.log("onInit")
-	await nextTick()
+	// await nextTick()
 	if (!props.editor.input) return
 	if (props.editor.lang !== "lua") return
 	if (!tauri) return toast.error("Could not format code")
+	init.value = false
 
 	await editorStore.formatCode(props.editor)
 	const result = await processLintResult(props.editor)
 	console.log(result)
 	lintResult.value = result
-	init.value = false
 }
 
 onMounted(async () => {
-	await nextTick()
 	init.value = true
+	await nextTick()
 	console.log(monacoEditor.value?.$editor)
 	monacoEditor.value?.$editor?.onDidPaste(onInit)
 })

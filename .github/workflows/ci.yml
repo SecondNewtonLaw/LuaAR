@@ -60,20 +60,6 @@ jobs:
                   tagName: app-v__VERSION__
                   releaseName: "App v__VERSION__"
                   releaseBody: "See the assets to download this version and install."
-                  releaseDraft: true
+                  releaseDraft: false
                   prerelease: false
                   args: ${{ matrix.args }}
-
-    release:
-        name: Release pushed tag
-        runs-on: ubuntu-22.04
-        steps:
-            - name: Create release
-              env:
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-                  tag: ${{ github.ref_name }}
-              run: |
-                  gh release create "$tag" \
-                      --repo="$GITHUB_REPOSITORY" \
-                      --title="${GITHUB_REPOSITORY#*/} ${tag#v}" \
-                      --generate-notes
