@@ -2,13 +2,12 @@
 	<v-card>
 		<v-card-title>
 			<div class="title-content">
-				Editor
-				<v-checkbox v-model="editor.selected" density="compact" hide-details>
-					<v-tooltip activator="parent" location="bottom">Select Editor</v-tooltip>
-				</v-checkbox>
 				<!-- Title input -->
 				<v-text-field
+					prefix="Editor"
+					persistent-placeholder
 					v-model="editor.title"
+					:readonly="isLintResult"
 					variant="solo"
 					label="Title"
 					placeholder="Enter title"
@@ -29,10 +28,13 @@
 					density="compact"
 					prepend-inner-icon="mdi-code-tags"
 					hide-details />
+				<v-checkbox v-model="editor.selected" density="compact" hide-details>
+					<v-tooltip activator="parent" location="bottom">Select Editor</v-tooltip>
+				</v-checkbox>
 			</div>
 
 			<VToolbar flat color="transparent">
-				<v-btn-group>
+				<v-btn-group variant="tonal" color="primary">
 					<v-btn @click="editorStore.stripCode(editor)" :disabled="editor.input === ''"> Strip Code </v-btn>
 					<v-btn @click="formatCode(editor)" :disabled="editor.input === ''"> Format Code </v-btn>
 					<!-- Remove logs -->
@@ -42,14 +44,12 @@
 					</v-btn>
 					<!-- Lint -->
 					<v-btn
-						icon
 						@click="editorStore.lintCode(editor)"
 						:disabled="editor.input === '' || !tauri || editor.lang !== 'lua'">
-						<v-icon>mdi-alert-circle</v-icon>
-						<v-tooltip activator="parent" location="bottom">Lint Code</v-tooltip>
+						Lint Code
 					</v-btn>
 				</v-btn-group>
-				<v-btn-group>
+				<v-btn-group variant="elevated">
 					<v-btn icon @click="editorStore.toggleCollapse(editor)">
 						<v-icon>{{ editor.collapsed ? "mdi-chevron-down" : "mdi-chevron-up" }}</v-icon>
 						<v-tooltip activator="parent" location="bottom">{{
@@ -69,7 +69,7 @@
 			</VToolbar>
 		</v-card-title>
 		<v-expand-transition>
-			<v-card-text v-show="!editor.collapsed">
+			<v-card-text v-show="!editor.collapsed" class="fill-height">
 				<div class="code-info-chips">
 					<CodeInfoChip
 						v-if="codeInfoCount.definitive.length > 0"
@@ -129,7 +129,7 @@
 					}"
 					:lang="editor.lang || settingsStore.defaultLanguage"
 					v-model="editor.input"
-					:class="['editor']" />
+					class="editor" />
 			</v-card-text>
 		</v-expand-transition>
 	</v-card>
@@ -146,6 +146,8 @@ const monacoEditor = useTemplateRef("monacoEditor")
 const props = defineProps<{
 	editor: Editor
 }>()
+
+const isLintResult = computed(() => props.editor.title?.toLowerCase().includes("lint"))
 const deprecatedAPI = ref([
 	/^\s*(wait|delay|spawn)\s*(\([^\)]*\))?\s*$/i,
 	/\bSetPrimaryPartCFrame\b/i,
@@ -198,9 +200,12 @@ const formatCode = async (editor: Editor) => {
 </script>
 
 <style scoped lang="scss">
+.v-card {
+	height: 85vh;
+}
 .editor {
 	width: 100%;
-	height: 75vh;
+	height: 100%;
 }
 
 .title-content {
@@ -223,13 +228,5 @@ const formatCode = async (editor: Editor) => {
 	flex-wrap: wrap;
 	gap: 0.5rem;
 	margin-bottom: 0.5rem;
-}
-</style>
-
-<style lang="scss">
-.matched-class {
-	/* Add your styles for matched words here */
-	color: red !important;
-	font-weight: bold;
 }
 </style>

@@ -36,7 +36,7 @@
 			</v-col>
 		</v-row>
 		<v-row>
-			<v-col v-for="(editor, index) in editors" :key="index">
+			<v-col v-for="(editor, index) in editors" :key="index" md="12" :lg="editors.length === 1 ? 12 : 6">
 				<EditorCard :editor />
 			</v-col>
 
@@ -140,7 +140,7 @@ const addEditorFromReview = async (id: string) => {
 	const review = reviewStore.reviews?.find((review) => review.id === id)
 	if (review && review.id) {
 		const editor = (await reviewStore.getEditorsFromReview(review.id))[0]
-		editor.title = `From Review: #${review.id} | ${editor.title ?? "Editor 1"}`
+		editor.title = `From Review: #${review.id} | ${editor.title ?? "1"}`
 
 		editorStore.addEditor(editor)
 	}

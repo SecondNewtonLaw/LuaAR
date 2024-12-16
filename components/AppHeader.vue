@@ -1,7 +1,11 @@
 <template>
 	<header class="mb-4">
 		<v-toolbar color="transparent" floating elevation="10">
-			<v-toolbar-title class="text-h6 font-weight-bold"> AR Atlas </v-toolbar-title>
+			<v-toolbar-title>
+				<v-btn variant="text" class="font-weight-bold text-h5" :active="false" :to="{ name: 'index' }"
+					>AR Atlas</v-btn
+				>
+			</v-toolbar-title>
 			<v-spacer></v-spacer>
 			<v-toolbar-items>
 				<v-btn icon="mdi-home-outline" :to="{ name: 'index' }" />

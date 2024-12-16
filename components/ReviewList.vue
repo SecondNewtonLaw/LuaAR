@@ -24,7 +24,8 @@
 						<template v-slot:append v-if="reviewStore.chosenPath">
 							<v-btn
 								density="compact"
-								variant="flat"
+								variant="elevated"
+								color="secondary"
 								icon="mdi-close"
 								@click.stop="reviewStore.chosenPath = null"></v-btn>
 						</template>
@@ -33,7 +34,7 @@
 
 				<v-col cols="auto">
 					<v-btn
-						rounded="lg"
+						density="compact"
 						variant="text"
 						icon="mdi-refresh"
 						@click="reviewStore.loadReviews"
@@ -41,7 +42,13 @@
 						outlined />
 				</v-col>
 				<v-col cols="auto" v-if="selected.length > 0">
-					<v-btn variant="text" icon="mdi-delete" @click="isDialogOpen = true" color="red" outlined />
+					<v-btn
+						variant="text"
+						density="compact"
+						icon="mdi-delete"
+						@click="isDialogOpen = true"
+						color="red"
+						outlined />
 				</v-col>
 			</v-row>
 		</template>
