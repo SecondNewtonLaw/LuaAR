@@ -5,6 +5,8 @@ on:
     push:
         branches:
             - main
+        tags:
+            - "v*"
 
 jobs:
     publish-tauri:
@@ -61,3 +63,17 @@ jobs:
                   releaseDraft: true
                   prerelease: false
                   args: ${{ matrix.args }}
+
+    release:
+        name: Release pushed tag
+        runs-on: ubuntu-22.04
+        steps:
+            - name: Create release
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                  tag: ${{ github.ref_name }}
+              run: |
+                  gh release create "$tag" \
+                      --repo="$GITHUB_REPOSITORY" \
+                      --title="${GITHUB_REPOSITORY#*/} ${tag#v}" \
+                      --generate-notes
