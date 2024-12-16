@@ -34,7 +34,7 @@
 			</div>
 
 			<VToolbar flat color="transparent">
-				<v-btn-group variant="tonal" color="primary">
+				<v-btn-group variant="tonal" color="primary" v-if="!isLintResult">
 					<v-btn @click="editorStore.stripCode(editor)" :disabled="editor.input === ''"> Strip Code </v-btn>
 					<v-btn @click="formatCode(editor)" :disabled="editor.input === ''"> Format Code </v-btn>
 					<!-- Remove logs -->
@@ -49,6 +49,7 @@
 						Lint Code
 					</v-btn>
 				</v-btn-group>
+				<v-spacer />
 				<v-btn-group variant="elevated">
 					<v-btn icon @click="editorStore.toggleCollapse(editor)">
 						<v-icon>{{ editor.collapsed ? "mdi-chevron-down" : "mdi-chevron-up" }}</v-icon>
@@ -70,7 +71,7 @@
 		</v-card-title>
 		<v-expand-transition>
 			<v-card-text v-show="!editor.collapsed" class="fill-height">
-				<div class="code-info-chips">
+				<div class="code-info-chips" v-if="!isLintResult">
 					<CodeInfoChip
 						v-if="codeInfoCount.definitive.length > 0"
 						:count="codeInfoCount.definitive.length"
@@ -197,6 +198,16 @@ const formatCode = async (editor: Editor) => {
 
 	editorStore.formatCode(editor)
 }
+
+onMounted(() => {
+	monacoEditor.value?.$editor?.onDidPaste(() => {
+		if (props.editor.lang !== "lua") return
+		if (!tauri) return toast.error("Could not format code")
+
+		editorStore.formatCode(props.editor)
+		editorStore.lintCode(props.editor)
+	})
+})
 </script>
 
 <style scoped lang="scss">
