@@ -1,74 +1,83 @@
 <template>
 	<div>
 		<v-form>
-			<v-row v-for="(user, userIndex) in users" :key="userIndex">
-				<v-col cols="12">
-					<v-card>
-						<v-card-title class="d-flex justify-space-between">
-							User {{ userIndex + 1 }}
-							<v-btn icon color="error" density="compact" @click="removeUser(userIndex)">
-								<v-icon>mdi-delete-outline</v-icon>
-							</v-btn>
-						</v-card-title>
-						<v-card-text>
-							<v-text-field variant="solo" single-line v-model="user.notes" label="Notes for User" dense>
-							</v-text-field>
-							<v-row v-for="(uid, uidIndex) in user.userids" :key="uidIndex">
-								<v-col cols="4">
-									<v-text-field
-										variant="solo"
-										single-line
-										v-model="uid.userid"
-										label="User ID"
-										density="compact">
-									</v-text-field>
-								</v-col>
-								<v-col cols="2">
-									<v-select
-										variant="solo"
-										single-line
-										v-model="uid.role"
-										:items="['main', 'alt']"
-										label="Role"
-										density="compact">
-									</v-select>
-								</v-col>
-								<v-col cols="full">
-									<v-text-field
-										variant="solo"
-										single-line
-										density="compact"
-										v-model="uid.notes"
-										label="Notes for User ID"
-										dense>
-									</v-text-field>
-								</v-col>
-								<v-col cols="auto">
-									<v-btn
-										icon
-										density="compact"
-										class="my-1"
-										@click="removeUserId(userIndex, uidIndex)">
-										<v-icon>mdi-delete-outline</v-icon>
-									</v-btn>
-								</v-col>
-							</v-row>
-							<v-btn single-line color="secondary" density="compact" @click="addUserId(userIndex)">
-								<v-icon>mdi-plus</v-icon>
-								Add User ID
-							</v-btn>
-						</v-card-text>
-					</v-card>
-				</v-col>
-			</v-row>
-			<v-btn single-line color="primary" density="compact" @click="addUser">
-				<v-icon>mdi-plus</v-icon>
-				Add user
-			</v-btn>
-			<v-btn single-line color="info" density="compact" @click="showImport = true">
-				<v-icon>mdi-import</v-icon>
-				Import Text
-			</v-btn>
+			<transition-group name="fade" tag="div">
+				<v-row v-for="(user, userIndex) in users" :key="userIndex">
+					<v-col cols="12">
+						<v-card>
+							<v-card-title class="d-flex justify-space-between">
+								User {{ userIndex + 1 }}
+								<v-btn icon color="error" density="compact" @click="removeUser(userIndex)">
+									<v-icon>mdi-delete-outline</v-icon>
+								</v-btn>
+							</v-card-title>
+							<v-card-text>
+								<v-text-field
+									variant="solo"
+									single-line
+									v-model="user.notes"
+									label="Notes for User"
+									dense>
+								</v-text-field>
+								<transition-group name="fade" tag="div">
+									<v-row v-for="(uid, uidIndex) in user.userids" :key="uidIndex">
+										<v-col cols="4">
+											<v-text-field
+												variant="solo"
+												single-line
+												v-model="uid.userid"
+												label="User ID"
+												density="compact">
+											</v-text-field>
+										</v-col>
+										<v-col cols="2">
+											<v-select
+												variant="solo"
+												single-line
+												v-model="uid.role"
+												:items="['main', 'alt']"
+												label="Role"
+												density="compact">
+											</v-select>
+										</v-col>
+										<v-col cols="full">
+											<v-text-field
+												variant="solo"
+												single-line
+												density="compact"
+												v-model="uid.notes"
+												label="Notes for User ID"
+												dense>
+											</v-text-field>
+										</v-col>
+										<v-col cols="auto">
+											<v-btn
+												icon
+												density="compact"
+												class="my-1"
+												@click="removeUserId(userIndex, uidIndex)">
+												<v-icon>mdi-delete-outline</v-icon>
+											</v-btn>
+										</v-col>
+									</v-row>
+								</transition-group>
+								<v-btn single-line color="secondary" density="compact" @click="addUserId(userIndex)">
+									<v-icon>mdi-plus</v-icon>
+									Add User ID
+								</v-btn>
+							</v-card-text>
+						</v-card>
+					</v-col>
+				</v-row>
+			</transition-group>
+			<v-btn-group divided rounded class="ga-2 my-4">
+				<v-btn prepend-icon="mdi-plus" single-line color="primary" density="compact" @click="addUser">
+					Add user
+				</v-btn>
+				<v-btn prepend-icon="mdi-import" color="info" density="compact" @click="showImport = true">
+					Import Text
+				</v-btn>
+			</v-btn-group>
 			<v-dialog v-model="showImport" max-width="600px">
 				<v-card>
 					<v-card-title>Import Users from Text</v-card-title>
@@ -82,7 +91,7 @@
 				</v-card>
 			</v-dialog>
 		</v-form>
-		<v-divider class="my-4"></v-divider>
+		<v-divider class="mb-4"></v-divider>
 		<v-card>
 			<v-card-title class="d-flex justify-space-between">
 				Text Output
@@ -193,4 +202,28 @@ const importUsers = () => {
 }
 </script>
 
-<style></style>
+<style scoped>
+.fade-enter-active,
+.fade-leave-active {
+	transition: opacity 0.5s;
+}
+.fade-enter-from,
+.fade-leave-to {
+	opacity: 0;
+}
+.fade-move,
+.fade-enter-active,
+.fade-leave-active {
+	transition: all 0.5s cubic-bezier(0.55, 0, 0.1, 1);
+}
+
+.fade-enter-from,
+.fade-leave-to {
+	opacity: 0;
+	transform: scaleY(0.01) translate(30px, 0);
+}
+
+.fade-leave-active {
+	position: absolute;
+}
+</style>
