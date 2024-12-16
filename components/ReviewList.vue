@@ -25,7 +25,6 @@
 							<v-btn
 								density="compact"
 								variant="elevated"
-								color="secondary"
 								icon="mdi-close"
 								@click.stop="reviewStore.chosenPath = null"></v-btn>
 						</template>

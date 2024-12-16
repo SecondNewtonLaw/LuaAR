@@ -65,14 +65,14 @@ export const useEditorStore = defineStore("editors", () => {
 		const parsedResult = await processLintResult(editor)
 		if (!parsedResult) return
 
-		const { details } = parsedResult
-
+		const { details, summary } = parsedResult
+		console.log("Lint Results:", details, summary)
 		addEditor({
 			input: JSON.stringify(details, null, 2),
 			collapsed: false,
 			selected: false,
 			lang: "json",
-			title: "Parsed Lint Details",
+			title: `Lint Results: ${summary.errors} errors, ${summary.warnings} warnings`,
 		})
 	}
 	const stripCode = (editor: Editor) => {
