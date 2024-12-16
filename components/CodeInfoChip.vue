@@ -1,7 +1,7 @@
 <template>
 	<v-chip :color="color">
 		{{ text }}<template v-if="count !== null">: {{ count }}</template>
-		<v-tooltip v-if="details?.length" activator="parent" location="bottom">
+		<v-tooltip v-if="details?.length" activator="parent" location="bottom" close-delay="500">
 			<v-list rounded select-strategy="single-leaf" max-height="300">
 				<v-list-item v-for="(line, index) in details" :key="index">
 					<VListItemTitle>{{ line }}</VListItemTitle>
