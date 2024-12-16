@@ -37,7 +37,7 @@ const parseLintResult = (result: string): LintResult => {
 	const parseErrors: LintDetailItem[] = []
 
 	const lines = result.split("\n")
-	console.log(result)
+
 	let currentError: LintDetailItem | null = null
 
 	for (let i = 0; i < lines.length; i++) {
@@ -103,12 +103,10 @@ const processLintResult = async (editor: Editor) => {
 		const result = await invoke<string>("lint_code", { luaCode: code })
 		const parsedResult = parseLintResult(result)
 
-		console.log("Parsed Lint Result:", parsedResult)
 		toast.success("Lint result parsed successfully")
 
 		return parsedResult
 	} catch (error) {
-		console.log("Error processing lint result:", error)
 		toast.error("Failed to process lint result")
 		return null
 	}

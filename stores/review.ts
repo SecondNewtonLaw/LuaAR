@@ -148,7 +148,7 @@ export const useReviewStore = defineStore("reviews", () => {
 		if (!isTouched.value) return toast.info("No changes to save")
 		await makeReviewsDir()
 		silent.value = true
-		const review = currentReview.value
+		const review = { ...currentReview.value }
 		const update = !!review.id
 		if (!review.id) {
 			review.id = crypto.randomUUID()

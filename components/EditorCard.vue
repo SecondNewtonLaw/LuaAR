@@ -97,10 +97,8 @@
 					<!-- LINT -->
 					<CodeInfoChip
 						v-if="lintResult"
-						:count="Object.values(lintResult?.summary).reduce((a, b) => a + b, 0)"
-						:color="
-							Object.values(lintResult?.summary).reduce((a, b) => a + b, 0) === 0 ? 'success' : 'warning'
-						"
+						:count="lintCount"
+						:color="lintCount == 0 ? 'success' : lintCount < 10 ? 'warning' : 'error'"
 						:details="lintResultMessages"
 						text="Lint" />
 
@@ -181,6 +179,9 @@ const incorrectAPI = ref([/\bFindFirst\w*\s*\([^\)]*\)\s*[:.]/i, /Instance\.new\
 
 const loc = computed(() => stripLoggingStatements(stripInput(props.editor), props.editor.lang).split("\n").length)
 const lintResult = ref<LintResult | null>(null)
+const lintCount = computed(() =>
+	lintResult.value ? Object.values(lintResult.value.summary).reduce((a, b) => a + b, 0) : 0
+)
 const lintResultMessages = computed(() => {
 	if (!lintResult.value) return []
 	//LintResult .details has record of string, {message: string}, show all messages
@@ -217,8 +218,11 @@ const formatCode = async (editor: Editor) => {
 	editorStore.formatCode(editor)
 }
 
+const init = ref(true)
 const onInit = async () => {
+	console.log("onInit")
 	await nextTick()
+	if (!props.editor.input) return
 	if (props.editor.lang !== "lua") return
 	if (!tauri) return toast.error("Could not format code")
 
@@ -226,11 +230,26 @@ const onInit = async () => {
 	const result = await processLintResult(props.editor)
 	console.log(result)
 	lintResult.value = result
+	init.value = false
 }
-onMounted(() => {
+
+onMounted(async () => {
+	await nextTick()
+	init.value = true
+	console.log(monacoEditor.value?.$editor)
 	monacoEditor.value?.$editor?.onDidPaste(onInit)
-	onInit()
 })
+watch(
+	() => props.editor.input,
+	() => {
+		if (!init.value) return
+		onInit()
+	},
+	{
+		flush: "post",
+		immediate: true,
+	}
+)
 </script>
 
 <style scoped lang="scss">
