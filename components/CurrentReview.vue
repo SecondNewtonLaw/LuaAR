@@ -165,8 +165,8 @@ const handlePaste = (event: ClipboardEvent) => {
 const previousReview = computed(
 	() =>
 		reviewStore.reviews
-			?.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-			.filter((review) => review.user_id === reviewStore.currentReview.user_id)[
+			?.filter((review) => review.user_id === reviewStore.currentReview.user_id)
+			.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())[
 			reviewStore.currentReview.id ? 1 : 0
 		]
 )
