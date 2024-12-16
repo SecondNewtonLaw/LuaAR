@@ -90,14 +90,30 @@
 								v-model="reviewStore.currentReview.review">
 							</v-textarea>
 						</v-col>
-						<v-col v-if="previousReview" cols="4">
+						<v-col v-if="previousReview" cols="4" class="position-relative">
 							<v-textarea
 								:label="`Previous Review (${new Date(previousReview.created_at).toLocaleString()})`"
 								auto-grow
 								variant="solo-filled"
 								disabled
 								:model-value="previousReview.review"
-								readonly></v-textarea>
+								readonly>
+							</v-textarea>
+							<v-btn
+								v-if="personalReviews"
+								icon="mdi-history"
+								density="compact"
+								:color="
+									new Date(previousReview.created_at) > new Date(reviewStore.currentReview.created_at)
+										? 'primary'
+										: 'default'
+								"
+								class="position-absolute top-0 right-0 mt-4 mr-4"
+								@click="
+									previousReviewIndex =
+										previousReviewIndex === personalReviews.length - 1 ? 0 : previousReviewIndex + 1
+								">
+							</v-btn>
 						</v-col>
 					</v-row>
 
@@ -162,12 +178,16 @@ const handlePaste = (event: ClipboardEvent) => {
 	}
 }
 
+const previousReviewIndex = ref(0)
+const personalReviews = computed(() =>
+	reviewStore.reviews?.filter(
+		(review) => review.user_id === reviewStore.currentReview.user_id && review.id !== reviewStore.currentReview.id
+	)
+)
 const previousReview = computed(
 	() =>
-		reviewStore.reviews
-			?.filter((review) => review.user_id === reviewStore.currentReview.user_id)
-			.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())[
-			reviewStore.currentReview.id ? 1 : 0
+		personalReviews.value?.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())[
+			previousReviewIndex.value
 		]
 )
 
