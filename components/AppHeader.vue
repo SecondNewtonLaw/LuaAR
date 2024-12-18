@@ -13,46 +13,73 @@
 				<!-- <v-btn icon="mdi-file-document-outline" :to="{ name: 'HD' }" /> -->
 				<v-btn icon="mdi-shield-account-outline" :to="{ name: 'moderation' }" />
 				<v-btn icon="mdi-cog" @click="openSettings = true" />
+				<v-tooltip location="bottom">
+					<template #activator="{ props }">
+						<v-btn
+							v-bind="props"
+							icon="mdi-cloud-download-outline"
+							@click="updateApplication"
+							v-if="update" />
+					</template>
+					Update Available {{ update?.version }}
+				</v-tooltip>
 			</v-toolbar-items>
 		</v-toolbar>
 
-		<v-dialog v-model="openSettings" max-width="500">
-			<v-card>
-				<v-card-title class="headline">Settings</v-card-title>
-				<v-card-text>
-					<v-row>
-						<v-col cols="12">
-							<v-text-field
-								label="Minimum LOC"
-								v-model="settingsStore.loc"
-								type="number"
-								:rules="[
-									(v) => !!v || 'Value is required',
-									(v) => v >= 0 || 'Value must be greater than or equal to 0',
-								]" />
-						</v-col>
-
-						<v-col cols="12">
-							<v-select
-								v-model="settingsStore.defaultLanguage"
-								:items="settingsStore.languages"
-								label="Default Language"
-								:rules="[(v) => !!v || 'Value is required']" />
-						</v-col>
-					</v-row>
-				</v-card-text>
-				<v-card-actions>
-					<v-spacer></v-spacer>
-					<v-btn @click="openSettings = false">Close</v-btn>
-				</v-card-actions>
-			</v-card>
-		</v-dialog>
+		<SettingsDialog v-model="openSettings" />
 	</header>
 </template>
 
 <script lang="ts" setup>
+import { relaunch } from "@tauri-apps/plugin-process"
+import { check, Update } from "@tauri-apps/plugin-updater"
+import { toast } from "vuetify-sonner"
+
 const openSettings = ref(false)
-const settingsStore = useSettingsStore()
+const update = ref<Update | null>(null)
+try {
+	update.value = await check()
+	console.log("update", update.value)
+	if (update.value) {
+		console.log(`found update ${update.value.version} from ${update.value.date} with notes ${update.value.body}`)
+	}
+} catch (error) {
+	console.log("failed to check for updates", error)
+	toast.error("Failed to check for updates")
+}
+
+const updateApplication = async () => {
+	if (!update.value) {
+		console.log("no update available")
+		return
+	}
+	try {
+		let downloaded = 0
+		let contentLength = 0
+		// alternatively we could also call update.download() and update.install() separately
+		await update.value.downloadAndInstall((event) => {
+			switch (event.event) {
+				case "Started":
+					contentLength = event.data.contentLength || 0
+					console.log(`started downloading ${event.data.contentLength} bytes`)
+					break
+				case "Progress":
+					downloaded += event.data.chunkLength || 0
+					console.log(`downloaded ${downloaded} from ${contentLength}`)
+					break
+				case "Finished":
+					console.log("download finished")
+					break
+			}
+		})
+
+		console.log("update installed")
+		await relaunch()
+	} catch (error) {
+		console.log("failed to update", error)
+		toast.error("Failed to update")
+	}
+}
 </script>
 
 <style scoped></style>

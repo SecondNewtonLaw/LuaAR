@@ -3,6 +3,9 @@
 		<v-col cols="12">
 			<ReviewList :reviews="reviews" />
 		</v-col>
+		<v-col cols="12">
+			<ReviewStatistics :reviews="reviews" />
+		</v-col>
 	</v-row>
 </template>
 

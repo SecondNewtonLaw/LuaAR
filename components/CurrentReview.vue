@@ -1,16 +1,18 @@
 <template>
 	<div>
 		<v-card ref="card">
-			<v-card-title>
+			<v-card-title class="d-flex align-center">
 				<!-- Back icon to go to the previous review -->
 				Current Review {{ reviewStore.isTouched ? "*" : "" }}
 				<!-- Show adding or editing according to if id is set label with tooltip -->
-				<v-chip color="primary" label>
+				<v-chip color="primary" label class="ml-2">
 					{{ reviewStore.currentReview.id ? "Editing" : "Adding" }}
 					<v-tooltip activator="parent" location="bottom" v-if="reviewStore.currentReview.id">
 						{{ reviewStore.currentReview.id }}
 					</v-tooltip>
 				</v-chip>
+				<v-spacer />
+				<v-btn color="primary" appendIcon="mdi-plus" @click="emits('new')">NEW REVIEW</v-btn>
 			</v-card-title>
 			<v-card-subtitle>
 				{{
@@ -27,16 +29,32 @@
 			</v-card-subtitle>
 			<v-card-item>
 				<v-form validate-on="input lazy" ref="form">
-					<v-combobox
-						label="Title"
-						clearable
-						variant="solo-filled"
-						v-model="reviewStore.currentReview.title"
-						@update:search="titleSelected"
-						:items="existingTitles"></v-combobox>
+					<v-row class="align-center">
+						<v-col>
+							<v-combobox
+								label="Title"
+								clearable
+								density="comfortable"
+								variant="solo-filled"
+								v-model="reviewStore.currentReview.title"
+								@update:search="titleSelected"
+								:items="existingTitles"></v-combobox>
+						</v-col>
+						<v-col cols="auto" class="mb-5">
+							<!-- Approved -->
+							<v-btn
+								:variant="reviewStore.currentReview.approved ? 'elevated' : 'tonal'"
+								@click="reviewStore.currentReview.approved = !reviewStore.currentReview.approved"
+								:color="reviewStore.currentReview.approved ? 'success' : 'error'">
+								{{ reviewStore.currentReview.approved ? "Approved" : "Declined " }}
+							</v-btn>
+						</v-col>
+					</v-row>
+
 					<v-text-field
 						label="URL"
 						variant="solo-filled"
+						density="comfortable"
 						append-inner-icon="mdi-link"
 						placeholder="https://hiddendevs.com/applications/1"
 						clearable
@@ -70,6 +88,7 @@
 					<v-combobox
 						label="User ID"
 						clearable
+						density="comfortable"
 						variant="solo-filled"
 						:rules="[
 							(v) => !!v || 'User ID is required',
@@ -86,6 +105,7 @@
 								append-inner-icon="mdi-message-text"
 								variant="solo-filled"
 								ref="review-area"
+								density="comfortable"
 								auto-grow
 								v-model="reviewStore.currentReview.review">
 							</v-textarea>
@@ -94,6 +114,7 @@
 							<v-textarea
 								:label="`Previous Review (${new Date(previousReview.created_at).toLocaleString()})`"
 								auto-grow
+								density="comfortable"
 								variant="solo-filled"
 								disabled
 								:model-value="previousReview.review"
@@ -102,7 +123,7 @@
 							<v-btn
 								v-if="personalReviews"
 								icon="mdi-history"
-								density="compact"
+								density="comfortable"
 								:color="
 									new Date(previousReview.created_at) > new Date(reviewStore.currentReview.created_at)
 										? 'primary'
@@ -121,6 +142,7 @@
 					<v-file-input
 						clearable
 						multiple
+						density="comfortable"
 						chips
 						variant="solo-filled"
 						prepend-icon=""
@@ -145,6 +167,8 @@ const existingTitles = computed(() => [...new Set(reviewStore.reviews?.map((revi
 const form = useTemplateRef("form")
 
 defineExpose({ form })
+
+const emits = defineEmits<{ new: [] }>()
 const userIdSelected = () => {
 	const review = reviewStore.reviews?.find((review) => review.user_id === reviewStore.currentReview.user_id)
 	if (review) {

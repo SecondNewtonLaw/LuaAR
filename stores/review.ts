@@ -8,22 +8,26 @@ export interface Review {
 	url: string | null
 	user_id: string | null
 	review: string | null
+	approved: boolean
 	id?: string
 	evidence: string[]
+}
+
+const template: Review = {
+	title: null,
+	created_at: "",
+	updated_at: "",
+	url: null,
+	review: null,
+	approved: false,
+	user_id: null,
+	evidence: [],
 }
 export const useReviewStore = defineStore("reviews", () => {
 	const settingsStore = useSettingsStore()
 	const reviews = ref<Review[]>()
 	const editorStore = useEditorStore()
-	const currentReview = ref<Review>({
-		title: null,
-		created_at: "",
-		updated_at: "",
-		url: null,
-		user_id: null,
-		review: null,
-		evidence: [],
-	})
+	const currentReview = ref<Review>({ ...template })
 
 	let oldReview = JSON.stringify(currentReview.value)
 
@@ -62,15 +66,7 @@ export const useReviewStore = defineStore("reviews", () => {
 	)
 
 	const newReview = () => {
-		currentReview.value = {
-			title: "",
-			created_at: "",
-			updated_at: "",
-			url: "",
-			review: "",
-			user_id: "",
-			evidence: [],
-		}
+		currentReview.value = { ...template }
 		oldReview = JSON.stringify(currentReview.value)
 		evidence.value = []
 		editorStore.resetEditors()
@@ -94,7 +90,12 @@ export const useReviewStore = defineStore("reviews", () => {
 			})
 		}
 	}
+
+	const loading = ref(false)
 	const loadReviews = async () => {
+		if (loading.value) return
+		loading.value = true
+
 		try {
 			await makeReviewsDir()
 			const reviewList = await readDir(basePath.value, dirOptions.value)
@@ -109,6 +110,8 @@ export const useReviewStore = defineStore("reviews", () => {
 		} catch (error) {
 			toast.error("Failed to load reviews")
 			console.log(error)
+		} finally {
+			loading.value = false
 		}
 	}
 
@@ -232,13 +235,34 @@ export const useReviewStore = defineStore("reviews", () => {
 
 	watch(basePath, () => loadReviews())
 
+	const loadingApproval = ref(false)
+	const toggleApproval = async (review: Review) => {
+		loadingApproval.value = true
+		review.approved = !review.approved
+
+		const path = `${basePath.value}/${review.id}`
+		await makeReviewDir(path)
+		let encoder = new TextEncoder()
+		let data = encoder.encode(JSON.stringify(review))
+		try {
+			await writeFile(`${path}/meta.json`, data, { ...dirOptions.value })
+		} catch (error) {
+			toast.error("Failed to save review metadata")
+			console.log(error)
+		}
+		reviews.value = reviews.value?.map((r) => (r.id === review.id ? review : r))
+		loadingApproval.value = false
+	}
 	return {
 		currentReview,
 		isTouched,
 		evidence,
 		reviews,
+		loading,
 		chosenPath,
 		loadReviews,
+		toggleApproval,
+		loadingApproval,
 		loadReview,
 		saveReview,
 		removeReview,
