@@ -1,7 +1,6 @@
 <template>
 	<div>
-		<v-btn color="primary" appendIcon="mdi-plus" class="mb-2" @click="newReview">NEW REVIEW</v-btn>
-		<CurrentReview class="mb-6" ref="form" />
+		<CurrentReview class="mb-6" ref="form" @new="newReview" />
 
 		<v-row>
 			<v-col>

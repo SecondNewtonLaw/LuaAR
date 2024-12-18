@@ -229,14 +229,14 @@ const onInit = async () => {
 
 	await editorStore.formatCode(props.editor)
 	const result = await processLintResult(props.editor)
-	console.log(result)
+
 	lintResult.value = result
 }
 
 onMounted(async () => {
 	init.value = true
 	await nextTick()
-	console.log(monacoEditor.value?.$editor)
+
 	monacoEditor.value?.$editor?.onDidPaste(onInit)
 })
 watch(

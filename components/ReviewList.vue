@@ -55,6 +55,7 @@
 		<v-data-table
 			v-model="selected"
 			:headers="headers"
+			:loading="reviewStore.loading"
 			:items="userReviewCounts"
 			:search="search"
 			title=""
@@ -63,6 +64,7 @@
 			density="compact"
 			show-select
 			item-key="id"
+			:row-props="rowProps"
 			:items-per-page-options="[5, 10, 15, 20]"
 			class="elevation-1"
 			:sort-by="sortBy"
@@ -86,6 +88,18 @@
 						{{ value ? `Evidence provided (${value.length})` : `No evidence provided` }}
 					</v-tooltip>
 				</v-checkbox>
+			</template>
+
+			<template #item.approved="{ item, value }">
+				<v-btn
+					:icon="value ? 'mdi-check' : 'mdi-close'"
+					small
+					density="comfortable"
+					:loading="reviewStore.loadingApproval"
+					@click.stop="reviewStore.toggleApproval(item)"
+					:color="value ? 'success' : 'error'"
+					:variant="value ? 'elevated' : 'outlined'">
+				</v-btn>
 			</template>
 
 			<template #item.actions="{ item }">
@@ -198,6 +212,12 @@ const headers = ref([
 		value: (item: Review) => dateFormatter.format(new Date(item.updated_at)),
 	},
 	{
+		title: "Approved",
+		key: "approved",
+		sortable: false,
+		align: "center" as const,
+	},
+	{
 		title: "Actions",
 		key: "actions",
 		align: "center" as const,
@@ -277,6 +297,17 @@ const customFilter = (
 const openLink = (link: string) => {
 	shell.open(link)
 }
+
+const rowProps = (item: any) => ({
+	"review-approved": !!(item.item as Review).approved,
+})
 </script>
 
-<style scoped></style>
+<style scoped lang="scss">
+:deep(.v-data-table__tr) {
+	&[review-approved="true"] {
+		background-color: #00ff1515 !important;
+	}
+	background-color: #ff000015 !important;
+}
+</style>
