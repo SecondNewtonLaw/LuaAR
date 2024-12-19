@@ -9,6 +9,7 @@ export interface Review {
 	user_id: string | null
 	review: string | null
 	approved: boolean
+	muted: boolean
 	id?: string
 	evidence: string[]
 }
@@ -20,6 +21,7 @@ const template: Review = {
 	url: null,
 	review: null,
 	approved: false,
+	muted: false,
 	user_id: null,
 	evidence: [],
 }
