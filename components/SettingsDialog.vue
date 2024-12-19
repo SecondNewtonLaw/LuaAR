@@ -6,8 +6,11 @@
 				<v-card-text>
 					<v-row>
 						<v-col cols="12">
-							<v-text-field
+							<v-combobox
 								label="Minimum LOC"
+								:items="[50, 100, 200]"
+								auto-select-first
+								hide-spin-buttons
 								v-model="settingsStore.loc"
 								type="number"
 								:rules="[
@@ -17,7 +20,7 @@
 						</v-col>
 
 						<v-col cols="12">
-							<v-select
+							<v-autocomplete
 								v-model="settingsStore.defaultLanguage"
 								:items="settingsStore.languages"
 								label="Default Language"

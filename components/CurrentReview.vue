@@ -1,7 +1,7 @@
 <template>
 	<div>
 		<v-card ref="card">
-			<v-card-title class="d-flex align-center">
+			<v-card-title class="d-flex align-center pa-2 pl-4">
 				<!-- Back icon to go to the previous review -->
 				Current Review {{ reviewStore.isTouched ? "*" : "" }}
 				<!-- Show adding or editing according to if id is set label with tooltip -->
