@@ -13,6 +13,24 @@
 						single-line></v-text-field>
 				</v-col>
 
+				<!-- Filter for muted apps, apps with evidence, approved and declined apps -->
+				<v-col cols="auto">
+					<v-select
+						variant="outlined"
+						density="compact"
+						single-line
+						hide-details
+						min-width="10rem"
+						multiple
+						chips
+						clearable
+						v-model="filtersEnabled"
+						:items="Object.keys(filters)"
+						label="Filters"
+						dense>
+					</v-select>
+				</v-col>
+
 				<v-col cols="auto">
 					<v-btn @click="chooseDirectory" color="primary" outlined>
 						<v-icon icon="mdi-folder-open" class="mr-2"></v-icon>
@@ -102,6 +120,10 @@
 				</v-btn>
 			</template>
 
+			<template #item.muted="{ value }">
+				<v-icon :color="value ? 'red' : 'grey'" :icon="value ? 'mdi-volume-off' : 'mdi-volume-high'" />
+			</template>
+
 			<template #item.actions="{ item }">
 				<v-btn
 					icon="mdi-shield-account"
@@ -137,13 +159,33 @@ const reviewStore = useReviewStore()
 const props = defineProps<{
 	reviews?: Review[]
 }>()
+
 const selected = ref<string[]>([])
 
+const dateFormatter = new Intl.DateTimeFormat("en-US", {
+	year: "numeric",
+	month: "short",
+	day: "numeric",
+	hour: "numeric",
+	minute: "numeric",
+})
+
+type Filter = (r: Review) => boolean
+const filters: Record<string, Filter> = {
+	"Has Evidence": (r) => !!r.evidence && r.evidence.length > 0,
+	Approved: (r) => !!r.approved,
+	Declined: (r) => !r.approved,
+	Muted: (r) => !!r.muted,
+}
+const filtersEnabled = ref<string[]>([])
 const userReviewCounts = computed(() => {
 	if (!props.reviews) return []
 
 	const counts = new Map<string, number>()
-	return props.reviews
+	const reviews = filtersEnabled.value.length
+		? props.reviews.filter((review) => filtersEnabled.value.every((filter) => filters[filter](review)))
+		: props.reviews
+	return reviews
 		.slice() // Create a shallow copy to avoid mutating props
 		.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
 		.map((review) => {
@@ -156,14 +198,6 @@ const userReviewCounts = computed(() => {
 				userReviewIndex: count + 1,
 			}
 		})
-})
-
-const dateFormatter = new Intl.DateTimeFormat("en-US", {
-	year: "numeric",
-	month: "short",
-	day: "numeric",
-	hour: "numeric",
-	minute: "numeric",
 })
 
 const sortBy = ref([{ key: "created_at", order: "desc" as const }])
@@ -198,7 +232,12 @@ const headers = ref([
 	},
 
 	{ title: "Evidence", key: "evidence", sortable: false, align: "center" as const },
-
+	{
+		title: "Muted",
+		key: "muted",
+		sortable: false,
+		align: "center" as const,
+	},
 	{
 		title: "Created At",
 		key: "created_at",
@@ -217,6 +256,7 @@ const headers = ref([
 		sortable: false,
 		align: "center" as const,
 	},
+
 	{
 		title: "Actions",
 		key: "actions",
@@ -258,6 +298,7 @@ const selectReview = (event: PointerEvent, row: any) => {
 	}
 }
 const search = ref("")
+
 const dates = ref(["", ""])
 
 const isDialogOpen = ref(false)
@@ -279,10 +320,11 @@ const customFilter = (
 	_query: string,
 	item?: InternalItem<Review>
 ): boolean | number | [number, number] | [number, number][] => {
-	if (!search.value && !dates.value) return true
 	if (!item) return false
-
 	const review = item.raw as Review
+
+	if (!search.value && !dates.value) return true
+
 	const searchLower = search.value.toLowerCase()
 
 	const matchesSearch =
@@ -291,7 +333,9 @@ const customFilter = (
 		review.title?.toLowerCase().includes(searchLower) ||
 		(!!review.url && review.url.toLowerCase().includes(searchLower))
 
-	return matchesSearch
+	if (!matchesSearch) return false
+
+	return true
 }
 
 const openLink = (link: string) => {
