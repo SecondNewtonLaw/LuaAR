@@ -4,9 +4,10 @@
 			<DatePickerComponent v-model="startDate" label="Start Date" />
 			<DatePickerComponent v-model="endDate" label="End Date" />
 		</div>
-		<v-card-text>
-			<v-chip color="success" class="mr-2">{{ approvalRatio }}% Approved</v-chip>
+		<v-card-text class="d-flex ga-2">
+			<v-chip color="success">{{ approvalRatio }}% Approved</v-chip>
 			<v-chip color="error">{{ deniedRatio }}% Denied</v-chip>
+			<v-chip color="warning">{{ totalMutes }} Muted</v-chip>
 		</v-card-text>
 
 		<v-row class="mt-4">
@@ -28,6 +29,12 @@
 				color="error"
 				:series="deniedReviewsSeries"
 				:labels="labels" />
+			<ReviewCard
+				title="Muted Reviews"
+				:total="mutedReviews"
+				color="warning"
+				:series="mutedReviewsSeries"
+				:labels="labels" />
 		</v-row>
 		<apexchart height="300px" :options="chartOptions" :series="chartSeries"></apexchart>
 	</v-card>
@@ -47,16 +54,18 @@ const startHalf = currentDay <= 15 ? 1 : 16
 const startDate = ref<Date | null>(new Date(today.getFullYear(), today.getMonth(), startHalf))
 const endDate = ref<Date | null>(new Date(today.getFullYear(), today.getMonth() + 1, startHalf === 1 ? 15 : 0))
 
-const getCountsPerDay = (approved: boolean) => {
+const getCountsPerDay = (predecate: (review: Review) => boolean) => {
 	if (!props.reviews) return []
 	const counts = new Map<string, number>()
 	props.reviews.forEach((review) => {
 		const reviewDate = new Date(review.created_at)
 		if (startDate.value && reviewDate < new Date(startDate.value)) return
 		if (endDate.value && reviewDate > new Date(endDate.value)) return
-		if (!!review.approved === approved) {
-			const date = reviewDate.toDateString()
+		const date = reviewDate.toDateString()
+		if (predecate(review)) {
 			counts.set(date, (counts.get(date) || 0) + 1)
+		} else {
+			counts.set(date, counts.get(date) || 0)
 		}
 	})
 	return Array.from(counts.entries())
@@ -64,8 +73,8 @@ const getCountsPerDay = (approved: boolean) => {
 		.sort((a, b) => new Date(a.x).getTime() - new Date(b.x).getTime())
 }
 
-const approvalsPerDay = computed(() => getCountsPerDay(true))
-const denialsPerDay = computed(() => getCountsPerDay(false))
+const approvalsPerDay = computed(() => getCountsPerDay((r) => !!r.approved))
+const denialsPerDay = computed(() => getCountsPerDay((r) => !r.approved))
 
 // Add a computed property for filtered reviews
 const filteredReviews = computed(() => {
@@ -87,7 +96,7 @@ const getRatio = (approved: boolean) =>
 
 const approvalRatio = computed(() => getRatio(true))
 const deniedRatio = computed(() => getRatio(false))
-
+const totalMutes = computed(() => filteredReviews.value.filter((r) => r.muted).length)
 const chartOptions = computed(() => ({
 	chart: {
 		id: "area",
@@ -141,10 +150,12 @@ const createSeries = (predicate: (review: Review) => boolean) =>
 const totalReviewsSeries = createSeries(() => true)
 const approvedReviewsSeries = createSeries((r) => r.approved)
 const deniedReviewsSeries = createSeries((r) => !r.approved)
+const mutedReviewsSeries = createSeries((r) => r.muted)
 
 const totalReviews = computed(() => totalReviewsSeries.value.reduce((a, b) => a + b, 0))
 const approvedReviews = computed(() => approvedReviewsSeries.value.reduce((a, b) => a + b, 0))
 const deniedReviews = computed(() => deniedReviewsSeries.value.reduce((a, b) => a + b, 0))
+const mutedReviews = computed(() => mutedReviewsSeries.value.reduce((a, b) => a + b, 0))
 </script>
 
 <style scoped lang="scss"></style>

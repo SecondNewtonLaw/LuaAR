@@ -1,7 +1,7 @@
 <template>
 	<div>
 		<v-card ref="card">
-			<v-card-title class="d-flex align-center">
+			<v-card-title class="d-flex align-center pa-2 pl-4">
 				<!-- Back icon to go to the previous review -->
 				Current Review {{ reviewStore.isTouched ? "*" : "" }}
 				<!-- Show adding or editing according to if id is set label with tooltip -->
@@ -138,19 +138,32 @@
 						</v-col>
 					</v-row>
 
-					<!-- evidence multiple images -->
-					<v-file-input
-						clearable
-						multiple
-						density="comfortable"
-						chips
-						variant="solo-filled"
-						prepend-icon=""
-						append-inner-icon="mdi-image-multiple"
-						label="Evidence"
-						v-model="reviewStore.evidence"></v-file-input>
-
-					<ImageSlider v-model="reviewStore.currentReview.evidence" />
+					<v-row class="align-center mt-0">
+						<v-col>
+							<v-file-input
+								clearable
+								multiple
+								chips
+								hide-details
+								accept="image/*"
+								variant="solo-filled"
+								prepend-icon=""
+								append-inner-icon="mdi-image-multiple"
+								label="Evidence"
+								v-model="reviewStore.evidence"></v-file-input>
+						</v-col>
+						<v-col cols="auto">
+							<!-- Muted or not -->
+							<v-btn
+								:prepend-icon="reviewStore.currentReview.muted ? 'mdi-volume-off' : 'mdi-volume-high'"
+								:variant="reviewStore.currentReview.muted ? 'elevated' : 'tonal'"
+								@click="reviewStore.currentReview.muted = !reviewStore.currentReview.muted"
+								:color="reviewStore.currentReview.muted ? 'error' : 'primary'">
+								{{ reviewStore.currentReview.muted ? "Muted" : "Not Muted" }}
+							</v-btn>
+						</v-col>
+					</v-row>
+					<ImageSlider class="mt-4" v-model="reviewStore.currentReview.evidence" />
 				</v-form>
 			</v-card-item>
 		</v-card>
