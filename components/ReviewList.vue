@@ -51,20 +51,12 @@
 
 				<v-col cols="auto">
 					<v-btn
-						density="compact"
-						variant="text"
+						density="comfortable"
+						variant="outlined"
+						:loading="reviewStore.loading"
 						icon="mdi-refresh"
 						@click="reviewStore.loadReviews"
 						color="primary"
-						outlined />
-				</v-col>
-				<v-col cols="auto" v-if="selected.length > 0">
-					<v-btn
-						variant="text"
-						density="compact"
-						icon="mdi-delete"
-						@click="isDialogOpen = true"
-						color="red"
 						outlined />
 				</v-col>
 			</v-row>
@@ -80,10 +72,9 @@
 			hover
 			select-strategy="page"
 			density="compact"
-			show-select
 			item-key="id"
 			:row-props="rowProps"
-			:items-per-page-options="[5, 10, 15, 20]"
+			:items-per-page-options="[5, 10, 20, 50, 100]"
 			class="elevation-1"
 			:sort-by="sortBy"
 			:custom-filter="customFilter"
@@ -108,30 +99,42 @@
 				</v-checkbox>
 			</template>
 
-			<template #item.approved="{ item, value }">
-				<v-btn
-					:icon="value ? 'mdi-check' : 'mdi-close'"
-					small
-					density="comfortable"
-					:loading="reviewStore.loadingApproval"
-					@click.stop="reviewStore.toggleApproval(item)"
-					:color="value ? 'success' : 'error'"
-					:variant="value ? 'elevated' : 'outlined'">
-				</v-btn>
-			</template>
-
 			<template #item.muted="{ value }">
 				<v-icon :color="value ? 'red' : 'grey'" :icon="value ? 'mdi-volume-off' : 'mdi-volume-high'" />
 			</template>
 
 			<template #item.actions="{ item }">
-				<v-btn
-					icon="mdi-shield-account"
-					small
-					density="comfortable"
-					color="primary"
-					@click.stop="openLink(`https://hiddendevs.com/admin/useredit?userid=${item.user_id}`)"
-					title="View User" />
+				<v-btn-group density="compact">
+					<v-btn
+						icon="mdi-shield-account"
+						density="comfortable"
+						color="primary"
+						@click.stop="openLink(`https://hiddendevs.com/admin/useredit?userid=${item.user_id}`)"
+						title="View User" />
+
+					<v-btn
+						:icon="item.approved ? 'mdi-check' : 'mdi-close'"
+						density="comfortable"
+						:title="item.approved ? 'Approved' : 'Declined'"
+						:loading="reviewStore.loadingApproval"
+						@click.stop="reviewStore.toggleApproval(item)"
+						:color="item.approved ? 'success' : 'error'">
+					</v-btn>
+					<v-divider thickness="2" class="mx-1" vertical></v-divider>
+					<v-btn
+						icon="mdi-pencil"
+						density="comfortable"
+						color="primary"
+						@click.stop="reviewStore.loadReview(item.id)"
+						title="Edit Review" />
+
+					<v-btn
+						icon="mdi-delete"
+						density="comfortable"
+						color="red"
+						@click.stop=";(isDialogOpen = true) && (selected = [item.id?.toString() || ''])"
+						title="Delete Review" />
+				</v-btn-group>
 			</template>
 		</v-data-table>
 
@@ -249,12 +252,6 @@ const headers = ref([
 		key: "updated_at",
 		sort: (a: string, b: string) => new Date(a).getTime() - new Date(b).getTime(),
 		value: (item: Review) => dateFormatter.format(new Date(item.updated_at)),
-	},
-	{
-		title: "Approved",
-		key: "approved",
-		sortable: false,
-		align: "center" as const,
 	},
 
 	{

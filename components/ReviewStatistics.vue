@@ -1,5 +1,9 @@
 <template>
-	<v-card title="Analytics" class="mb-4">
+	<v-card class="mb-4">
+		<v-card-title> Review Statistics </v-card-title>
+		<v-card-subtitle
+			>From: {{ startDate?.toLocaleDateString() }} To: {{ endDate?.toLocaleDateString() }}
+		</v-card-subtitle>
 		<div class="date-picker-container" style="display: flex; gap: 16px">
 			<DatePickerComponent v-model="startDate" label="Start Date" />
 			<DatePickerComponent v-model="endDate" label="End Date" />

@@ -1,11 +1,5 @@
 <template>
-	<v-date-picker
-		hide-header
-		show-adjacent-months
-		v-model="modelValue"
-		:label="label"
-		color="primary"
-		landscape></v-date-picker>
+	<v-date-picker hide-header show-adjacent-months v-model="modelValue" :label="label" color="primary"></v-date-picker>
 </template>
 
 <script lang="ts" setup>
