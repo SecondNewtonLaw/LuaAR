@@ -1,6 +1,6 @@
 <template>
-	<div>
-		<v-card ref="card">
+	<div ref="card">
+		<v-card>
 			<v-card-title class="d-flex align-center pa-2 pl-4">
 				<!-- Back icon to go to the previous review -->
 				Current Review {{ reviewStore.isTouched ? "*" : "" }}
@@ -15,20 +15,32 @@
 				<v-btn color="primary" appendIcon="mdi-plus" @click="emits('new')">NEW REVIEW</v-btn>
 			</v-card-title>
 			<v-card-subtitle>
-				{{
-					reviewStore.currentReview.created_at
-						? `Created at: ${new Date(reviewStore.currentReview.created_at).toLocaleString()}`
-						: "New Review"
-				}}
-				<br />
-				{{
-					reviewStore.currentReview.updated_at
-						? `Updated at: ${new Date(reviewStore.currentReview.updated_at).toLocaleString()}`
-						: ""
-				}}
+				<v-text-field
+					single-line
+					hide-details
+					class="mb-2"
+					clearable
+					prefix="Created at: "
+					density="compact"
+					variant="solo-filled"
+					:label="reviewStore.currentReview.created_at ? '' : 'New review'"
+					@update:model-value="
+						reviewStore.currentReview.created_at = $event ? new Date($event).toLocaleString() : ''
+					"
+					:model-value="
+						reviewStore.currentReview.created_at
+							? new Date(reviewStore.currentReview.created_at).toLocaleString()
+							: ''
+					" />
+
+				<v-chip class="mt-2" v-if="reviewStore.currentReview.updated_at">{{
+					new Date(reviewStore.currentReview.updated_at).toLocaleString()
+				}}</v-chip>
 			</v-card-subtitle>
 			<v-card-item>
 				<v-form validate-on="input lazy" ref="form">
+					<!-- Modify created date -->
+
 					<v-row class="align-center">
 						<v-col>
 							<v-combobox
@@ -149,8 +161,12 @@
 								variant="solo-filled"
 								prepend-icon=""
 								append-inner-icon="mdi-image-multiple"
-								label="Evidence"
-								v-model="reviewStore.evidence"></v-file-input>
+								label="Media"
+								v-model="reviewStore.evidence">
+								<!-- <template #append v-if="reviewStore.evidence.length">
+									<v-btn @click="showImgurUpload = true" color="error"> Imgur </v-btn>
+								</template> -->
+							</v-file-input>
 						</v-col>
 						<v-col cols="auto">
 							<!-- Muted or not -->
@@ -168,17 +184,30 @@
 			</v-card-item>
 		</v-card>
 		<DraggableTextarea v-if="showDraggable" v-model="reviewStore.currentReview.review" />
+
+		<v-dialog v-model="showImgurUpload" persistent max-width="500px">
+			<v-card>
+				<v-card-title>Upload to Imgur</v-card-title>
+				<v-card-text> Upload the images to Imgur to get the links to embed in the review. </v-card-text>
+				<v-card-actions>
+					<v-btn color="error" @click="showImgurUpload = false">Cancel</v-btn>
+					<v-btn color="primary" @click="upload">Upload</v-btn>
+				</v-card-actions>
+			</v-card>
+		</v-dialog>
 	</div>
 </template>
 
 <script lang="ts" setup>
+import { toast } from "vuetify-sonner"
+const config = useRuntimeConfig()
 const { scrape } = useScrape()
 const reviewStore = useReviewStore()
 const reviewArea = useTemplateRef("review-area")
 const existingUserIds = computed(() => [...new Set(reviewStore.reviews?.map((review) => review.user_id) || [])])
 const existingTitles = computed(() => [...new Set(reviewStore.reviews?.map((review) => review.title) || [])])
 const form = useTemplateRef("form")
-
+const showImgurUpload = ref(false)
 defineExpose({ form })
 
 const emits = defineEmits<{ new: [] }>()
@@ -241,11 +270,37 @@ onMounted(() => {
 	if (reviewArea.value?.$el) {
 		observer.observe(reviewArea.value.$el)
 	}
-	card.value?.$el?.addEventListener("paste", handlePaste)
+	card.value?.addEventListener("paste", handlePaste)
 })
 
 onUnmounted(() => {
 	observer.disconnect()
-	card.value?.$el?.removeEventListener("paste", handlePaste)
+	card.value?.removeEventListener("paste", handlePaste)
 })
+
+const upload = async () => {
+	try {
+		const links = await Promise.all(
+			reviewStore.evidence.map(async (evidence) => {
+				const response = await fetch("https://api.imgur.com/3/image", {
+					method: "POST",
+					headers: {
+						Authorization: `Client-ID ${config.public.imgurClientId}`,
+					},
+					body: JSON.stringify({ image: evidence }),
+				})
+				const json = await response.json()
+				return json.data.link
+			})
+		)
+		reviewStore.currentReview.review += `\n\n${links.join("\n")}`
+
+		toast.success("Images uploaded to Imgur")
+	} catch (error) {
+		console.log("Failed to upload images to Imgur", error)
+		toast.error("Failed to upload images to Imgur")
+	} finally {
+		showImgurUpload.value = false
+	}
+}
 </script>
