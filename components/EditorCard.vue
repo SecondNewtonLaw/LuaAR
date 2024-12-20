@@ -70,7 +70,7 @@
 			</VToolbar>
 		</v-card-title>
 		<v-expand-transition>
-			<v-card-text v-show="!editor.collapsed" class="fill-height">
+			<v-card-text v-if="!editor.collapsed">
 				<div class="code-info-chips" v-if="!isLintResult">
 					<CodeInfoChip
 						v-if="codeInfoCount.definitive.length > 0"
@@ -253,12 +253,9 @@ watch(
 </script>
 
 <style scoped lang="scss">
-.v-card {
-	height: 85vh;
-}
 .editor {
 	width: 100%;
-	height: 100%;
+	height: 85vh;
 }
 
 .title-content {

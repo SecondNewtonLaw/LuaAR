@@ -68,7 +68,7 @@ export const useReviewStore = defineStore("reviews", () => {
 	)
 
 	const newReview = () => {
-		currentReview.value = { ...template }
+		currentReview.value = { ...template, created_at: new Date().toISOString() }
 		oldReview = JSON.stringify(currentReview.value)
 		evidence.value = []
 		editorStore.resetEditors()
