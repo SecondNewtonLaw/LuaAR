@@ -1,7 +1,12 @@
 export default defineNuxtConfig({
 	// (optional) Enable the Nuxt devtools
 	devtools: { enabled: true },
-
+	runtimeConfig: {
+		public: {
+			imgurClientId: process.env.NUXT_IMGUR_CLIENT_ID,
+			imgurClientSecret: process.env.NUXT_IMGUR_CLIENT_SECRET,
+		},
+	},
 	// Enable SSG
 	ssr: false,
 
