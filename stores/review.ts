@@ -16,7 +16,7 @@ export interface Review {
 
 const template: Review = {
 	title: null,
-	created_at: "",
+	created_at: new Date().toISOString(),
 	updated_at: "",
 	url: null,
 	review: null,
@@ -157,7 +157,7 @@ export const useReviewStore = defineStore("reviews", () => {
 		const update = !!review.id
 		if (!review.id) {
 			review.id = crypto.randomUUID()
-			review.created_at = new Date().toISOString()
+			review.created_at = review.created_at || new Date().toISOString()
 		}
 		review.updated_at = new Date().toISOString()
 		const path = `${basePath.value}/${review.id}`

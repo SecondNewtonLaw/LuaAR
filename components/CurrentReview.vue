@@ -23,7 +23,7 @@
 					prefix="Created at: "
 					density="compact"
 					variant="solo-filled"
-					:label="reviewStore.currentReview.created_at ? '' : 'New review'"
+					:label="reviewStore.currentReview.created_at ? '' : 'Date'"
 					@update:model-value="
 						reviewStore.currentReview.created_at = $event ? new Date($event).toLocaleString() : ''
 					"
@@ -36,6 +36,8 @@
 				<v-chip class="mt-2" v-if="reviewStore.currentReview.updated_at">{{
 					new Date(reviewStore.currentReview.updated_at).toLocaleString()
 				}}</v-chip>
+
+				<v-divider class="mt-2" thickness="2"></v-divider>
 			</v-card-subtitle>
 			<v-card-item>
 				<v-form validate-on="input lazy" ref="form">

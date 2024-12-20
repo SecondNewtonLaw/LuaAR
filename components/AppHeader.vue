@@ -18,10 +18,10 @@
 					<template #activator="{ props }">
 						<v-btn
 							v-bind="props"
-							:icon="download === 100 ? 'mdi-check' : 'mdi-cloud-download-outline'"
+							:icon="download === 100 ? 'mdi-check' : 'mdi-download-outline'"
 							:color="download === 100 ? 'success' : 'primary'"
 							@click="updateApplication"
-							v-if="(update && download === null) || download === 100" />
+							v-if="(available && download === null) || download === 100" />
 
 						<v-progress-circular
 							v-bind="props"
@@ -47,6 +47,7 @@ import { toast } from "vuetify-sonner"
 
 const openSettings = ref(false)
 let update: Update | null = null
+const available = ref(false)
 const download = ref<number | null>(null)
 
 const updateApplication = async () => {
@@ -89,6 +90,8 @@ const updateApplication = async () => {
 onMounted(async () => {
 	try {
 		update = await check()
+		console.log("update", update)
+		available.value = !!update
 	} catch (error) {
 		console.log("failed to check for updates", error)
 		toast.error("Failed to check for updates")
