@@ -165,10 +165,10 @@
 								append-inner-icon="mdi-image-multiple"
 								label="Media"
 								v-model="reviewStore.evidence">
-								<!-- <template #append v-if="reviewStore.evidence.length">
-									<v-btn @click="showImgurUpload = true" color="error"> Imgur </v-btn>
-								</template> -->
 							</v-file-input>
+						</v-col>
+						<v-col cols="auto" v-if="reviewStore.currentReview.evidence.length">
+							<v-btn @click="showImgurUpload = true" color="primary">Upload to IMGUR </v-btn>
 						</v-col>
 						<v-col cols="auto">
 							<!-- Muted or not -->
@@ -187,21 +187,13 @@
 		</v-card>
 		<DraggableTextarea v-if="showDraggable" v-model="reviewStore.currentReview.review" />
 
-		<v-dialog v-model="showImgurUpload" persistent max-width="500px">
-			<v-card>
-				<v-card-title>Upload to Imgur</v-card-title>
-				<v-card-text> Upload the images to Imgur to get the links to embed in the review. </v-card-text>
-				<v-card-actions>
-					<v-btn color="error" @click="showImgurUpload = false">Cancel</v-btn>
-					<v-btn color="primary" @click="upload">Upload</v-btn>
-				</v-card-actions>
-			</v-card>
-		</v-dialog>
+		<ImgurDialog v-model="showImgurUpload" />
 	</div>
 </template>
 
 <script lang="ts" setup>
 import { toast } from "vuetify-sonner"
+
 const config = useRuntimeConfig()
 const { scrape } = useScrape()
 const reviewStore = useReviewStore()
@@ -279,30 +271,4 @@ onUnmounted(() => {
 	observer.disconnect()
 	card.value?.removeEventListener("paste", handlePaste)
 })
-
-const upload = async () => {
-	try {
-		const links = await Promise.all(
-			reviewStore.evidence.map(async (evidence) => {
-				const response = await fetch("https://api.imgur.com/3/image", {
-					method: "POST",
-					headers: {
-						Authorization: `Client-ID ${config.public.imgurClientId}`,
-					},
-					body: JSON.stringify({ image: evidence }),
-				})
-				const json = await response.json()
-				return json.data.link
-			})
-		)
-		reviewStore.currentReview.review += `\n\n${links.join("\n")}`
-
-		toast.success("Images uploaded to Imgur")
-	} catch (error) {
-		console.log("Failed to upload images to Imgur", error)
-		toast.error("Failed to upload images to Imgur")
-	} finally {
-		showImgurUpload.value = false
-	}
-}
 </script>
