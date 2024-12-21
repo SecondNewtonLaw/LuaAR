@@ -220,7 +220,6 @@ const formatCode = async (editor: Editor) => {
 
 const init = ref(true)
 const onInit = async () => {
-	console.log("onInit")
 	// await nextTick()
 	if (!props.editor.input) return
 	if (props.editor.lang !== "lua") return

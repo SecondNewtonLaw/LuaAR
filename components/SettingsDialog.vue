@@ -26,6 +26,14 @@
 								label="Default Language"
 								:rules="[(v) => !!v || 'Value is required']" />
 						</v-col>
+
+						<v-col cols="12">
+							<v-autocomplete
+								v-model="settingsStore.defaultRole"
+								:items="settingsStore.roles"
+								label="Default Role"
+								:rules="[(v) => !!v || 'Value is required']" />
+						</v-col>
 					</v-row>
 				</v-card-text>
 				<v-card-actions>

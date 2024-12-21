@@ -6,35 +6,52 @@
 				Current Review {{ reviewStore.isTouched ? "*" : "" }}
 				<!-- Show adding or editing according to if id is set label with tooltip -->
 				<v-chip color="primary" label class="ml-2">
-					{{ reviewStore.currentReview.id ? "Editing" : "Adding" }}
-					<v-tooltip activator="parent" location="bottom" v-if="reviewStore.currentReview.id">
-						{{ reviewStore.currentReview.id }}
+					{{ currentReview.id ? "Editing" : "Adding" }}
+					<v-tooltip activator="parent" location="bottom" v-if="currentReview.id">
+						{{ currentReview.id }}
 					</v-tooltip>
 				</v-chip>
 				<v-spacer />
 				<v-btn color="primary" appendIcon="mdi-plus" @click="emits('new')">NEW REVIEW</v-btn>
 			</v-card-title>
 			<v-card-subtitle>
-				<v-text-field
-					single-line
-					hide-details
-					class="mb-2"
-					clearable
-					prefix="Created at: "
-					density="compact"
-					variant="solo-filled"
-					:label="reviewStore.currentReview.created_at ? '' : 'Date'"
-					@update:model-value="
-						reviewStore.currentReview.created_at = $event ? new Date($event).toLocaleString() : ''
-					"
-					:model-value="
-						reviewStore.currentReview.created_at
-							? new Date(reviewStore.currentReview.created_at).toLocaleString()
-							: ''
-					" />
+				<v-row>
+					<v-col>
+						<v-text-field
+							single-line
+							hide-details
+							class="mb-2"
+							clearable
+							prefix="Created at: "
+							density="compact"
+							variant="solo-filled"
+							:label="currentReview.created_at ? '' : 'Date'"
+							@update:model-value="
+								currentReview.created_at = $event ? new Date($event).toLocaleString() : ''
+							"
+							:model-value="
+								currentReview.created_at ? new Date(currentReview.created_at).toLocaleString() : ''
+							" />
+					</v-col>
+					<v-col class="mb-2" cols="auto">
+						<v-autocomplete
+							density="compact"
+							variant="solo-filled"
+							:min-width="`${currentReview.role?.length * 10 + 110}px`"
+							single-line
+							clearable
+							auto-select-first
+							hide-selected
+							:items="settingsStore.roles"
+							v-model="currentReview.role"
+							@update:search="userIdSelected"
+							label="Role"
+							:rules="[(v) => !!v || 'Role is required']" />
+					</v-col>
+				</v-row>
 
-				<v-chip class="mt-2" v-if="reviewStore.currentReview.updated_at">{{
-					new Date(reviewStore.currentReview.updated_at).toLocaleString()
+				<v-chip class="mt-2" v-if="currentReview.updated_at">{{
+					new Date(currentReview.updated_at).toLocaleString()
 				}}</v-chip>
 
 				<v-divider class="mt-2" thickness="2"></v-divider>
@@ -50,17 +67,17 @@
 								clearable
 								density="comfortable"
 								variant="solo-filled"
-								v-model="reviewStore.currentReview.title"
+								v-model="currentReview.title"
 								@update:search="titleSelected"
 								:items="existingTitles"></v-combobox>
 						</v-col>
 						<v-col cols="auto" class="mb-5">
 							<!-- Approved -->
 							<v-btn
-								:variant="reviewStore.currentReview.approved ? 'elevated' : 'tonal'"
-								@click="reviewStore.currentReview.approved = !reviewStore.currentReview.approved"
-								:color="reviewStore.currentReview.approved ? 'success' : 'error'">
-								{{ reviewStore.currentReview.approved ? "Approved" : "Declined " }}
+								:variant="currentReview.approved ? 'elevated' : 'tonal'"
+								@click="currentReview.approved = !currentReview.approved"
+								:color="currentReview.approved ? 'success' : 'error'">
+								{{ currentReview.approved ? "Approved" : "Declined " }}
 							</v-btn>
 						</v-col>
 					</v-row>
@@ -72,22 +89,22 @@
 						append-inner-icon="mdi-link"
 						placeholder="https://hiddendevs.com/applications/1"
 						clearable
-						v-model="reviewStore.currentReview.url"
+						v-model="currentReview.url"
 						:rules="[
 							(v) => !v || /^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/i.test(v) || 'Must be a valid URL',
 							(v) => !v || v.includes('hiddendevs.com') || 'URL must be from hiddendevs.com domain',
 						]">
-						<template
+						<!-- <template
 							v-slot:append-inner
 							v-if="
-								reviewStore.currentReview.url &&
-								/^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/i.test(reviewStore.currentReview.url) &&
-								reviewStore.currentReview.url.includes('hiddendevs.com')
+								currentReview.url &&
+								/^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/i.test(currentReview.url) &&
+								currentReview.url.includes('hiddendevs.com')
 							">
 							<v-tooltip location="bottom">
 								<template v-slot:activator="{ props }">
 									<div v-bind="props" class="d-inline-block mr-2">
-										<v-btn @click="scrape(reviewStore.currentReview.url)" disabled>Scrape</v-btn>
+										<v-btn @click="scrape(currentReview.url)" disabled>Scrape</v-btn>
 									</div>
 								</template>
 								<span>
@@ -96,7 +113,7 @@
 									Currently disabled due to lack of skills.
 								</span>
 							</v-tooltip>
-						</template>
+						</template> -->
 					</v-text-field>
 
 					<v-combobox
@@ -108,7 +125,7 @@
 							(v) => !!v || 'User ID is required',
 							(v) => !isNaN(Number(v)) || 'User ID must be a number',
 						]"
-						v-model="reviewStore.currentReview.user_id"
+						v-model="currentReview.user_id"
 						@update:search="userIdSelected"
 						:items="existingUserIds" />
 
@@ -121,7 +138,7 @@
 								ref="review-area"
 								density="comfortable"
 								auto-grow
-								v-model="reviewStore.currentReview.review">
+								v-model="currentReview.review">
 							</v-textarea>
 						</v-col>
 						<v-col v-if="previousReview" cols="4" class="position-relative">
@@ -139,7 +156,7 @@
 								icon="mdi-history"
 								density="comfortable"
 								:color="
-									new Date(previousReview.created_at) > new Date(reviewStore.currentReview.created_at)
+									new Date(previousReview.created_at) > new Date(currentReview.created_at)
 										? 'primary'
 										: 'default'
 								"
@@ -167,35 +184,34 @@
 								v-model="reviewStore.evidence">
 							</v-file-input>
 						</v-col>
-						<v-col cols="auto" v-if="reviewStore.currentReview.evidence.length">
-							<v-btn @click="showImgurUpload = true" color="primary">Upload to IMGUR </v-btn>
+						<v-col cols="auto" v-if="currentReview.evidence.length" title="Disabled">
+							<v-btn disabled readonly @click="showImgurUpload = true" color="primary"
+								>Upload to IMGUR
+							</v-btn>
 						</v-col>
 						<v-col cols="auto">
 							<!-- Muted or not -->
 							<v-btn
-								:prepend-icon="reviewStore.currentReview.muted ? 'mdi-volume-off' : 'mdi-volume-high'"
-								:variant="reviewStore.currentReview.muted ? 'elevated' : 'tonal'"
-								@click="reviewStore.currentReview.muted = !reviewStore.currentReview.muted"
-								:color="reviewStore.currentReview.muted ? 'error' : 'primary'">
-								{{ reviewStore.currentReview.muted ? "Muted" : "Not Muted" }}
+								:prepend-icon="currentReview.muted ? 'mdi-volume-off' : 'mdi-volume-high'"
+								:variant="currentReview.muted ? 'elevated' : 'tonal'"
+								@click="currentReview.muted = !currentReview.muted"
+								:color="currentReview.muted ? 'error' : 'primary'">
+								{{ currentReview.muted ? "Muted" : "Not Muted" }}
 							</v-btn>
 						</v-col>
 					</v-row>
-					<ImageSlider class="mt-4" v-model="reviewStore.currentReview.evidence" />
+					<ImageSlider class="mt-4" v-model="currentReview.evidence" />
 				</v-form>
 			</v-card-item>
 		</v-card>
-		<DraggableTextarea v-if="showDraggable" v-model="reviewStore.currentReview.review" />
+		<DraggableTextarea v-if="showDraggable" v-model="currentReview.review" />
 
 		<ImgurDialog v-model="showImgurUpload" />
 	</div>
 </template>
 
 <script lang="ts" setup>
-import { toast } from "vuetify-sonner"
-
-const config = useRuntimeConfig()
-const { scrape } = useScrape()
+const settingsStore = useSettingsStore()
 const reviewStore = useReviewStore()
 const reviewArea = useTemplateRef("review-area")
 const existingUserIds = computed(() => [...new Set(reviewStore.reviews?.map((review) => review.user_id) || [])])
@@ -205,16 +221,18 @@ const showImgurUpload = ref(false)
 defineExpose({ form })
 
 const emits = defineEmits<{ new: [] }>()
+
+const currentReview = computed(() => reviewStore.currentReview)
 const userIdSelected = () => {
-	const review = reviewStore.reviews?.find((review) => review.user_id === reviewStore.currentReview.user_id)
+	const review = reviewStore.reviews?.find((review) => review.user_id === currentReview.value.user_id)
 	if (review) {
-		reviewStore.currentReview.title = review.title
+		currentReview.value.title = review.title
 	}
 }
 const titleSelected = () => {
-	const review = reviewStore.reviews?.find((review) => review.title === reviewStore.currentReview.title)
+	const review = reviewStore.reviews?.find((review) => review.title === currentReview.value.title)
 	if (review) {
-		reviewStore.currentReview.user_id = review.user_id
+		currentReview.value.user_id = review.user_id
 	}
 }
 
@@ -229,7 +247,7 @@ const handlePaste = (event: ClipboardEvent) => {
 			const reader = new FileReader()
 			reader.onload = (e) => {
 				const base64 = e.target?.result as string
-				reviewStore.currentReview.evidence.push(base64)
+				currentReview.value.evidence.push(base64)
 			}
 			if (blob) {
 				reader.readAsDataURL(blob)
@@ -241,7 +259,10 @@ const handlePaste = (event: ClipboardEvent) => {
 const previousReviewIndex = ref(0)
 const personalReviews = computed(() =>
 	reviewStore.reviews?.filter(
-		(review) => review.user_id === reviewStore.currentReview.user_id && review.id !== reviewStore.currentReview.id
+		(review) =>
+			review.user_id === currentReview.value.user_id &&
+			review.id !== currentReview.value.id &&
+			review.role === currentReview.value.role
 	)
 )
 const previousReview = computed(
