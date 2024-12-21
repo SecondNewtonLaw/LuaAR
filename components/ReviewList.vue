@@ -79,6 +79,9 @@
 			:sort-by="sortBy"
 			:custom-filter="customFilter"
 			@click:row="selectReview">
+			<template v-slot:loading>
+				<v-skeleton-loader loading type="table-row@10"></v-skeleton-loader>
+			</template>
 			<template #item.url="{ value }">
 				<v-chip color="primary" v-if="value" small :href="value" @click.stop.prevent="openLink(value)">{{
 					value
