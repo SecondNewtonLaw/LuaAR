@@ -23,6 +23,7 @@
 		"@tauri-apps/plugin-updater": "~2",
 		"@types/markdown-it": "^14.1.2",
 		"apexcharts": "^4.2.0",
+		"axios": "^1.7.9",
 		"highlight.js": "^11.10.0",
 		"markdown-it": "^14.1.0",
 		"monaco-editor": "^0.52.0",
