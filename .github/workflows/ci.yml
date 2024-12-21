@@ -56,6 +56,7 @@ jobs:
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
                   TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+                  NUXT_IMGUR_CLIENT_ID: ${{ secrets.NUXT_IMGUR_CLIENT_ID }}
               with:
                   tagName: app-v__VERSION__
                   releaseName: "App v__VERSION__"
