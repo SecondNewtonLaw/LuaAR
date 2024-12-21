@@ -3,11 +3,16 @@ use tauri::command;
 use tauri::path::BaseDirectory;
 use tauri::AppHandle;
 use tauri::Manager;
-use tauri::Window;
+
+#[cfg(not(target_os = "android"))]
+use tauri_plugin_updater;
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
+#[cfg(not(target_os = "android"))]
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_process::init())
+
         .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_dialog::init())
@@ -24,9 +29,18 @@ pub fn run() {
         })
         .invoke_handler(tauri::generate_handler![
             format_code,
-            lint_code,
-            close_splashscreen
+            lint_code
         ])
+        .run(tauri::generate_context!())
+        .expect("error while running tauri application");
+}
+
+#[cfg_attr(mobile, tauri::mobile_entry_point)]
+#[cfg(target_os = "android")]
+pub fn run_android() {
+    tauri::Builder::default()
+        .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_fs::init())
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
@@ -121,18 +135,3 @@ fn lint_code(app_handle: AppHandle, lua_code: String) -> Result<String, String> 
     }
 }
 
-#[command]
-async fn close_splashscreen(window: Window) {
-    // Close splashscreen
-    window
-        .get_webview_window("splashscreen")
-        .expect("no window labeled 'splashscreen' found")
-        .close()
-        .unwrap();
-    // Show main window
-    window
-        .get_webview_window("main")
-        .expect("no window labeled 'main' found")
-        .show()
-        .unwrap();
-}

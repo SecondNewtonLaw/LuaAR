@@ -266,13 +266,18 @@ const headers = ref([
 ])
 
 const chooseDirectory = async () => {
-	const directory = await open({
-		directory: true,
-		recursive: true,
-	})
+	try {
+		const directory = await open({
+			directory: true,
+			recursive: true,
+		})
 
-	if (!directory) return
-	reviewStore.chosenPath = directory
+		if (!directory) return
+		reviewStore.chosenPath = directory
+	} catch (error) {
+		console.log(error)
+		toast.error("Failed to open directory")
+	}
 }
 let clickTimeout: number | null = null
 
