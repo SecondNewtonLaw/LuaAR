@@ -3,6 +3,7 @@
 	"identifier": "default",
 	"description": "enables the default permissions",
 	"windows": ["main"],
+	"platforms": ["windows", "android"],
 	"permissions": [
 		"core:default",
 		"fs:default",
@@ -95,11 +96,6 @@
 			]
 		},
 		"dialog:default",
-		"shell:default",
-		"updater:default",
-		"updater:allow-check",
-		"updater:allow-download",
-		"updater:allow-install",
-		"updater:allow-download-and-install"
+		"shell:default"
 	]
 }

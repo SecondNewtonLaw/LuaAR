@@ -4,10 +4,17 @@
 		<v-card-subtitle
 			>From: {{ startDate?.toLocaleDateString() }} To: {{ endDate?.toLocaleDateString() }}
 		</v-card-subtitle>
-		<div class="date-picker-container" style="display: flex; gap: 16px">
-			<DatePickerComponent v-model="startDate" label="Start Date" />
-			<DatePickerComponent v-model="endDate" label="End Date" />
-		</div>
+		<v-row class="align-start">
+			<v-col cols="auto">
+				<DatePickerComponent v-model="startDate" label="Start Date" />
+			</v-col>
+			<v-col>
+				<DatePickerComponent v-model="endDate" label="End Date" />
+			</v-col>
+			<v-col cols="5">
+				<v-select multiple v-model="selectedRoles" :items="settingsStore.roles" label="Roles"></v-select>
+			</v-col>
+		</v-row>
 		<v-card-text class="d-flex ga-2">
 			<v-chip color="success">{{ approvalRatio }}% Approved</v-chip>
 			<v-chip color="error">{{ deniedRatio }}% Denied</v-chip>
@@ -45,9 +52,8 @@
 </template>
 
 <script lang="ts" setup>
-import DatePickerComponent from "./DatePickerComponent.vue"
-import ReviewCard from "./ReviewCard.vue"
-
+const settingsStore = useSettingsStore()
+const selectedRoles = ref<Role[]>([settingsStore.defaultRole])
 const props = defineProps<{
 	reviews?: Review[]
 }>()
@@ -58,13 +64,20 @@ const startHalf = currentDay <= 15 ? 1 : 16
 const startDate = ref<Date | null>(new Date(today.getFullYear(), today.getMonth(), startHalf))
 const endDate = ref<Date | null>(new Date(today.getFullYear(), today.getMonth() + 1, startHalf === 1 ? 15 : 0))
 
-const getCountsPerDay = (predecate: (review: Review) => boolean) => {
+const filteredReviews = computed(() => {
 	if (!props.reviews) return []
-	const counts = new Map<string, number>()
-	props.reviews.forEach((review) => {
+	return props.reviews.filter((review) => {
+		if (!selectedRoles.value.includes(review.role)) return false
 		const reviewDate = new Date(review.created_at)
-		if (startDate.value && reviewDate < new Date(startDate.value)) return
-		if (endDate.value && reviewDate > new Date(endDate.value)) return
+		return (!startDate.value || reviewDate >= startDate.value) && (!endDate.value || reviewDate <= endDate.value)
+	})
+})
+
+const getCountsPerDay = (predecate: (review: Review) => boolean) => {
+	if (!filteredReviews.value) return []
+	const counts = new Map<string, number>()
+	filteredReviews.value.forEach((review) => {
+		const reviewDate = new Date(review.created_at)
 		const date = reviewDate.toDateString()
 		if (predecate(review)) {
 			counts.set(date, (counts.get(date) || 0) + 1)
@@ -80,16 +93,6 @@ const getCountsPerDay = (predecate: (review: Review) => boolean) => {
 const approvalsPerDay = computed(() => getCountsPerDay((r) => !!r.approved))
 const denialsPerDay = computed(() => getCountsPerDay((r) => !r.approved))
 
-// Add a computed property for filtered reviews
-const filteredReviews = computed(() => {
-	if (!props.reviews) return []
-	return props.reviews.filter((review) => {
-		const reviewDate = new Date(review.created_at)
-		return (!startDate.value || reviewDate >= startDate.value) && (!endDate.value || reviewDate <= endDate.value)
-	})
-})
-
-// Modify getRatio to use filteredReviews
 const getRatio = (approved: boolean) =>
 	filteredReviews.value.length
 		? (
@@ -147,7 +150,8 @@ const createSeries = (predicate: (review: Review) => boolean) =>
 	computed(() =>
 		dates.value.map(
 			(date) =>
-				props.reviews?.filter((r) => predicate(r) && new Date(r.created_at).toDateString() === date).length || 0
+				filteredReviews.value?.filter((r) => predicate(r) && new Date(r.created_at).toDateString() === date)
+					.length || 0
 		)
 	)
 

@@ -52,7 +52,6 @@ const download = ref<number | null>(null)
 
 const updateApplication = async () => {
 	if (!update) {
-		console.log("no update available")
 		return
 	}
 	try {
@@ -60,11 +59,9 @@ const updateApplication = async () => {
 		let contentLength = 0
 
 		await update.download((event) => {
-			console.log("downloaded", download.value)
 			switch (event.event) {
 				case "Started":
 					contentLength = event.data.contentLength || 0
-					console.log("download started", contentLength)
 					download.value = 0
 					break
 				case "Progress":
@@ -72,7 +69,6 @@ const updateApplication = async () => {
 					download.value = (downloaded / contentLength) * 100
 					break
 				case "Finished":
-					console.log("download finished")
 					download.value = 100
 					break
 			}
@@ -90,7 +86,6 @@ const updateApplication = async () => {
 onMounted(async () => {
 	try {
 		update = await check()
-		console.log("update", update)
 		available.value = !!update
 	} catch (error) {
 		console.log("failed to check for updates", error)

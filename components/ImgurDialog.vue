@@ -64,17 +64,55 @@ interface ImgurResponse {
 	}
 }
 
+interface ImgurAlbumResponse {
+	status: number
+	success: boolean
+	data: {
+		id: string
+		deletehash: string
+		link: string
+	}
+}
+
 const showImgurUpload = defineModel<boolean>()
 
 const config = useRuntimeConfig()
 const reviewStore = useReviewStore()
 const description = ref("")
 const uploading = ref(false)
+
+const createAlbum = async (ids: string[]): Promise<string> => {
+	const formData = new FormData()
+	formData.append("ids", ids.join(","))
+	formData.append(
+		"title",
+		`HD Application: ${reviewStore.currentReview.title ?? "N/A"} - ${reviewStore.currentReview.user_id ?? "N/A"}`
+	)
+	formData.append("description", description.value)
+	const response = await $fetch<ImgurAlbumResponse>("https://api.imgur.com/3/album", {
+		method: "POST",
+		headers: {
+			Authorization: `Client-ID ${config.public.imgurClientId}`,
+		},
+		body: formData,
+		referrer: "",
+	})
+	if (!response.success) {
+		throw new Error(`${response.status}: Failed to create Imgur album`)
+	}
+	return response.data.id
+}
+
 const upload = async () => {
 	try {
 		uploading.value = true
 
-		const links = await Promise.all(
+		//authorize
+		if (!config.public.imgurClientId) {
+			throw new Error("Imgur client ID is not set")
+		}
+
+		const ids = await Promise.all(
 			reviewStore.currentReview.evidence.map(async (evidence) => {
 				//evidence is a base64 string, convert it into suitable format for formdata
 				const blob = await fetch(evidence).then((res) => res.blob())
@@ -87,7 +125,6 @@ const upload = async () => {
 						reviewStore.currentReview.user_id ?? "N/A"
 					}`
 				)
-				formData.append("description", description.value)
 
 				const response = await $fetch<ImgurResponse>("https://api.imgur.com/3/image", {
 					method: "POST",
@@ -103,13 +140,15 @@ const upload = async () => {
 					throw new Error(`${response.status}: Failed to upload to Imgur`)
 				}
 
-				return response.data.link
+				return response.data.id
 			})
 		)
-		reviewStore.currentReview.review ??= ""
-		reviewStore.currentReview.review += `\nGenerated IMGUR links\n${links.join("\n")}`
 
-		toast.success(`Uploaded ${links.length} image${links.length > 1 ? "s" : ""} to Imgur`)
+		const albumId = await createAlbum(ids)
+		reviewStore.currentReview.review ??= ""
+		reviewStore.currentReview.review += `\nGenerated IMGUR album: https://imgur.com/a/${albumId}`
+
+		toast.success(`Uploaded ${ids.length} image${ids.length > 1 ? "s" : ""} to Imgur`)
 	} catch (error) {
 		console.log("Failed to upload images to Imgur", error)
 		toast.error("Failed to upload images to Imgur")
