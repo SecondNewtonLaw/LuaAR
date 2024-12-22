@@ -103,7 +103,7 @@ const getRatio = (approved: boolean) =>
 
 const approvalRatio = computed(() => getRatio(true))
 const deniedRatio = computed(() => getRatio(false))
-const totalMutes = computed(() => filteredReviews.value.filter((r) => r.muted).length)
+const totalMutes = computed(() => filteredReviews.value.filter((r) => r.muted === true).length)
 const chartOptions = computed(() => ({
 	chart: {
 		id: "area",
@@ -137,10 +137,9 @@ const chartSeries = computed(() => [
 
 const dates = computed(() => {
 	const daysDiff = Math.ceil((endDate.value!.getTime() - startDate.value!.getTime()) / 86400000) + 1
-	return Array.from({ length: daysDiff }, (_, i) => {
-		const date = new Date(startDate.value!.getTime() + i * 86400000)
-		return date.toDateString()
-	})
+	return Array.from({ length: daysDiff }, (_, i) =>
+		new Date(startDate.value!.getTime() + i * 86400000).toDateString()
+	)
 })
 
 // DD/MM
