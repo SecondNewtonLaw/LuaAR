@@ -12,7 +12,7 @@
 				<v-btn icon="mdi-comment-text-outline" :to="{ name: 'reviews' }" />
 				<!-- <v-btn icon="mdi-file-document-outline" :to="{ name: 'HD' }" /> -->
 				<v-btn icon="mdi-shield-account-outline" :to="{ name: 'moderation' }" />
-				<v-btn icon="mdi-cog" @click="openSettings = true" />
+				<v-btn icon="mdi-cog-outline" @click="openSettings = true" />
 
 				<v-tooltip location="bottom">
 					<template #activator="{ props }">

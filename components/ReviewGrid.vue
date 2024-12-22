@@ -2,11 +2,7 @@
 	<v-card flat>
 		<!-- Make a grid inside v card text 3x3 pages with title of the review -->
 		<v-card-text>
-			<v-data-iterator
-				:items="reviews || []"
-				items-per-page="12"
-				:loading="reviewStore.loading"
-				:sort-by="sortBy">
+			<v-data-iterator :items="reviews || []" items-per-page="12" :loading="reviewStore.loading">
 				<template #default="{ items }">
 					<v-row v-if="items.length > 0">
 						<v-col sm="6" md="4" lg="3" v-for="review in items" :key="review.raw.id">
@@ -78,8 +74,12 @@
 const router = useRouter()
 const settingsStore = useSettingsStore()
 const reviewStore = useReviewStore()
-const sortBy = ref([{ key: "created_at", order: "desc" as const }])
+
 const props = defineProps<{ reviews?: Review[] }>()
+
+const reviews = computed(() =>
+	props.reviews?.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+)
 const selectReview = (review: Review) => {
 	reviewStore.loadReview(review.id)
 	router.push({ name: "index" })

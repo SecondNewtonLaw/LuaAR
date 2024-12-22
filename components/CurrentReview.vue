@@ -40,6 +40,7 @@
 							:min-width="`${currentReview.role?.length * 10 + 110}px`"
 							single-line
 							clearable
+							hide-details
 							auto-select-first
 							hide-selected
 							:items="settingsStore.roles"
@@ -65,11 +66,12 @@
 							<v-combobox
 								label="Title"
 								clearable
+								auto-select-first
 								density="comfortable"
 								variant="solo-filled"
 								v-model="currentReview.title"
 								@update:search="titleSelected"
-								:items="existingTitles"></v-combobox>
+								:items="existingTitles" />
 						</v-col>
 						<v-col cols="auto" class="mb-5">
 							<!-- Approved -->
@@ -93,32 +95,12 @@
 						:rules="[
 							(v) => !v || /^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/i.test(v) || 'Must be a valid URL',
 							(v) => !v || v.includes('hiddendevs.com') || 'URL must be from hiddendevs.com domain',
-						]">
-						<!-- <template
-							v-slot:append-inner
-							v-if="
-								currentReview.url &&
-								/^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/i.test(currentReview.url) &&
-								currentReview.url.includes('hiddendevs.com')
-							">
-							<v-tooltip location="bottom">
-								<template v-slot:activator="{ props }">
-									<div v-bind="props" class="d-inline-block mr-2">
-										<v-btn @click="scrape(currentReview.url)" disabled>Scrape</v-btn>
-									</div>
-								</template>
-								<span>
-									Scrape the URL for the code & allat
-									<br />
-									Currently disabled due to lack of skills.
-								</span>
-							</v-tooltip>
-						</template> -->
-					</v-text-field>
+						]" />
 
 					<v-combobox
 						label="User ID"
 						clearable
+						auto-select-first
 						density="comfortable"
 						variant="solo-filled"
 						:rules="[

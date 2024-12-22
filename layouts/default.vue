@@ -1,14 +1,33 @@
 <template>
-	<v-container fluid>
+	<v-container fluid height="100vh" class="d-flex flex-column">
 		<AppHeader />
 		<main>
 			<slot />
 		</main>
-		<footer></footer>
+		<v-spacer />
+		<v-footer color="transparent" class="align-end">
+			<v-row class="d-flex justify-space-between">
+				<v-spacer />
+				<v-col cols="auto">
+					<v-chip color="primary" label>
+						{{ version }}
+					</v-chip>
+				</v-col>
+				<v-col cols="auto">
+					<v-btn
+						:icon="darkMode ? 'mdi-white-balance-sunny' : 'mdi-moon-waning-crescent'"
+						density="comfortable"
+						@click="darkMode = !darkMode"
+						:ripple="false">
+					</v-btn>
+				</v-col>
+			</v-row>
+		</v-footer>
 	</v-container>
 </template>
 
 <script lang="ts" setup>
+import { app } from "@tauri-apps/api"
 const theme = useTheme()
 const darkMode = ref(false)
 
@@ -18,6 +37,8 @@ watch(darkMode, (value) => {
 onMounted(async () => {
 	darkMode.value = theme.current.value.dark
 })
+
+const version = await app.getVersion()
 </script>
 
 <style lang="scss" scoped>
