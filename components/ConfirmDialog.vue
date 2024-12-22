@@ -9,10 +9,10 @@
 				<v-card-actions>
 					<v-spacer></v-spacer>
 					<v-btn @click="isDialogOpen = false">Cancel</v-btn>
-					<v-btn color="red" @click=";(isDialogOpen = false) && emits('confirm')">{{ submit }}</v-btn>
+					<v-btn color="red" @click=";(isDialogOpen = false) || emits('confirm')">{{ submit }}</v-btn>
 				</v-card-actions>
-			</v-card></v-dialog
-		>
+			</v-card>
+		</v-dialog>
 	</div>
 </template>
 

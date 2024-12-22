@@ -13,6 +13,12 @@
 				</v-chip>
 				<v-spacer />
 				<v-btn color="primary" appendIcon="mdi-plus" @click="emits('new')">NEW REVIEW</v-btn>
+				<v-btn icon @click="saveReview" color="primary" class="ml-2" rounded density="comfortable">
+					<v-icon>mdi-content-save-outline</v-icon>
+					<v-tooltip activator="parent" location="bottom"
+						>{{ currentReview.id ? "Update" : "Save" }} review</v-tooltip
+					>
+				</v-btn>
 			</v-card-title>
 			<v-card-subtitle>
 				<v-row>
@@ -193,6 +199,8 @@
 </template>
 
 <script lang="ts" setup>
+import { toast } from "vuetify-sonner"
+
 const settingsStore = useSettingsStore()
 const reviewStore = useReviewStore()
 const reviewArea = useTemplateRef("review-area")
@@ -218,6 +226,15 @@ const titleSelected = () => {
 	}
 }
 
+const saveReview = async () => {
+	const validationObject = await form.value?.validate()
+	if (!validationObject?.valid) {
+		toast.error("Please fix the errors before saving the review.")
+		return
+	}
+
+	await reviewStore.saveReview()
+}
 const card = useTemplateRef("card")
 
 const handlePaste = (event: ClipboardEvent) => {

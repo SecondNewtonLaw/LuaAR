@@ -12,14 +12,7 @@ export interface Editor {
 
 export const useEditorStore = defineStore("editors", () => {
 	const settingsStore = useSettingsStore()
-	const editors = ref<Editor[]>([
-		{
-			input: "",
-			collapsed: false,
-			selected: false,
-			lang: settingsStore.defaultLanguage,
-		},
-	])
+	const editors = ref<Editor[]>([])
 
 	const tauri = isTauri()
 
@@ -30,7 +23,7 @@ export const useEditorStore = defineStore("editors", () => {
 
 	const resetEditors = () => {
 		editors.value = []
-		addEditor()
+		settingsStore.group === "Programming" && addEditor()
 	}
 
 	const toggleCollapse = (editor: Editor) => {
@@ -84,6 +77,8 @@ export const useEditorStore = defineStore("editors", () => {
 		editor.input = stripLoggingStatements(editor.input, editor.lang)
 		toast.success("Logs removed")
 	}
+
+	resetEditors()
 	return {
 		editors,
 

@@ -10,8 +10,13 @@
 							:items-per-page="10"
 							v-model="selected"
 							:loading="reviewStore.loading"
-							:sort-by="sortBy"
-							show-select>
+							:sort-by="sortBy">
+							<template #item.approved="{ value }">
+								<v-chip
+									dense
+									:text="value ? 'Approved' : 'Not Approved'"
+									:color="value ? 'green' : 'red'" />
+							</template>
 							<template #item.created_at="{ value }">
 								{{ new Date(value).toLocaleString() }}
 							</template>
@@ -107,11 +112,17 @@ const confirmRemoveUser = async () => {
 	toast.info("Removing user...")
 }
 
-const sortBy = ref([{ key: "created_at", order: "desc" as const }])
+const sortBy = ref([{ key: "created_at", order: "asc" as const }])
 const headers = [
 	{ title: "User ID", key: "id" },
 	{ title: "Title", key: "title" },
-	{ title: "Approved", key: "approved", value: (value: User) => !!value.approved },
+	{
+		title: "Approved",
+		key: "approved",
+		value: (value: User) => !!value.approved,
+		align: "center" as const,
+		sortable: false,
+	},
 	{ title: "Mutes", key: "mutes" },
 	{ title: "Reviews", key: "reviews" },
 	{
