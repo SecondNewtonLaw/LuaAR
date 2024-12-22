@@ -9,17 +9,7 @@
 			<v-row class="d-flex justify-space-between">
 				<v-spacer />
 				<v-col cols="auto">
-					<v-chip color="primary" label>
-						{{ version }}
-					</v-chip>
-				</v-col>
-				<v-col cols="auto">
-					<v-btn
-						:icon="darkMode ? 'mdi-white-balance-sunny' : 'mdi-moon-waning-crescent'"
-						density="comfortable"
-						@click="darkMode = !darkMode"
-						:ripple="false">
-					</v-btn>
+					<v-chip color="primary" label> Version: {{ version }} </v-chip>
 				</v-col>
 			</v-row>
 		</v-footer>
