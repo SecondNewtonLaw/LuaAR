@@ -97,7 +97,7 @@ const getCountsPerDay = (predecate: (review: Review) => boolean) => {
 	const counts = new Map<string, number>()
 	filteredReviews.value.forEach((review) => {
 		const reviewDate = new Date(review.created_at)
-		const date = reviewDate.toDateString()
+		const date = reviewDate.toLocaleDateString()
 		if (predecate(review)) {
 			counts.set(date, (counts.get(date) || 0) + 1)
 		} else {
@@ -122,7 +122,7 @@ const getRatio = (approved: boolean) =>
 
 const approvalRatio = computed(() => getRatio(true))
 const deniedRatio = computed(() => getRatio(false))
-const totalMutes = computed(() => filteredReviews.value.filter((r) => r.muted === true).length)
+const totalMutes = computed(() => filteredReviews.value.filter((r) => r.muted).length)
 const chartOptions = computed(() => ({
 	chart: {
 		id: "area",
@@ -155,10 +155,17 @@ const chartSeries = computed(() => [
 ])
 
 const dates = computed(() => {
-	const daysDiff = Math.ceil((endDate.value!.getTime() - startDate.value!.getTime()) / 86400000) + 1
-	return Array.from({ length: daysDiff }, (_, i) =>
-		new Date(startDate.value!.getTime() + i * 86400000).toDateString()
-	)
+	const MILLISECONDS_IN_A_DAY = 86400000
+	const start = startDate.value
+	const end = endDate.value
+	const totalDays = Math.ceil((end.getTime() - start.getTime()) / MILLISECONDS_IN_A_DAY) + 1
+
+	const uniqueDates = Array.from({ length: totalDays }, (_, index) => {
+		const currentDate = new Date(start.getTime() + index * MILLISECONDS_IN_A_DAY)
+		return currentDate.toLocaleDateString()
+	})
+
+	return Array.from(new Set(uniqueDates))
 })
 
 // DD/MM
@@ -168,8 +175,9 @@ const createSeries = (predicate: (review: Review) => boolean) =>
 	computed(() =>
 		dates.value.map(
 			(date) =>
-				filteredReviews.value?.filter((r) => predicate(r) && new Date(r.created_at).toDateString() === date)
-					.length || 0
+				filteredReviews.value?.filter(
+					(r) => predicate(r) && new Date(r.created_at).toLocaleDateString() === date
+				).length || 0
 		)
 	)
 
