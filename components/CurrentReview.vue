@@ -62,7 +62,7 @@
 
 					<v-row class="align-center">
 						<v-col>
-							<v-autocomplete
+							<v-combobox
 								label="Title"
 								clearable
 								auto-select-first
@@ -96,7 +96,7 @@
 							(v) => !v || v.includes('hiddendevs.com') || 'URL must be from hiddendevs.com domain',
 						]" />
 
-					<v-autocomplete
+					<v-combobox
 						label="User ID"
 						clearable
 						auto-select-first

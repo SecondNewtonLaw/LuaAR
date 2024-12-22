@@ -121,7 +121,7 @@ const chartOptions = computed(() => ({
 			shadeIntensity: 0.5,
 		},
 	},
-	xaxis: { categories: [new Date().toLocaleDateString()] },
+	xaxis: { categories: [] },
 }))
 
 const chartSeries = computed(() => [

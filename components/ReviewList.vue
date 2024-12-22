@@ -20,7 +20,7 @@
 					<v-skeleton-loader loading type="table-row@10"></v-skeleton-loader>
 				</template>
 				<template #item.url="{ value }">
-					<v-chip color="primary" v-if="value" small :href="value" @click.stop.prevent="openLink(value)">{{
+					<v-chip color="primary" v-if="value" small :href="value" @click.stop.prevent="shell.open(value)">{{
 						value
 					}}</v-chip>
 					<v-chip color="grey" v-else small>None</v-chip>
@@ -49,7 +49,7 @@
 							icon="mdi-shield-account"
 							density="comfortable"
 							color="primary"
-							@click.stop="openLink(`https://hiddendevs.com/admin/useredit?userid=${item.user_id}`)"
+							@click.stop="shell.open(`https://hiddendevs.com/admin/useredit?userid=${item.user_id}`)"
 							title="View User" />
 
 						<v-btn
@@ -79,24 +79,18 @@
 			</v-data-table>
 		</v-card-text>
 
-		<v-dialog v-model="isDialogOpen" max-width="500">
-			<v-card>
-				<v-card-title class="headline">Confirm Deletion</v-card-title>
-				<v-card-text>
-					Are you sure you want to remove the selected review{{ selected.length > 1 ? "s" : "" }}?
-				</v-card-text>
-				<v-card-actions>
-					<v-spacer></v-spacer>
-					<v-btn @click="isDialogOpen = false">Cancel</v-btn>
-					<v-btn color="red" @click="confirmRemoveReview">Delete</v-btn>
-				</v-card-actions>
-			</v-card></v-dialog
-		>
+		<ConfirmDialog
+			v-model="isDialogOpen"
+			@confirm="confirmRemoveReview"
+			title="Remove Review"
+			text="Are you sure you want to remove the selected review?"
+			submit="Remove" />
 	</v-card>
 </template>
 
 <script lang="ts" setup>
 import * as shell from "@tauri-apps/plugin-shell"
+
 import { toast } from "vuetify-sonner"
 const reviewStore = useReviewStore()
 const props = defineProps<{
@@ -104,14 +98,6 @@ const props = defineProps<{
 }>()
 
 const selected = ref<string[]>([])
-
-const dateFormatter = new Intl.DateTimeFormat("en-US", {
-	year: "numeric",
-	month: "short",
-	day: "numeric",
-	hour: "numeric",
-	minute: "numeric",
-})
 
 const userReviewCounts = computed(() => {
 	if (!props.reviews) return []
@@ -175,13 +161,13 @@ const headers = ref([
 		title: "Created At",
 		key: "created_at",
 		sort: (a: string, b: string) => new Date(a).getTime() - new Date(b).getTime(),
-		value: (item: Review) => dateFormatter.format(new Date(item.created_at)),
+		value: (item: Review) => new Date(item.created_at).toLocaleString(),
 	},
 	{
 		title: "Updated At",
 		key: "updated_at",
 		sort: (a: string, b: string) => new Date(a).getTime() - new Date(b).getTime(),
-		value: (item: Review) => dateFormatter.format(new Date(item.updated_at)),
+		value: (item: Review) => new Date(item.updated_at).toLocaleString(),
 	},
 
 	{
@@ -224,10 +210,6 @@ const confirmRemoveReview = () => {
 
 	selected.value = []
 	isDialogOpen.value = false
-}
-
-const openLink = (link: string) => {
-	shell.open(link)
 }
 
 const rowProps = (item: any) => ({
