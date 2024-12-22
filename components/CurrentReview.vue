@@ -57,9 +57,10 @@
 					</v-col>
 				</v-row>
 
-				<v-chip class="mt-2" v-if="currentReview.updated_at">{{
-					new Date(currentReview.updated_at).toLocaleString()
-				}}</v-chip>
+				<v-chip class="mt-2" rounded="sm" v-if="currentReview.updated_at">
+					Updated at:
+					{{ new Date(currentReview.updated_at).toLocaleString() }}</v-chip
+				>
 
 				<v-divider class="mt-2" thickness="2"></v-divider>
 			</v-card-subtitle>
