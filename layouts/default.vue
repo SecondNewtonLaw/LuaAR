@@ -4,11 +4,14 @@
 		<main>
 			<slot />
 		</main>
-		<footer></footer>
+		<footer>
+			{{ app.getVersion() }}
+		</footer>
 	</v-container>
 </template>
 
 <script lang="ts" setup>
+import { app } from "@tauri-apps/api"
 const theme = useTheme()
 const darkMode = ref(false)
 

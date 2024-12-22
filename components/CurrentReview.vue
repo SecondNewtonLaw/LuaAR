@@ -62,14 +62,15 @@
 
 					<v-row class="align-center">
 						<v-col>
-							<v-combobox
+							<v-autocomplete
 								label="Title"
 								clearable
+								auto-select-first
 								density="comfortable"
 								variant="solo-filled"
 								v-model="currentReview.title"
 								@update:search="titleSelected"
-								:items="existingTitles"></v-combobox>
+								:items="existingTitles" />
 						</v-col>
 						<v-col cols="auto" class="mb-5">
 							<!-- Approved -->
@@ -93,32 +94,12 @@
 						:rules="[
 							(v) => !v || /^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/i.test(v) || 'Must be a valid URL',
 							(v) => !v || v.includes('hiddendevs.com') || 'URL must be from hiddendevs.com domain',
-						]">
-						<!-- <template
-							v-slot:append-inner
-							v-if="
-								currentReview.url &&
-								/^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/i.test(currentReview.url) &&
-								currentReview.url.includes('hiddendevs.com')
-							">
-							<v-tooltip location="bottom">
-								<template v-slot:activator="{ props }">
-									<div v-bind="props" class="d-inline-block mr-2">
-										<v-btn @click="scrape(currentReview.url)" disabled>Scrape</v-btn>
-									</div>
-								</template>
-								<span>
-									Scrape the URL for the code & allat
-									<br />
-									Currently disabled due to lack of skills.
-								</span>
-							</v-tooltip>
-						</template> -->
-					</v-text-field>
+						]" />
 
-					<v-combobox
+					<v-autocomplete
 						label="User ID"
 						clearable
+						auto-select-first
 						density="comfortable"
 						variant="solo-filled"
 						:rules="[
