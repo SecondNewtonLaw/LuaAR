@@ -27,10 +27,6 @@
 						<v-icon>mdi-file-compare</v-icon>
 						<v-tooltip activator="parent" location="bottom">Show Diff</v-tooltip>
 					</v-btn>
-					<v-btn icon @click="saveReview">
-						<v-icon>mdi-content-save-outline</v-icon>
-						<v-tooltip activator="parent" location="bottom">Save Review</v-tooltip>
-					</v-btn>
 				</v-btn-group>
 			</v-col>
 		</v-row>

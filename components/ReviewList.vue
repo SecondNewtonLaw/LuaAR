@@ -15,7 +15,7 @@
 				:items-per-page-options="[5, 10, 20, 50, 100]"
 				class="elevation-1"
 				:sort-by="sortBy"
-				@click:row="selectReview">
+				@click:row="clickedRow">
 				<template v-slot:loading>
 					<v-skeleton-loader loading type="table-row@10"></v-skeleton-loader>
 				</template>
@@ -65,7 +65,7 @@
 							icon="mdi-pencil"
 							density="comfortable"
 							color="primary"
-							@click.stop="reviewStore.loadReview(item.id)"
+							@click.stop="selectReview(item)"
 							title="Edit Review" />
 
 						<v-btn
@@ -179,8 +179,11 @@ const headers = ref([
 ])
 
 let clickTimeout: number | null = null
-
-const selectReview = (event: PointerEvent, row: any) => {
+const selectReview = (review: Review) => {
+	reviewStore.loadReview(review.id)
+	useRouter().push({ name: "index" })
+}
+const clickedRow = (event: PointerEvent, row: any) => {
 	const review = row.item as Review
 
 	if (clickTimeout) {
@@ -196,9 +199,7 @@ const selectReview = (event: PointerEvent, row: any) => {
 			toast.success("Copied to clipboard")
 		}, 300) // Adjust the timeout duration as needed
 	} else if (event.detail === 2) {
-		// Double click: select review
-		reviewStore.loadReview(review.id)
-		useRouter().push({ name: "index" })
+		selectReview(review)
 	}
 }
 
