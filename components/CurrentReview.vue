@@ -40,6 +40,7 @@
 							:min-width="`${currentReview.role?.length * 10 + 110}px`"
 							single-line
 							clearable
+							hide-details
 							auto-select-first
 							hide-selected
 							:items="settingsStore.roles"
