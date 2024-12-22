@@ -55,6 +55,14 @@ export const useSettingsStore = defineStore(
 		const getGroupByRole = (role: Role) => Object.keys(groupedRoles).find((key) => groupedRoles[key].includes(role))
 		const getRolesByGroup = (group: string) => groupedRoles[group]
 		const group = computed(() => getGroupByRole(defaultRole.value))
+
+		//reviews
+		const reviewPage = ref(1)
+
+		const today = new Date()
+		const startHalf = today.getDate() < 15 ? 1 : 16
+		const startDate = ref(new Date(today.getFullYear(), today.getMonth(), startHalf).toISOString())
+		const endDate = ref(new Date(today.getFullYear(), today.getMonth() + 1, startHalf === 1 ? 15 : 0).toISOString())
 		return {
 			loc,
 			defaultLanguage,
@@ -64,6 +72,11 @@ export const useSettingsStore = defineStore(
 			getGroupByRole,
 			getRolesByGroup,
 			group,
+
+			//reviews
+			reviewPage,
+			startDate,
+			endDate,
 		}
 	},
 	{

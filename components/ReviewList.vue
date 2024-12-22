@@ -7,6 +7,7 @@
 				:loading="reviewStore.loading"
 				:items="userReviewCounts"
 				title=""
+				v-model:page="settingsStore.reviewPage"
 				hover
 				select-strategy="page"
 				density="compact"
@@ -93,6 +94,7 @@ import * as shell from "@tauri-apps/plugin-shell"
 
 import { toast } from "vuetify-sonner"
 const reviewStore = useReviewStore()
+const settingsStore = useSettingsStore()
 const props = defineProps<{
 	reviews?: Review[]
 }>()

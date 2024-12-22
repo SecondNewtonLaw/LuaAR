@@ -16,6 +16,7 @@
 					density="comfortable"
 					multiple
 					hide-details
+					variant="solo-filled"
 					prepend-inner-icon="mdi-account-group"
 					v-model="selectedRoles"
 					:items="settingsStore.roles"
@@ -73,11 +74,14 @@ const props = defineProps<{
 	reviews?: Review[]
 }>()
 
-const today = new Date()
-const currentDay = today.getDate()
-const startHalf = currentDay <= 15 ? 1 : 16
-const startDate = ref<Date | null>(new Date(today.getFullYear(), today.getMonth(), startHalf))
-const endDate = ref<Date | null>(new Date(today.getFullYear(), today.getMonth() + 1, startHalf === 1 ? 15 : 0))
+const startDate = computed({
+	get: () => new Date(settingsStore.startDate),
+	set: (date: Date) => (settingsStore.startDate = date.toISOString()),
+})
+const endDate = computed({
+	get: () => new Date(settingsStore.endDate),
+	set: (date: Date) => (settingsStore.endDate = date.toISOString()),
+})
 
 const filteredReviews = computed(() => {
 	if (!props.reviews) return []

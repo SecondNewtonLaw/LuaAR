@@ -2,14 +2,16 @@
 	<div>
 		<v-dialog v-model="openSettings" max-width="500">
 			<v-card>
-				<v-card-title class="headline">Settings</v-card-title>
+				<v-card-title class="headline text-center">Settings</v-card-title>
 				<v-card-text>
-					<v-row>
-						<v-col cols="12">
+					<v-row class="ga-0">
+						<v-col cols="12" class="py-0">
 							<v-combobox
 								label="Minimum LOC"
 								:items="[50, 100, 200]"
 								auto-select-first
+								variant="solo-filled"
+								density="comfortable"
 								hide-spin-buttons
 								v-model="settingsStore.loc"
 								type="number"
@@ -19,18 +21,22 @@
 								]" />
 						</v-col>
 
-						<v-col cols="12">
+						<v-col cols="12" class="py-0">
 							<v-autocomplete
 								v-model="settingsStore.defaultLanguage"
 								:items="settingsStore.languages"
+								variant="solo-filled"
+								density="comfortable"
 								label="Default Language"
 								:rules="[(v) => !!v || 'Value is required']" />
 						</v-col>
 
-						<v-col cols="12">
+						<v-col cols="12" class="py-0">
 							<v-autocomplete
 								v-model="settingsStore.defaultRole"
 								:items="settingsStore.roles"
+								variant="solo-filled"
+								density="comfortable"
 								label="Default Role"
 								:rules="[(v) => !!v || 'Value is required']" />
 						</v-col>

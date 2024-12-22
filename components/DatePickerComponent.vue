@@ -1,5 +1,5 @@
 <template>
-	<div>
+	<div v-if="modelValue">
 		<v-menu
 			close-on-back
 			v-model="menu"
@@ -9,7 +9,7 @@
 			min-width="auto">
 			<template v-slot:activator="{ props }">
 				<v-text-field
-					:model-value="modelValue?.toLocaleDateString()"
+					:model-value="modelValue.toLocaleDateString()"
 					:label="label"
 					hide-details
 					variant="solo-filled"
