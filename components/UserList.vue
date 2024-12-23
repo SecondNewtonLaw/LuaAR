@@ -62,8 +62,8 @@ interface User {
 }
 
 const reviewStore = useReviewStore()
-const reviews = computed(
-	() => reviewStore.reviews?.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()) || []
+const reviews = computed(() =>
+	quickSort(reviewStore.reviews || [], (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
 )
 
 const selected = ref<string[]>([])

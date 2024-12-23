@@ -47,16 +47,18 @@
 			:headers="showSkills ? skillHeaders : headers"
 			:items="showSkills ? filteredSkills : filteredReaders">
 			<template #item.skills="{ item }">
-				<v-chip-group>
+				<v-chip-group column>
 					<v-chip v-if="'skills' in item" v-for="skill in item.skills" :key="skill" class="mr-2">{{
 						skill
 					}}</v-chip>
 				</v-chip-group>
 			</template>
 			<template #item.readers="{ item }">
-				<v-chip v-if="'readers' in item" v-for="reader in item.readers" :key="reader" class="mr-2">{{
-					reader
-				}}</v-chip>
+				<v-chip-group>
+					<v-chip v-if="'readers' in item" v-for="reader in item.readers" :key="reader" class="mr-2">{{
+						reader
+					}}</v-chip>
+				</v-chip-group>
 			</template>
 		</v-data-table>
 	</div>
@@ -84,14 +86,14 @@ const readers = ref<Reader[]>([
 		user_id: 326078015727599616,
 		skills: ["Lua", "Python", "JavaScript"],
 		name: "Scriptone",
-		timezone: "",
+		timezone: "Europe/Brussels",
 		role: "AR",
 	},
 	{
 		user_id: 1010290469235871785,
 		skills: ["Lua", "C#", "C++"],
 		name: "Dottik",
-		timezone: "",
+		timezone: "America/Barbados",
 		role: "AR",
 	},
 	{
@@ -105,7 +107,7 @@ const readers = ref<Reader[]>([
 		user_id: 302058196896579584,
 		skills: ["Lua"],
 		name: "Optimized",
-		timezone: "",
+		timezone: "Asia/Kolkata",
 		role: "SAR",
 	},
 	{
@@ -156,7 +158,7 @@ const readers = ref<Reader[]>([
 		user_id: 879313965790920764,
 		skills: ["Builder", "Terrain Editor", "Interface Designer"],
 		name: "Parra",
-		timezone: "",
+		timezone: "America/Belize",
 		role: "SAR",
 	},
 	{
@@ -176,7 +178,7 @@ const readers = ref<Reader[]>([
 			"Sound Effects",
 			"HTML/CSS",
 			"Python",
-			"PHP",
+
 			"Music Composer",
 			"3D Modeler",
 			"Video Editor",
@@ -185,7 +187,7 @@ const readers = ref<Reader[]>([
 			"Visual Effects",
 		],
 		name: "Aero",
-		timezone: "",
+		timezone: "Asia/Kolkata",
 		role: "Head",
 	},
 	{
@@ -199,7 +201,7 @@ const readers = ref<Reader[]>([
 		user_id: 886355963894988801,
 		skills: ["Interface Designer", "Graphics Artist"],
 		name: "jonahxo",
-		timezone: "",
+		timezone: "America/Los_Angeles",
 		role: "Management",
 	},
 	{
@@ -258,7 +260,18 @@ const headers = [
 	{ title: "Name", key: "name" },
 	{ title: "Role", key: "role" },
 	{ title: "Skills", key: "skills" },
-	{ title: "Timezone", key: "timezone" },
+	// { title: "Timezone", key: "timezone" },
+	// {
+	// 	title: "Time",
+	// 	key: "_",
+	// 	value: (item: Reader) => {
+	// 		try {
+	// 			return new Date().toLocaleTimeString("en-US", { timeZone: item.timezone })
+	// 		} catch {
+	// 			return "Invalid timezone"
+	// 		}
+	// 	},
+	// },
 ]
 
 const skillHeaders = [

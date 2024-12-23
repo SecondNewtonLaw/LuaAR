@@ -70,9 +70,10 @@ const getCountsPerDay = (predecate: (review: Review) => boolean) => {
 			counts.set(date, counts.get(date) || 0)
 		}
 	})
-	return Array.from(counts.entries())
-		.map(([date, count]) => ({ x: date, y: count }))
-		.sort((a, b) => new Date(a.x).getTime() - new Date(b.x).getTime())
+	return quickSort(
+		Array.from(counts.entries()).map(([date, count]) => ({ x: date, y: count })),
+		(a, b) => new Date(a.x).getTime() - new Date(b.x).getTime()
+	)
 }
 
 const approvalsPerDay = computed(() => getCountsPerDay((r) => !!r.approved))

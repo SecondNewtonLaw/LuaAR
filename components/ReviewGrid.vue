@@ -78,7 +78,7 @@ const reviewStore = useReviewStore()
 const props = defineProps<{ reviews?: Review[] }>()
 
 const reviews = computed(() =>
-	props.reviews?.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+	quickSort(props.reviews || [], (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
 )
 const selectReview = (review: Review) => {
 	reviewStore.loadReview(review.id)

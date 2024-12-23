@@ -106,19 +106,19 @@ const userReviewCounts = computed(() => {
 
 	const counts = new Map<string, number>()
 	const reviews = props.reviews
-	return reviews
-		.slice() // Create a shallow copy to avoid mutating props
-		.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
-		.map((review) => {
-			const id = `${review.user_id}-${review.role || settingsStore.defaultSkill}`
-			if (!id) return { ...review, userReviewIndex: 0 }
-			const count = counts.get(id) || 0
-			counts.set(id, count + 1)
-			return {
-				...review,
-				userReviewIndex: count + 1,
-			}
-		})
+	return quickSort(
+		reviews.slice(),
+		(a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+	).map((review) => {
+		const id = `${review.user_id}-${review.role || settingsStore.defaultSkill}`
+		if (!id) return { ...review, userReviewIndex: 0 }
+		const count = counts.get(id) || 0
+		counts.set(id, count + 1)
+		return {
+			...review,
+			userReviewIndex: count + 1,
+		}
+	})
 })
 
 const sortBy = ref([{ key: "created_at", order: "desc" as const }])
