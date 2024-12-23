@@ -1,6 +1,6 @@
 <template>
 	<v-card flat>
-		<v-card-text>
+		<v-card-text class="pa-0">
 			<v-data-table
 				v-model="selected"
 				:headers="headers"
@@ -110,7 +110,7 @@ const userReviewCounts = computed(() => {
 		.slice() // Create a shallow copy to avoid mutating props
 		.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
 		.map((review) => {
-			const id = review.user_id
+			const id = `${review.user_id}-${review.role || settingsStore.defaultSkill}`
 			if (!id) return { ...review, userReviewIndex: 0 }
 			const count = counts.get(id) || 0
 			counts.set(id, count + 1)

@@ -1,51 +1,42 @@
 <template>
 	<div>
-		<v-card title="Users" flat>
-			<v-card-text>
-				<v-row>
-					<v-col cols="12">
-						<v-data-table
-							:headers="headers"
-							:items="users"
-							:items-per-page="10"
-							v-model="selected"
-							:loading="reviewStore.loading"
-							:sort-by="sortBy">
-							<template #item.approved="{ value }">
-								<v-chip
-									dense
-									:text="value ? 'Approved' : 'Not Approved'"
-									:color="value ? 'green' : 'red'" />
-							</template>
-							<template #item.created_at="{ value }">
-								{{ new Date(value).toLocaleString() }}
-							</template>
-							<template #item.actions="{ item }">
-								<v-btn-group density="compact">
-									<v-btn
-										icon="mdi-shield-account"
-										density="comfortable"
-										color="primary"
-										@click.stop="
-											shell.open(`https://hiddendevs.com/admin/useredit?userid=${item.id}`)
-										"
-										title="View User" />
+		<v-row>
+			<v-col cols="12">
+				<v-data-table
+					:headers="headers"
+					:items="users"
+					:items-per-page="10"
+					v-model="selected"
+					:loading="reviewStore.loading"
+					:sort-by="sortBy">
+					<template #item.approved="{ value }">
+						<v-chip dense :text="value ? 'Approved' : 'Not Approved'" :color="value ? 'green' : 'red'" />
+					</template>
+					<template #item.created_at="{ value }">
+						{{ new Date(value).toLocaleString() }}
+					</template>
+					<template #item.actions="{ item }">
+						<v-btn-group density="compact">
+							<v-btn
+								icon="mdi-shield-account"
+								density="comfortable"
+								color="primary"
+								@click.stop="shell.open(`https://hiddendevs.com/admin/useredit?userid=${item.id}`)"
+								title="View User" />
 
-									<v-divider thickness="2" class="mx-1" vertical></v-divider>
+							<v-divider thickness="2" class="mx-1" vertical></v-divider>
 
-									<v-btn
-										icon="mdi-delete"
-										density="comfortable"
-										color="red"
-										@click.stop=";(isDialogOpen = true) && (selected = [item.id?.toString() || ''])"
-										title="Delete Review" />
-								</v-btn-group>
-							</template>
-						</v-data-table>
-					</v-col>
-				</v-row>
-			</v-card-text>
-		</v-card>
+							<v-btn
+								icon="mdi-delete"
+								density="comfortable"
+								color="red"
+								@click.stop=";(isDialogOpen = true) && (selected = [item.id?.toString() || ''])"
+								title="Delete Review" />
+						</v-btn-group>
+					</template>
+				</v-data-table>
+			</v-col>
+		</v-row>
 
 		<ConfirmDialog
 			v-model="isDialogOpen"
