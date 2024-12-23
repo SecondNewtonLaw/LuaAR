@@ -267,9 +267,10 @@ const personalReviews = computed(() =>
 )
 const previousReview = computed(
 	() =>
-		personalReviews.value?.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())[
-			previousReviewIndex.value
-		]
+		quickSort(
+			personalReviews.value || [],
+			(a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+		)[previousReviewIndex.value]
 )
 
 const showDraggable = ref(false)

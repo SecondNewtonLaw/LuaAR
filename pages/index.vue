@@ -117,12 +117,14 @@ const hasPreviousReview = computed(
 )
 
 const promptReviewChoice = () => {
-	const reviews = reviewStore.reviews
-		?.filter(
+	const reviews = quickSort(
+		reviewStore.reviews?.filter(
 			(review) =>
 				review.user_id === reviewStore.currentReview.user_id && review.id !== reviewStore.currentReview.id
-		)
-		.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+		) || [],
+		(a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+	)
+
 	if (!reviews) return
 	if (reviews.length > 1) {
 		reviewsInDialog.value = reviews

@@ -112,6 +112,7 @@ export const useReviewStore = defineStore("reviews", () => {
 				})
 			)
 			reviews.value = allReviews.flat()
+			console.log("Reviews loaded")
 		} catch (error) {
 			toast.error("Failed to load reviews")
 			console.log(error)
