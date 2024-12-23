@@ -74,8 +74,11 @@
 						hide-details
 						variant="solo-filled"
 						prepend-inner-icon="mdi-account-group"
-						v-model="selectedRoles"
-						:items="settingsStore.roles"
+						chips
+						closable-chips
+						clearable
+						v-model="selectedSkills"
+						:items="settingsStore.skills"
 						label="Roles"></v-select>
 				</v-col>
 			</v-row>
@@ -116,11 +119,11 @@ const settingsStore = useSettingsStore()
 const reviewStore = useReviewStore()
 
 const viewMode = ref<"list" | "grid">("list")
-const selectedRoles = ref<Role[]>([settingsStore.defaultRole])
+const selectedSkills = ref<Skill[]>([])
 
 type Filter = (r: Review) => boolean
 const filters: Record<string, Filter> = {
-	"Has Evidence": (r) => !!r.evidence && r.evidence.length > 0,
+	"Has Media": (r) => !!r.evidence && r.evidence.length > 0,
 	Approved: (r) => !!r.approved,
 	Declined: (r) => !r.approved,
 	Muted: (r) => !!r.muted,
@@ -131,7 +134,7 @@ const filtersEnabled = ref<string[]>([])
 
 const reviews = computed(() =>
 	reviewStore.reviews?.filter((review) => {
-		if (!selectedRoles.value.includes(review.role)) return false
+		if (selectedSkills.value.length && !selectedSkills.value.includes(review.role)) return false
 		if (settingsStore.startDate && new Date(review.created_at) < settingsStore.startDate) return false
 		if (settingsStore.endDate && new Date(review.created_at) > settingsStore.endDate) return false
 		if (filtersEnabled.value.length > 1) return filtersEnabled.value.every((filter) => filters[filter](review))

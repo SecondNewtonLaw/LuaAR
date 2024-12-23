@@ -1,4 +1,4 @@
-const groupedRoles = {
+const groupedSkills = {
 	Programming: ["Lua", "JavaScript", "Python", "C#", "C++", "PHP", "Java", "HTML/CSS", "Vanilla Lua"] as const,
 	Art: [
 		"Graphics Artist",
@@ -20,22 +20,22 @@ const groupedRoles = {
 const languages = ["lua", "typescript", "html", "css", "json", "python"] as const
 
 export type CodeLanguage = (typeof languages)[number]
-export type Role = (typeof groupedRoles)[keyof typeof groupedRoles][number]
+export type Skill = (typeof groupedSkills)[keyof typeof groupedSkills][number]
 export const useSettingsStore = defineStore(
 	"settings",
 	() => {
 		const loc = ref(200)
 		const defaultLanguage = ref<CodeLanguage>("lua")
-		const defaultRole = ref<Role>("Lua")
-		const roles = ref<Role[]>(
-			Object.keys(groupedRoles).flatMap((key) => groupedRoles[key as keyof typeof groupedRoles])
+		const defaultSkill = ref<Skill>("Lua")
+		const skills = ref<Skill[]>(
+			Object.keys(groupedSkills).flatMap((key) => groupedSkills[key as keyof typeof groupedSkills])
 		)
-		const getGroupByRole = (role: never) =>
-			(Object.keys(groupedRoles) as Array<keyof typeof groupedRoles>).find((key) =>
-				groupedRoles[key].includes(role)
+		const getGroupBySkill = (skill: never) =>
+			(Object.keys(groupedSkills) as Array<keyof typeof groupedSkills>).find((key) =>
+				groupedSkills[key].includes(skill)
 			)
-		const getRolesByGroup = (group: keyof typeof groupedRoles) => groupedRoles[group]
-		const group = computed(() => getGroupByRole(defaultRole.value as unknown as never))
+		const getSkillsByGroup = (group: keyof typeof groupedSkills) => groupedSkills[group]
+		const group = computed(() => getGroupBySkill(defaultSkill.value as unknown as never))
 
 		//reviews
 		const reviewPage = ref(1)
@@ -60,10 +60,10 @@ export const useSettingsStore = defineStore(
 			loc,
 			defaultLanguage,
 			languages,
-			roles,
-			defaultRole,
+			skills,
+			defaultSkill,
 
-			getRolesByGroup,
+			getSkillsByGroup,
 			group,
 
 			//reviews

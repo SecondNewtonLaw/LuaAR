@@ -8,7 +8,7 @@
 						<v-col sm="6" md="4" lg="3" v-for="review in items" :key="review.raw.id">
 							<v-card class="px-6 pt-6" @click="selectReview(review.raw)" hover>
 								<v-card-title>{{ review.raw.title }}</v-card-title>
-								<v-card-subtitle>{{ review.raw.role || settingsStore.defaultRole }}</v-card-subtitle>
+								<v-card-subtitle>{{ review.raw.role || settingsStore.defaultSkill }}</v-card-subtitle>
 								<v-card-actions>
 									<v-spacer />
 									<v-chip variant="text" color="grey">

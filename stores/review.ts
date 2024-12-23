@@ -1,6 +1,5 @@
 import { BaseDirectory, exists, mkdir, readDir, readFile, remove, writeFile } from "@tauri-apps/plugin-fs"
 import { toast } from "vuetify-sonner"
-import type { Role } from "./settings"
 
 export interface Review {
 	title: string | null
@@ -13,7 +12,7 @@ export interface Review {
 	muted: boolean
 	id?: string
 	evidence: string[]
-	role: Role
+	role: Skill
 }
 
 const template: Review = {
@@ -32,7 +31,7 @@ export const useReviewStore = defineStore("reviews", () => {
 	const settingsStore = useSettingsStore()
 	const reviews = ref<Review[]>()
 	const editorStore = useEditorStore()
-	const currentReview = ref<Review>({ ...template, role: settingsStore.defaultRole })
+	const currentReview = ref<Review>({ ...template, role: settingsStore.defaultSkill })
 
 	let oldReview = JSON.stringify(currentReview.value)
 
@@ -71,7 +70,7 @@ export const useReviewStore = defineStore("reviews", () => {
 	)
 
 	const newReview = () => {
-		currentReview.value = { ...template, created_at: new Date().toISOString(), role: settingsStore.defaultRole }
+		currentReview.value = { ...template, created_at: new Date().toISOString(), role: settingsStore.defaultSkill }
 		oldReview = JSON.stringify(currentReview.value)
 		evidence.value = []
 		editorStore.resetEditors()
@@ -108,7 +107,7 @@ export const useReviewStore = defineStore("reviews", () => {
 				reviewList.map(async (review) => {
 					const data = await readFile(`${basePath.value}/${review.name}/meta.json`, dirOptions.value)
 					const reviewData = JSON.parse(new TextDecoder().decode(data)) as Review
-					reviewData.role ??= settingsStore.defaultRole
+					reviewData.role ??= settingsStore.defaultSkill
 					return reviewData
 				})
 			)

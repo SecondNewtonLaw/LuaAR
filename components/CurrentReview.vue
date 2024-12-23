@@ -49,11 +49,11 @@
 							hide-details
 							auto-select-first
 							hide-selected
-							:items="settingsStore.roles"
+							:items="settingsStore.skills"
 							v-model="currentReview.role"
 							@update:search="userIdSelected"
 							label="Role"
-							:rules="[(v) => !!v || 'Role is required']" />
+							:rules="[(v) => !!v || 'Skill is required']" />
 					</v-col>
 				</v-row>
 
