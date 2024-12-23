@@ -1,12 +1,11 @@
 <template>
-	<v-card class="mb-4">
-		<v-card-title> Review Statistics </v-card-title>
-		<v-card-subtitle
+	<v-card class="mb-4" flat>
+		<v-card-subtitle class="pa-0 mb-2"
 			>From: {{ settingsStore.startDate?.toLocaleDateString() }} To:
 			{{ settingsStore.endDate?.toLocaleDateString() }}
 		</v-card-subtitle>
 
-		<v-card-text class="d-flex ga-2">
+		<v-card-text class="d-flex ga-2 pa-0">
 			<v-chip color="success">{{ approvalRatio }}% Approved</v-chip>
 			<v-chip color="error">{{ deniedRatio }}% Denied</v-chip>
 			<v-chip color="warning">{{ totalMutes }} Muted</v-chip>

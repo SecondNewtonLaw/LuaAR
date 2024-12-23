@@ -2,7 +2,7 @@
 	<v-row>
 		<v-col cols="12">
 			<v-row class="mt-2" align-content="center" dense>
-				<v-col>
+				<v-col class="py-0">
 					<v-text-field
 						v-model="search"
 						label="Search"
@@ -14,7 +14,7 @@
 				</v-col>
 
 				<!-- Filter for muted apps, apps with evidence, approved and declined apps -->
-				<v-col cols="auto">
+				<v-col cols="auto" class="py-0">
 					<v-select
 						variant="outlined"
 						density="compact"
@@ -31,7 +31,7 @@
 					</v-select>
 				</v-col>
 
-				<v-col cols="auto">
+				<v-col cols="auto" class="py-0">
 					<v-btn @click="chooseDirectory" color="primary" outlined>
 						<v-icon icon="mdi-folder-open" class="mr-2"></v-icon>
 						Choose Directory
@@ -49,7 +49,7 @@
 					</v-btn>
 				</v-col>
 
-				<v-col cols="auto">
+				<v-col cols="auto" class="py-0">
 					<v-btn
 						density="comfortable"
 						variant="outlined"
@@ -61,13 +61,13 @@
 				</v-col>
 			</v-row>
 			<v-row class="align-start">
-				<v-col>
+				<v-col class="py-0">
 					<DatePickerComponent v-model="settingsStore.startDate" label="Start Date" />
 				</v-col>
-				<v-col>
+				<v-col class="py-0">
 					<DatePickerComponent v-model="settingsStore.endDate" label="End Date" />
 				</v-col>
-				<v-col>
+				<v-col class="py-0">
 					<v-select
 						density="comfortable"
 						multiple
@@ -81,26 +81,29 @@
 			</v-row>
 		</v-col>
 		<v-col cols="12">
-			<v-card flat>
-				<v-card-title>
-					Reviews
+			<VExpansionPanels :model-value="[0, 1]" multiple>
+				<VExpansionPanel eager>
+					<VExpansionPanelTitle class="py-0 ma-0 text-h6"
+						>Reviews
 
-					<v-btn-toggle density="comfortable" mandatory v-model="viewMode" class="ml-4 border">
-						<v-btn value="list" icon="mdi-view-list-outline"></v-btn>
-						<v-btn value="grid" icon="mdi-view-grid-outline"></v-btn>
-					</v-btn-toggle>
-				</v-card-title>
-
-				<v-card-text class="pa-0">
-					<v-expand-transition mode="out-in">
-						<ReviewList v-if="viewMode === 'list'" :reviews="reviews" />
-						<ReviewGrid v-else :reviews="reviews" />
-					</v-expand-transition>
-				</v-card-text>
-			</v-card>
-		</v-col>
-		<v-col cols="12">
-			<ReviewStatistics :reviews="reviews" />
+						<v-btn-toggle density="comfortable" mandatory v-model="viewMode" class="ml-4 border">
+							<v-btn @click.stop value="list" icon="mdi-view-list-outline"></v-btn>
+							<v-btn @click.stop value="grid" icon="mdi-view-grid-outline"></v-btn> </v-btn-toggle
+					></VExpansionPanelTitle>
+					<VExpansionPanelText class="pa-0 ma-0">
+						<v-expand-transition mode="out-in">
+							<ReviewList v-if="viewMode === 'list'" :reviews="reviews" />
+							<ReviewGrid v-else :reviews="reviews" />
+						</v-expand-transition>
+					</VExpansionPanelText>
+				</VExpansionPanel>
+				<VExpansionPanel eager>
+					<VExpansionPanelTitle class="py-0 ma-0 text-h6">Statistics</VExpansionPanelTitle>
+					<VExpansionPanelText class="pa-0 ma-0">
+						<ReviewStatistics :reviews="reviews" />
+					</VExpansionPanelText>
+				</VExpansionPanel>
+			</VExpansionPanels>
 		</v-col>
 	</v-row>
 </template>

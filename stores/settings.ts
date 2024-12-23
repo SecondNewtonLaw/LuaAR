@@ -55,6 +55,7 @@ export const useSettingsStore = defineStore(
 			get: () => new Date(endDateString.value),
 			set: (date: Date) => (endDateString.value = date.toISOString()),
 		})
+
 		return {
 			loc,
 			defaultLanguage,
@@ -69,6 +70,8 @@ export const useSettingsStore = defineStore(
 			reviewPage,
 			startDate,
 			endDate,
+			startDateString,
+			endDateString,
 		}
 	},
 	{
