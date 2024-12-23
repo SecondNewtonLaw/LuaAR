@@ -1,6 +1,86 @@
 <template>
 	<v-row>
 		<v-col cols="12">
+			<v-row class="mt-2" align-content="center" dense>
+				<v-col>
+					<v-text-field
+						v-model="search"
+						label="Search"
+						density="compact"
+						prepend-inner-icon="mdi-magnify"
+						variant="outlined"
+						hide-details
+						single-line></v-text-field>
+				</v-col>
+
+				<!-- Filter for muted apps, apps with evidence, approved and declined apps -->
+				<v-col cols="auto">
+					<v-select
+						variant="outlined"
+						density="compact"
+						single-line
+						hide-details
+						min-width="10rem"
+						multiple
+						chips
+						clearable
+						v-model="filtersEnabled"
+						:items="Object.keys(filters)"
+						label="Filters"
+						dense>
+					</v-select>
+				</v-col>
+
+				<v-col cols="auto">
+					<v-btn @click="chooseDirectory" color="primary" outlined>
+						<v-icon icon="mdi-folder-open" class="mr-2"></v-icon>
+						Choose Directory
+						<v-tooltip activator="parent" location="bottom">
+							{{ reviewStore.chosenPath || "No directory chosen" }}
+						</v-tooltip>
+
+						<template v-slot:append v-if="reviewStore.chosenPath">
+							<v-btn
+								density="compact"
+								variant="elevated"
+								icon="mdi-close"
+								@click.stop="reviewStore.chosenPath = null"></v-btn>
+						</template>
+					</v-btn>
+				</v-col>
+
+				<v-col cols="auto">
+					<v-btn
+						density="comfortable"
+						variant="outlined"
+						:loading="reviewStore.loading"
+						icon="mdi-refresh"
+						@click="reviewStore.loadReviews"
+						color="primary"
+						outlined />
+				</v-col>
+			</v-row>
+			<v-row class="align-start">
+				<v-col>
+					<DatePickerComponent v-model="settingsStore.startDate" label="Start Date" />
+				</v-col>
+				<v-col>
+					<DatePickerComponent v-model="settingsStore.endDate" label="End Date" />
+				</v-col>
+				<v-col>
+					<v-select
+						density="comfortable"
+						multiple
+						hide-details
+						variant="solo-filled"
+						prepend-inner-icon="mdi-account-group"
+						v-model="selectedRoles"
+						:items="settingsStore.roles"
+						label="Roles"></v-select>
+				</v-col>
+			</v-row>
+		</v-col>
+		<v-col cols="12">
 			<v-card flat>
 				<v-card-title>
 					Reviews
@@ -12,66 +92,6 @@
 				</v-card-title>
 
 				<v-card-text class="pa-0">
-					<v-row class="px-4" align-content="center" dense>
-						<v-col>
-							<v-text-field
-								v-model="search"
-								label="Search"
-								density="compact"
-								prepend-inner-icon="mdi-magnify"
-								variant="outlined"
-								hide-details
-								single-line></v-text-field>
-						</v-col>
-
-						<!-- Filter for muted apps, apps with evidence, approved and declined apps -->
-						<v-col cols="auto">
-							<v-select
-								variant="outlined"
-								density="compact"
-								single-line
-								hide-details
-								min-width="10rem"
-								multiple
-								chips
-								clearable
-								v-model="filtersEnabled"
-								:items="Object.keys(filters)"
-								label="Filters"
-								dense>
-							</v-select>
-						</v-col>
-
-						<v-col cols="auto">
-							<v-btn @click="chooseDirectory" color="primary" outlined>
-								<v-icon icon="mdi-folder-open" class="mr-2"></v-icon>
-								Choose Directory
-								<v-tooltip activator="parent" location="bottom">
-									{{ reviewStore.chosenPath || "No directory chosen" }}
-								</v-tooltip>
-
-								<template v-slot:append v-if="reviewStore.chosenPath">
-									<v-btn
-										density="compact"
-										variant="elevated"
-										icon="mdi-close"
-										@click.stop="reviewStore.chosenPath = null"></v-btn>
-								</template>
-							</v-btn>
-						</v-col>
-
-						<v-col cols="auto">
-							<v-btn
-								density="comfortable"
-								variant="outlined"
-								:loading="reviewStore.loading"
-								icon="mdi-refresh"
-								@click="reviewStore.loadReviews"
-								color="primary"
-								outlined />
-						</v-col>
-					</v-row>
-
 					<v-expand-transition mode="out-in">
 						<ReviewList v-if="viewMode === 'list'" :reviews="reviews" />
 						<ReviewGrid v-else :reviews="reviews" />
@@ -89,9 +109,12 @@
 import { open } from "@tauri-apps/plugin-dialog"
 import { toast } from "vuetify-sonner"
 
+const settingsStore = useSettingsStore()
 const reviewStore = useReviewStore()
 
 const viewMode = ref<"list" | "grid">("list")
+const selectedRoles = ref<Role[]>([settingsStore.defaultRole])
+
 type Filter = (r: Review) => boolean
 const filters: Record<string, Filter> = {
 	"Has Evidence": (r) => !!r.evidence && r.evidence.length > 0,
@@ -104,21 +127,20 @@ const search = ref("")
 const filtersEnabled = ref<string[]>([])
 
 const reviews = computed(() =>
-	reviewStore.reviews
-		?.filter((review) => {
-			if (filtersEnabled.value.length === 0) return true
-			return filtersEnabled.value.every((filter) => filters[filter](review))
-		})
-		.filter((review) => {
-			if (!search.value) return true
-			const searchLower = search.value.toLowerCase()
-			return (
-				review.review?.toLowerCase().includes(searchLower) ||
-				review.user_id?.toLowerCase().includes(searchLower) ||
-				review.title?.toLowerCase().includes(searchLower) ||
-				review.url?.toLowerCase().includes(searchLower)
-			)
-		})
+	reviewStore.reviews?.filter((review) => {
+		if (!selectedRoles.value.includes(review.role)) return false
+		if (settingsStore.startDate && new Date(review.created_at) < settingsStore.startDate) return false
+		if (settingsStore.endDate && new Date(review.created_at) > settingsStore.endDate) return false
+		if (filtersEnabled.value.length > 1) return filtersEnabled.value.every((filter) => filters[filter](review))
+		if (!search.value) return true
+		const searchLower = search.value.toLowerCase()
+		return (
+			review.review?.toLowerCase().includes(searchLower) ||
+			review.user_id?.toLowerCase().includes(searchLower) ||
+			review.title?.toLowerCase().includes(searchLower) ||
+			review.url?.toLowerCase().includes(searchLower)
+		)
+	})
 )
 
 const chooseDirectory = async () => {

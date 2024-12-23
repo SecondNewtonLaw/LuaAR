@@ -2,27 +2,10 @@
 	<v-card class="mb-4">
 		<v-card-title> Review Statistics </v-card-title>
 		<v-card-subtitle
-			>From: {{ startDate?.toLocaleDateString() }} To: {{ endDate?.toLocaleDateString() }}
+			>From: {{ settingsStore.startDate?.toLocaleDateString() }} To:
+			{{ settingsStore.endDate?.toLocaleDateString() }}
 		</v-card-subtitle>
-		<v-row class="align-start ma-2">
-			<v-col>
-				<DatePickerComponent v-model="startDate" label="Start Date" />
-			</v-col>
-			<v-col>
-				<DatePickerComponent v-model="endDate" label="End Date" />
-			</v-col>
-			<v-col>
-				<v-select
-					density="comfortable"
-					multiple
-					hide-details
-					variant="solo-filled"
-					prepend-inner-icon="mdi-account-group"
-					v-model="selectedRoles"
-					:items="settingsStore.roles"
-					label="Roles"></v-select>
-			</v-col>
-		</v-row>
+
 		<v-card-text class="d-flex ga-2">
 			<v-chip color="success">{{ approvalRatio }}% Approved</v-chip>
 			<v-chip color="error">{{ deniedRatio }}% Denied</v-chip>
@@ -69,28 +52,12 @@
 
 <script lang="ts" setup>
 const settingsStore = useSettingsStore()
-const selectedRoles = ref<Role[]>([settingsStore.defaultRole])
+
 const props = defineProps<{
 	reviews?: Review[]
 }>()
 
-const startDate = computed({
-	get: () => new Date(settingsStore.startDate),
-	set: (date: Date) => (settingsStore.startDate = date.toISOString()),
-})
-const endDate = computed({
-	get: () => new Date(settingsStore.endDate),
-	set: (date: Date) => (settingsStore.endDate = date.toISOString()),
-})
-
-const filteredReviews = computed(() => {
-	if (!props.reviews) return []
-	return props.reviews.filter((review) => {
-		if (!selectedRoles.value.includes(review.role)) return false
-		const reviewDate = new Date(review.created_at)
-		return (!startDate.value || reviewDate >= startDate.value) && (!endDate.value || reviewDate <= endDate.value)
-	})
-})
+const filteredReviews = computed(() => props.reviews || [])
 
 const getCountsPerDay = (predecate: (review: Review) => boolean) => {
 	if (!filteredReviews.value) return []
@@ -156,14 +123,13 @@ const chartSeries = computed(() => [
 
 const dates = computed(() => {
 	const MILLISECONDS_IN_A_DAY = 86400000
-	const start = startDate.value
-	const end = endDate.value
+	const start = settingsStore.startDate
+	const end = settingsStore.endDate
 	const totalDays = Math.ceil((end.getTime() - start.getTime()) / MILLISECONDS_IN_A_DAY) + 1
 
-	const uniqueDates = Array.from({ length: totalDays }, (_, index) => {
-		const currentDate = new Date(start.getTime() + index * MILLISECONDS_IN_A_DAY)
-		return currentDate.toLocaleDateString()
-	})
+	const uniqueDates = Array.from({ length: totalDays }, (_, index) =>
+		new Date(start.getTime() + index * MILLISECONDS_IN_A_DAY).toLocaleDateString()
+	)
 
 	return Array.from(new Set(uniqueDates))
 })
