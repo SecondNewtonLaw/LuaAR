@@ -31,17 +31,19 @@
 								:rules="[(v) => !!v || 'Value is required']" />
 						</v-col>
 
-						<v-col cols="12" class="py-0">
+						<v-col cols="12" class="py-0 my-0">
 							<v-autocomplete
 								v-model="settingsStore.defaultSkill"
 								:items="settingsStore.skills"
 								variant="solo-filled"
 								density="comfortable"
+								hide-details
 								label="Default Skill"
 								:rules="[(v) => !!v || 'Value is required']" />
 						</v-col>
 
-						<!-- <v-divider /> -->
+						<v-divider class="my-4" />
+						<v-card-subtitle class="text-center">Version: {{ settingsStore.version }}</v-card-subtitle>
 					</v-row>
 				</v-card-text>
 				<v-card-actions>
@@ -55,7 +57,6 @@
 
 <script lang="ts" setup>
 const openSettings = defineModel<boolean>()
-
 const settingsStore = useSettingsStore()
 </script>
 

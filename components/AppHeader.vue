@@ -1,7 +1,7 @@
 <template>
 	<header class="mb-4">
-		<v-toolbar color="transparent" floating elevation="10">
-			<v-toolbar-title>
+		<v-toolbar color="transparent" floating elevation="10" density="compact">
+			<v-toolbar-title class="ma-0">
 				<v-btn variant="text" class="font-weight-bold text-h5" :active="false" :to="{ name: 'index' }"
 					>AR Atlas</v-btn
 				>

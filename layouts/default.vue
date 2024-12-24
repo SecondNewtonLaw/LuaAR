@@ -4,32 +4,10 @@
 		<main>
 			<slot />
 		</main>
-		<v-spacer />
-		<v-footer color="transparent" class="align-end">
-			<v-row class="d-flex justify-space-between">
-				<v-spacer />
-				<v-col cols="auto">
-					<v-chip color="primary" label> Version: {{ version }} </v-chip>
-				</v-col>
-			</v-row>
-		</v-footer>
 	</v-container>
 </template>
 
-<script lang="ts" setup>
-import { app } from "@tauri-apps/api"
-const theme = useTheme()
-const darkMode = ref(false)
-
-watch(darkMode, (value) => {
-	theme.global.name.value = value ? "dark" : "light"
-})
-onMounted(async () => {
-	darkMode.value = theme.current.value.dark
-})
-
-const version = await app.getVersion()
-</script>
+<script lang="ts" setup></script>
 
 <style lang="scss" scoped>
 // .container {

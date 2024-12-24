@@ -49,9 +49,16 @@
 			:items="showSkills ? filteredSkills : filteredReaders">
 			<template #item.skills="{ item }">
 				<v-chip-group column>
-					<v-chip v-if="'skills' in item" v-for="skill in item.skills" :key="skill" class="mr-2">{{
-						skill
-					}}</v-chip>
+					<v-chip
+						v-if="'skills' in item"
+						v-for="skill in item.skills"
+						:key="skill"
+						class="mr-2 font-weight-bold"
+						variant="tonal"
+						@click="selectedSkills = [skill]"
+						:style="{ backgroundColor: `${colors.get(skill)}` }"
+						>{{ skill }}</v-chip
+					>
 				</v-chip-group>
 			</template>
 			<template #item.readers="{ item }">
@@ -257,6 +264,31 @@ const selectedRoles = ref<string[]>([])
 const selectedSkills = ref<Skill[]>([])
 const selectedUser = ref<string | null>(null)
 const sortBy = ref([{ key: "role", order: "desc" as const }])
+
+//color per skill
+const colors = new Map<Skill, string>()
+colors.set("Lua", "#26C620")
+colors.set("C#", "#26C620")
+colors.set("C++", "#26C620")
+colors.set("Python", "#26C620")
+colors.set("Java", "#26C620")
+colors.set("PHP", "#26C620")
+colors.set("JavaScript", "#26C620")
+colors.set("HTML/CSS", "#26C620")
+colors.set("Voice Actor", "#A57BF7")
+colors.set("Video Editor", "#F35167")
+colors.set("Graphics Artist", "#65B9B2")
+colors.set("Interface Designer", "#65B9B2")
+colors.set("Texture Artist", "#65B9B2")
+colors.set("Music Composer", "#A57BF7")
+colors.set("3D Modeler", "#27B3EE")
+colors.set("Animator", "#21BD74")
+colors.set("Clothing", "#CBCA49")
+colors.set("Builder", "#80A7FF")
+colors.set("Terrain Editor", "#BED048")
+colors.set("Sound Effects", "#A57BF7")
+colors.set("Visual Effects", "#65B9B2")
+
 const headers = [
 	{ title: "Name", key: "name" },
 	//sort should be by index of the role in the roles array
