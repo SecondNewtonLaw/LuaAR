@@ -1,6 +1,6 @@
 <template>
 	<div>
-		<v-row>
+		<v-row dense>
 			<v-col cols="12" sm="4">
 				<v-combobox
 					v-model="selectedRoles"
@@ -57,6 +57,7 @@
 						variant="tonal"
 						@click="selectedSkills = [skill]"
 						:style="{ backgroundColor: `${colors.get(skill)}` }"
+						style="filter: brightness(0.9)"
 						>{{ skill }}</v-chip
 					>
 				</v-chip-group>

@@ -37,6 +37,12 @@ const syntaxConfig: Record<
 		multiLineCommentEnd: "*/",
 		stringDelimiters: ['"', "'"],
 	},
+	python: {
+		singleLineComment: "#",
+		multiLineCommentStart: '"""',
+		multiLineCommentEnd: '"""',
+		stringDelimiters: ['"', "'"],
+	},
 }
 
 const stripInput = (editor: Editor): string => {
