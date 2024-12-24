@@ -262,7 +262,7 @@ watch(
 <style scoped lang="scss">
 .editor {
 	width: 100%;
-	height: 85vh;
+	height: 80vh;
 }
 
 .v-btn {
