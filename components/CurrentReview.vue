@@ -32,7 +32,14 @@
 				</v-btn-group>
 				<v-spacer />
 				<v-btn color="primary" appendIcon="mdi-plus" @click="emits('new')">NEW REVIEW</v-btn>
-				<v-btn icon @click="saveReview" color="primary" class="ml-2" rounded density="comfortable">
+				<v-btn
+					icon
+					@click="saveReview"
+					color="primary"
+					class="ml-2"
+					rounded
+					density="comfortable"
+					:loading="reviewStore.loading">
 					<v-icon>mdi-content-save-outline</v-icon>
 					<v-tooltip activator="parent" location="bottom"
 						>{{ currentReview.id ? "Update" : "Save" }} review</v-tooltip
