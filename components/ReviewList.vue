@@ -108,7 +108,7 @@ const userReviewCounts = computed(() => {
 	const reviews = props.reviews
 	return quickSort(
 		reviews.slice(),
-		(a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+		(a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
 	).map((review) => {
 		const id = `${review.user_id}-${review.role || settingsStore.defaultSkill}`
 		if (!id) return { ...review, userReviewIndex: 0 }

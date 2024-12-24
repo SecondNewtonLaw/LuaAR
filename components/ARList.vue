@@ -44,6 +44,7 @@
 		</v-row>
 
 		<v-data-table
+			:sort-by="sortBy"
 			:headers="showSkills ? skillHeaders : headers"
 			:items="showSkills ? filteredSkills : filteredReaders">
 			<template #item.skills="{ item }">
@@ -255,10 +256,11 @@ const users = ref<string[]>(readers.value.map((reader) => reader.name))
 const selectedRoles = ref<string[]>([])
 const selectedSkills = ref<Skill[]>([])
 const selectedUser = ref<string | null>(null)
-
+const sortBy = ref([{ key: "role", order: "desc" as const }])
 const headers = [
 	{ title: "Name", key: "name" },
-	{ title: "Role", key: "role" },
+	//sort should be by index of the role in the roles array
+	{ title: "Role", key: "role", sort: (a: string, b: string) => roles.value.indexOf(a) - roles.value.indexOf(b) },
 	{ title: "Skills", key: "skills" },
 	// { title: "Timezone", key: "timezone" },
 	// {
