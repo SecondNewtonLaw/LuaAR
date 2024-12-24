@@ -39,13 +39,14 @@
 								currentReview.created_at ? new Date(currentReview.created_at).toLocaleString() : ''
 							" />
 					</v-col>
-					<v-col class="mb-2" cols="auto">
+					<v-col cols="auto">
 						<v-autocomplete
 							density="compact"
 							variant="solo-filled"
 							:min-width="`${currentReview.role?.length * 10 + 110}px`"
 							single-line
 							clearable
+							class="mb-2"
 							hide-details
 							auto-select-first
 							hide-selected

@@ -16,7 +16,7 @@
 					density="comfortable"
 					prepend-inner-icon="mdi-calendar"
 					readonly
-					v-bind="props"></v-text-field>
+					v-bind="{ ...$attrs, ...props }" />
 			</template>
 			<v-date-picker
 				v-model="modelValue"

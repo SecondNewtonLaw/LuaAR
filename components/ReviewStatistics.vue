@@ -5,47 +5,57 @@
 			{{ settingsStore.endDate?.toLocaleDateString() }}
 		</v-card-subtitle>
 
-		<v-card-text class="d-flex ga-2 pa-0">
-			<v-chip color="success">{{ approvalRatio }}% Approved</v-chip>
-			<v-chip color="error">{{ deniedRatio }}% Denied</v-chip>
-			<v-chip color="warning">{{ totalMutes }} Muted</v-chip>
-		</v-card-text>
+		<v-card-text class="pa-0">
+			<v-row class="ga-2 my-1">
+				<v-col cols="auto" class="pa-0 ml-3">
+					<v-chip color="success">{{ approvalRatio }}% Approved</v-chip>
+				</v-col>
+				<v-col cols="auto" class="pa-0">
+					<v-chip color="error">{{ deniedRatio }}% Denied</v-chip>
+				</v-col>
+				<v-col cols="auto" class="pa-0">
+					<v-chip color="warning">{{ totalMutes }} Muted</v-chip>
+				</v-col>
+			</v-row>
 
-		<v-row>
-			<v-col>
-				<StatisticCard
-					title="Total Reviews"
-					:total="totalReviews"
-					color="primary"
-					:series="totalReviewsSeries"
-					:labels="labels" />
-			</v-col>
-			<v-col>
-				<StatisticCard
-					title="Approved Reviews"
-					:total="approvedReviews"
-					:labels="labels"
-					color="success"
-					:series="approvedReviewsSeries"
-			/></v-col>
-			<v-col>
-				<StatisticCard
-					title="Denied Reviews"
-					:total="deniedReviews"
-					color="error"
-					:series="deniedReviewsSeries"
-					:labels="labels"
-			/></v-col>
-			<v-col
-				><StatisticCard
-					title="Muted Reviews"
-					:total="mutedReviews"
-					color="warning"
-					:series="mutedReviewsSeries"
-					:labels="labels"
-			/></v-col>
-		</v-row>
-		<apexchart class="pa-5" height="300px" :options="chartOptions" :series="chartSeries"></apexchart>
+			<v-row class="pa-0 ma-0 mt-4">
+				<v-col class="pa-0">
+					<StatisticCard
+						title="Total Reviews"
+						:total="totalReviews"
+						color="primary"
+						:series="totalReviewsSeries"
+						:labels="labels" />
+				</v-col>
+				<v-col class="pa-0">
+					<StatisticCard
+						title="Approved Reviews"
+						:total="approvedReviews"
+						:labels="labels"
+						color="success"
+						:series="approvedReviewsSeries"
+				/></v-col>
+				<v-col class="pa-0">
+					<StatisticCard
+						title="Denied Reviews"
+						:total="deniedReviews"
+						color="error"
+						:series="deniedReviewsSeries"
+						:labels="labels"
+				/></v-col>
+				<v-col class="pa-0"
+					><StatisticCard
+						title="Muted Reviews"
+						:total="mutedReviews"
+						color="warning"
+						:series="mutedReviewsSeries"
+						:labels="labels"
+				/></v-col>
+				<v-col cols="12" class="pa-0 mt-4">
+					<apexchart height="300px" :options="chartOptions" :series="chartSeries"></apexchart>
+				</v-col>
+			</v-row>
+		</v-card-text>
 	</v-card>
 </template>
 

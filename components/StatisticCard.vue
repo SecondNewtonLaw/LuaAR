@@ -1,8 +1,8 @@
 <template>
-	<v-card flat>
-		<v-card-title>{{ title }}: {{ total }}</v-card-title>
+	<v-card flat class="pa-0 ma-0">
+		<v-card-title class="pa-0 ma-0">{{ title }}: {{ total }}</v-card-title>
 
-		<v-card-text>
+		<v-card-text class="pa-0">
 			<v-sparkline
 				:color="color"
 				height="100"

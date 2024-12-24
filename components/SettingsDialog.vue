@@ -40,6 +40,8 @@
 								label="Default Skill"
 								:rules="[(v) => !!v || 'Value is required']" />
 						</v-col>
+
+						<!-- <v-divider /> -->
 					</v-row>
 				</v-card-text>
 				<v-card-actions>
