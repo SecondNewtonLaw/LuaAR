@@ -9,7 +9,7 @@
 			<v-row class="d-flex justify-space-between">
 				<v-spacer />
 				<v-col cols="auto">
-					<v-chip color="primary" label> Version: {{ version }} </v-chip>
+					<v-chip color="primary" label> Version: {{ settingsStore.version }} </v-chip>
 				</v-col>
 			</v-row>
 		</v-footer>
@@ -17,25 +17,7 @@
 </template>
 
 <script lang="ts" setup>
-import { app } from "@tauri-apps/api"
-const theme = useTheme()
-const darkMode = ref(true)
-
-watch(
-	darkMode,
-	(value) => {
-		theme.global.name.value = value ? "dark" : "light"
-	},
-	{
-		immediate: true,
-	}
-)
-
-onMounted(async () => {
-	darkMode.value = theme.current.value.dark
-})
-
-const version = await app.getVersion()
+const settingsStore = useSettingsStore()
 </script>
 
 <style lang="scss" scoped>

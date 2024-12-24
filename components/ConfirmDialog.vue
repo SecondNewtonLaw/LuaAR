@@ -1,6 +1,6 @@
 <template>
 	<div>
-		<v-dialog v-model="isDialogOpen" max-width="500">
+		<v-dialog v-model="isDialogOpen" max-width="500" v-bind="$attrs">
 			<v-card>
 				<v-card-title class="headline">{{ title }}</v-card-title>
 				<v-card-text>
@@ -23,10 +23,10 @@ const emits = defineEmits<{
 }>()
 withDefaults(
 	defineProps<{
-		title: string
-		text: string
-		submit: string
-		color: string
+		title?: string
+		text?: string
+		submit?: string
+		color?: string
 	}>(),
 	{
 		title: "Confirm",

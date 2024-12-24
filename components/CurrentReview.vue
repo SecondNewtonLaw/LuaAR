@@ -2,15 +2,34 @@
 	<div ref="card">
 		<v-card>
 			<v-card-title class="d-flex align-center pa-2 pl-4">
-				<!-- Back icon to go to the previous review -->
 				Current Review {{ reviewStore.isTouched ? "*" : "" }}
-				<!-- Show adding or editing according to if id is set label with tooltip -->
 				<v-chip color="primary" label class="ml-2">
 					{{ currentReview.id ? "Editing" : "Adding" }}
 					<v-tooltip activator="parent" location="bottom" v-if="currentReview.id">
 						{{ currentReview.id }}
 					</v-tooltip>
 				</v-chip>
+
+				<v-spacer />
+				<v-btn-group
+					class="ga-2 position-absolute"
+					density="comfortable"
+					style="left: 50%; transform: translateX(-50%)">
+					<v-btn
+						:variant="currentReview.approved ? 'elevated' : 'tonal'"
+						@click="currentReview.approved = !currentReview.approved"
+						:color="currentReview.approved ? 'success' : 'error'">
+						{{ currentReview.approved ? "Approved" : "Declined " }}
+					</v-btn>
+					<v-divider vertical thickness="2" />
+					<v-btn
+						:prepend-icon="currentReview.muted ? 'mdi-volume-off' : 'mdi-volume-high'"
+						:variant="currentReview.muted ? 'elevated' : 'tonal'"
+						@click="currentReview.muted = !currentReview.muted"
+						:color="currentReview.muted ? 'error' : 'primary'">
+						{{ currentReview.muted ? "Muted" : "Not Muted" }}
+					</v-btn>
+				</v-btn-group>
 				<v-spacer />
 				<v-btn color="primary" appendIcon="mdi-plus" @click="emits('new')">NEW REVIEW</v-btn>
 				<v-btn icon @click="saveReview" color="primary" class="ml-2" rounded density="comfortable">
@@ -63,8 +82,9 @@
 					{{ new Date(currentReview.updated_at).toLocaleString() }}</v-chip
 				>
 
-				<v-divider class="mt-2" thickness="2"></v-divider>
+				<v-divider thickness="1"></v-divider>
 			</v-card-subtitle>
+
 			<v-card-item>
 				<v-form validate-on="input lazy" ref="form">
 					<!-- Modify created date -->
@@ -80,15 +100,6 @@
 								v-model="currentReview.title"
 								@update:search="titleSelected"
 								:items="existingTitles" />
-						</v-col>
-						<v-col cols="auto" class="mb-5">
-							<!-- Approved -->
-							<v-btn
-								:variant="currentReview.approved ? 'elevated' : 'tonal'"
-								@click="currentReview.approved = !currentReview.approved"
-								:color="currentReview.approved ? 'success' : 'error'">
-								{{ currentReview.approved ? "Approved" : "Declined " }}
-							</v-btn>
 						</v-col>
 					</v-row>
 
@@ -177,16 +188,6 @@
 						<v-col cols="auto" v-if="currentReview.evidence.length" title="Disabled">
 							<v-btn disabled readonly @click="showImgurUpload = true" color="primary"
 								>Upload to IMGUR
-							</v-btn>
-						</v-col>
-						<v-col cols="auto">
-							<!-- Muted or not -->
-							<v-btn
-								:prepend-icon="currentReview.muted ? 'mdi-volume-off' : 'mdi-volume-high'"
-								:variant="currentReview.muted ? 'elevated' : 'tonal'"
-								@click="currentReview.muted = !currentReview.muted"
-								:color="currentReview.muted ? 'error' : 'primary'">
-								{{ currentReview.muted ? "Muted" : "Not Muted" }}
 							</v-btn>
 						</v-col>
 					</v-row>

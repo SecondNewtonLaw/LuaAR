@@ -1,3 +1,5 @@
+import { app } from "@tauri-apps/api"
+
 const groupedSkills = {
 	Programming: ["Lua", "JavaScript", "Python", "C#", "C++", "PHP", "Java", "HTML/CSS", "Vanilla Lua"] as const,
 	Art: [
@@ -56,6 +58,24 @@ export const useSettingsStore = defineStore(
 			set: (date: Date) => (endDateString.value = date.toISOString()),
 		})
 
+		//app
+		const theme = useTheme()
+		const version = ref("")
+		app.getVersion().then((v) => (version.value = v))
+
+		const darkMode = ref(theme.current.value.dark)
+
+		watch(
+			darkMode,
+			(value) => {
+				const output = value ? "dark" : "light"
+				theme.global.name.value = output
+				app.setTheme(output)
+			},
+			{
+				immediate: true,
+			}
+		)
 		return {
 			loc,
 			defaultLanguage,
@@ -72,6 +92,10 @@ export const useSettingsStore = defineStore(
 			endDate,
 			startDateString,
 			endDateString,
+
+			//app
+			version,
+			darkMode,
 		}
 	},
 	{
