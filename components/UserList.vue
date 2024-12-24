@@ -42,6 +42,7 @@
 			v-model="isDialogOpen"
 			@confirm="confirmRemoveUser"
 			title="Remove User"
+			color="error"
 			text="Are you sure you want to remove the selected user?"
 			submit="Remove" />
 	</div>

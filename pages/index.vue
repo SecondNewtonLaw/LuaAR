@@ -66,20 +66,13 @@
 			</v-card>
 		</VDialog>
 
-		<!-- Confirmation dialog -->
-		<VDialog v-model="newReviewConfirmationDialogVisible" width="400" @keydown.enter="confirmNewReview">
-			<v-card>
-				<v-card-title class="headline">Confirm New Review</v-card-title>
-				<v-card-text> You have unsaved changes. Are you sure you want to start a new review? </v-card-text>
-				<v-card-actions>
-					<v-spacer></v-spacer>
-					<v-btn color="primary" @keydown.stop v-auto-focus @click.stop="confirmNewReview">Yes</v-btn>
-					<v-btn color="primary" @keydown.stop @click.stop="newReviewConfirmationDialogVisible = false"
-						>No</v-btn
-					>
-				</v-card-actions>
-			</v-card>
-		</VDialog>
+		<ConfirmDialog
+			v-model="newReviewConfirmationDialogVisible"
+			@confirm="confirmNewReview"
+			title="Confirm New Review"
+			color="primary"
+			text="You have unsaved changes. Are you sure you want to start a new review?"
+			submit="Yes" />
 	</div>
 </template>
 

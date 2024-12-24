@@ -19,11 +19,18 @@
 <script lang="ts" setup>
 import { app } from "@tauri-apps/api"
 const theme = useTheme()
-const darkMode = ref(false)
+const darkMode = ref(true)
 
-watch(darkMode, (value) => {
-	theme.global.name.value = value ? "dark" : "light"
-})
+watch(
+	darkMode,
+	(value) => {
+		theme.global.name.value = value ? "dark" : "light"
+	},
+	{
+		immediate: true,
+	}
+)
+
 onMounted(async () => {
 	darkMode.value = theme.current.value.dark
 })

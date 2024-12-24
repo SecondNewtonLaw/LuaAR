@@ -1,73 +1,81 @@
 <template>
 	<v-card>
 		<v-card-title>
-			<div class="title-content">
-				<!-- Title input -->
-				<v-text-field
-					prefix="Editor"
-					persistent-placeholder
-					v-model="editor.title"
-					:readonly="isLintResult"
-					variant="solo"
-					label="Title"
-					placeholder="Enter title"
-					density="compact"
-					prepend-inner-icon="mdi-text"
-					single-line
-					hide-details />
-				<!-- Language select -->
-				<v-select
-					:model-value="editor.lang || settingsStore.defaultLanguage"
-					@update:model-value="editor.lang = $event"
-					:items="settingsStore.languages"
-					label="Language"
-					variant="solo"
-					single-line
-					max-width="12rem"
-					class="flex-xl-0-0"
-					density="compact"
-					prepend-inner-icon="mdi-code-tags"
-					hide-details />
-				<v-checkbox v-model="editor.selected" density="compact" hide-details>
-					<v-tooltip activator="parent" location="bottom">Select Editor</v-tooltip>
-				</v-checkbox>
-			</div>
-
-			<VToolbar flat color="transparent">
-				<v-btn-group variant="tonal" color="primary" v-if="!isLintResult">
-					<v-btn @click="editorStore.stripCode(editor)" :disabled="editor.input === ''"> Strip Code </v-btn>
-					<v-btn @click="formatCode(editor)" :disabled="editor.input === ''"> Format Code </v-btn>
-					<!-- Remove logs -->
-					<v-btn @click="editorStore.removeLogs(editor)" :disabled="editor.input === ''">
-						Remove Logs
-						<v-tooltip activator="parent" location="bottom">Remove all prints, warns, and errors</v-tooltip>
-					</v-btn>
-					<!-- Lint -->
-					<v-btn
-						@click="editorStore.lintCode(editor)"
-						:disabled="editor.input === '' || !tauri || editor.lang !== 'lua'">
-						Lint Code
-					</v-btn>
-				</v-btn-group>
-				<v-spacer />
-				<v-btn-group variant="elevated">
-					<v-btn icon @click="editorStore.toggleCollapse(editor)">
-						<v-icon>{{ editor.collapsed ? "mdi-chevron-down" : "mdi-chevron-up" }}</v-icon>
-						<v-tooltip activator="parent" location="bottom">{{
-							editor.collapsed ? "Expand" : "Collapse"
-						}}</v-tooltip>
-					</v-btn>
-					<v-btn icon @click="editorStore.removeEditor(editor)">
-						<v-icon>mdi-close</v-icon>
-						<v-tooltip activator="parent" location="bottom">Remove Editor</v-tooltip>
-					</v-btn>
-					<!-- Duplicate -->
-					<v-btn icon @click="duplicateEditor">
-						<v-icon>mdi-content-copy</v-icon>
-						<v-tooltip activator="parent" location="bottom">Duplicate Editor</v-tooltip>
-					</v-btn>
-				</v-btn-group>
-			</VToolbar>
+			<!-- Title input -->
+			<v-row dense>
+				<v-col>
+					<v-text-field
+						prefix="Editor"
+						persistent-placeholder
+						v-model="editor.title"
+						:readonly="isLintResult"
+						variant="solo"
+						label="Title"
+						placeholder="Enter title"
+						density="compact"
+						prepend-inner-icon="mdi-text"
+						single-line
+						hide-details />
+				</v-col>
+				<v-col cols="auto" class="d-flex align-center ga-2 mr-1">
+					<v-select
+						:model-value="editor.lang || settingsStore.defaultLanguage"
+						@update:model-value="editor.lang = $event"
+						:items="settingsStore.languages"
+						label="Language"
+						variant="solo"
+						single-line
+						max-width="12rem"
+						class="flex-xl-0-0"
+						density="compact"
+						prepend-inner-icon="mdi-code-tags"
+						hide-details />
+					<v-checkbox v-model="editor.selected" density="compact" hide-details>
+						<v-tooltip activator="parent" location="bottom">Select Editor</v-tooltip>
+					</v-checkbox>
+				</v-col>
+				<v-col cols="12">
+					<VToolbar flat color="transparent" density="compact">
+						<v-btn-group variant="tonal" color="primary" v-if="!isLintResult">
+							<v-btn class="ml-0" @click="editorStore.stripCode(editor)" :disabled="editor.input === ''">
+								Strip Code
+							</v-btn>
+							<v-btn @click="formatCode(editor)" :disabled="editor.input === ''"> Format Code </v-btn>
+							<!-- Remove logs -->
+							<v-btn @click="editorStore.removeLogs(editor)" :disabled="editor.input === ''">
+								Remove Logs
+								<v-tooltip activator="parent" location="bottom"
+									>Remove all prints, warns, and errors</v-tooltip
+								>
+							</v-btn>
+							<!-- Lint -->
+							<v-btn
+								@click="editorStore.lintCode(editor)"
+								:disabled="editor.input === '' || !tauri || editor.lang !== 'lua'">
+								Lint Code
+							</v-btn>
+						</v-btn-group>
+						<v-spacer />
+						<v-btn-group variant="elevated" class="ga-2">
+							<v-btn icon density="comfortable" @click="editorStore.toggleCollapse(editor)">
+								<v-icon>{{ editor.collapsed ? "mdi-chevron-down" : "mdi-chevron-up" }}</v-icon>
+								<v-tooltip activator="parent" location="bottom">{{
+									editor.collapsed ? "Expand" : "Collapse"
+								}}</v-tooltip>
+							</v-btn>
+							<v-btn icon density="comfortable" @click="editorStore.removeEditor(editor)">
+								<v-icon>mdi-close</v-icon>
+								<v-tooltip activator="parent" location="bottom">Remove Editor</v-tooltip>
+							</v-btn>
+							<!-- Duplicate -->
+							<v-btn class="mr-0" density="comfortable" icon @click="duplicateEditor">
+								<v-icon>mdi-content-copy</v-icon>
+								<v-tooltip activator="parent" location="bottom">Duplicate Editor</v-tooltip>
+							</v-btn>
+						</v-btn-group>
+					</VToolbar>
+				</v-col>
+			</v-row>
 		</v-card-title>
 		<v-expand-transition>
 			<v-card-text v-if="!editor.collapsed">
@@ -255,16 +263,6 @@ watch(
 .editor {
 	width: 100%;
 	height: 85vh;
-}
-
-.title-content {
-	display: flex;
-	gap: 0.5rem;
-	align-items: center;
-}
-
-.v-toolbar :deep(div) {
-	justify-content: space-between;
 }
 
 .v-btn {

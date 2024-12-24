@@ -84,6 +84,7 @@
 			v-model="isDialogOpen"
 			@confirm="confirmRemoveReview"
 			title="Remove Review"
+			color="error"
 			text="Are you sure you want to remove the selected review?"
 			submit="Remove" />
 	</v-card>
