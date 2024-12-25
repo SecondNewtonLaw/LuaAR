@@ -6,7 +6,7 @@
 			</v-chip>
 		</template>
 
-		<v-list rounded="lg" select-strategy="single-leaf" max-height="300">
+		<v-list rounded="lg" select-strategy="single-leaf" max-height="300" v-if="details">
 			<v-list-item v-for="(line, index) in details" :key="index">
 				<VListItemTitle>{{ line }}</VListItemTitle>
 			</v-list-item>

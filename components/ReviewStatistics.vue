@@ -24,14 +24,12 @@
 						title="Total Reviews"
 						:total="totalReviews"
 						color="primary"
-						:series="totalReviewsSeries"
-						:labels="labels" />
+						:series="totalReviewsSeries" />
 				</v-col>
 				<v-col class="pa-0">
 					<StatisticCard
 						title="Approved Reviews"
 						:total="approvedReviews"
-						:labels="labels"
 						color="success"
 						:series="approvedReviewsSeries"
 				/></v-col>
@@ -41,7 +39,6 @@
 						:total="deniedReviews"
 						color="error"
 						:series="deniedReviewsSeries"
-						:labels="labels"
 				/></v-col>
 				<v-col class="pa-0"
 					><StatisticCard
@@ -49,7 +46,6 @@
 						:total="mutedReviews"
 						color="warning"
 						:series="mutedReviewsSeries"
-						:labels="labels"
 				/></v-col>
 				<v-col cols="12" class="pa-0 mt-4">
 					<apexchart height="300px" :options="chartOptions" :series="chartSeries"></apexchart>
@@ -108,6 +104,7 @@ const chartOptions = computed(() => ({
 			show: false,
 		},
 	},
+	colors: ["#00E396", "#FF4560"],
 	theme: {
 		mode: "dark",
 		palette: "palette1",
@@ -142,9 +139,6 @@ const dates = computed(() => {
 
 	return Array.from(new Set(uniqueDates))
 })
-
-// DD/MM
-const labels = computed(() => dates.value.map((date) => date.slice(4, 10)))
 
 const createSeries = (predicate: (review: Review) => boolean) =>
 	computed(() =>
