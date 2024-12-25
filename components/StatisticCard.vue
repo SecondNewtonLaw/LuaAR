@@ -9,7 +9,6 @@
 				padding="24"
 				auto-draw-easing="ease-in-out"
 				:auto-draw-duration="Math.random() * 500 + 500"
-				show-labels
 				auto-draw
 				stroke-linecap="round"
 				smooth
@@ -19,15 +18,13 @@
 </template>
 
 <script lang="ts" setup>
-const props = defineProps<{
+defineProps<{
 	title: string
 	total: number
-	labels: string[]
+
 	color: string
 	series: number[]
 }>()
-
-const labels = computed(() => props.labels as unknown as number[])
 </script>
 
 <style scoped lang="scss"></style>

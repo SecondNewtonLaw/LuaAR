@@ -79,7 +79,7 @@
 		</v-card-title>
 		<v-expand-transition>
 			<v-card-text v-if="!editor.collapsed">
-				<div class="code-info-chips" v-if="!isLintResult">
+				<div class="d-flex ga-2 mb-2 flex-wrap" v-if="!isLintResult">
 					<CodeInfoChip
 						v-if="codeInfoCount.definitive.length > 0"
 						:count="codeInfoCount.definitive.length"
@@ -138,6 +138,8 @@
 						minimap: {
 							enabled: false,
 						},
+						wordWrap: 'on',
+
 						autoIndent: 'full',
 						cursorBlinking: 'smooth',
 						cursorSmoothCaretAnimation: 'on',
@@ -268,12 +270,5 @@ watch(
 .v-btn {
 	margin: 0 5px;
 	border-radius: 0;
-}
-
-.code-info-chips {
-	display: flex;
-	flex-wrap: wrap;
-	gap: 0.5rem;
-	margin-bottom: 0.5rem;
 }
 </style>

@@ -83,15 +83,18 @@ const updateApplication = async () => {
 	}
 }
 
-onMounted(async () => {
+const updateAvailable = async () => {
 	try {
 		update = await check()
 		available.value = !!update
+
+		if (!update) setTimeout(updateAvailable, 30000)
 	} catch (error) {
 		console.log("failed to check for updates", error)
 		toast.error("Failed to check for updates")
 	}
-})
+}
+onMounted(updateAvailable)
 </script>
 
 <style scoped></style>

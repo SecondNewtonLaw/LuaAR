@@ -18,6 +18,7 @@
 					<v-btn
 						:variant="currentReview.approved ? 'elevated' : 'tonal'"
 						@click="currentReview.approved = !currentReview.approved"
+						:prepend-icon="currentReview.approved ? 'mdi-check' : 'mdi-close'"
 						:color="currentReview.approved ? 'success' : 'error'">
 						{{ currentReview.approved ? "Approved" : "Declined " }}
 					</v-btn>
