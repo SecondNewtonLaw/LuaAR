@@ -117,7 +117,6 @@ const chartOptions = computed(() => ({
 			shadeIntensity: 0.5,
 		},
 	},
-	xaxis: { categories: [] },
 }))
 
 const chartSeries = computed(() => [
