@@ -138,6 +138,8 @@
 						minimap: {
 							enabled: false,
 						},
+						wordWrap: 'on',
+
 						autoIndent: 'full',
 						cursorBlinking: 'smooth',
 						cursorSmoothCaretAnimation: 'on',

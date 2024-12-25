@@ -9,12 +9,7 @@
 						<v-icon>mdi-plus</v-icon>
 						<v-tooltip activator="parent" location="bottom">Add Editor</v-tooltip>
 					</v-btn>
-					<v-btn
-						icon
-						width="56px"
-						v-if="reviewed"
-						:disabled="!hasPreviousReview"
-						@click="promptReviewChoice()">
+					<v-btn icon width="56px" :disabled="!hasPreviousReview" @click="promptReviewChoice()">
 						<v-icon>mdi-plus</v-icon>
 						<v-icon>mdi-comment-text-outline</v-icon>
 						<v-tooltip activator="parent" location="bottom">Add Editor from other Review(s)</v-tooltip>
@@ -36,10 +31,7 @@
 			</v-col>
 
 			<v-col v-if="diffVisible" cols="12">
-				<DiffViewer
-					:originalContent="modifiedContent"
-					:modifiedContent="originalContent"
-					v-model="diffVisible" />
+				<DiffViewer :originalContent :modifiedContent v-model="diffVisible" />
 			</v-col>
 		</v-row>
 
@@ -82,9 +74,18 @@ import { toast } from "vuetify-sonner"
 const editorStore = useEditorStore()
 const reviewStore = useReviewStore()
 const editors = computed(() => editorStore.editors)
+
+//diff
 const diffVisible = ref(false)
-const originalContent = ref("")
-const modifiedContent = ref("")
+const selectedEditors = computed(() => editors.value.filter((editor) => editor.selected))
+const originalContent = computed(() => selectedEditors.value[1]?.input)
+const modifiedContent = computed(() => selectedEditors.value[0]?.input)
+
+watch(selectedEditors, () => {
+	if (selectedEditors.value.length < 2) {
+		diffVisible.value = false
+	}
+})
 const form = useTemplateRef("form")
 const newReviewConfirmationDialogVisible = ref(false)
 
@@ -92,17 +93,14 @@ const showDiff = () => {
 	if (editors.value.length == 2) {
 		editors.value.forEach((editor) => (editor.selected = true))
 	}
-	const selectedEditors = editors.value.filter((editor) => editor.selected)
-	if (selectedEditors.length === 2) {
-		originalContent.value = selectedEditors[0].input
-		modifiedContent.value = selectedEditors[1].input
+
+	if (selectedEditors.value.length === 2) {
 		diffVisible.value = true
 	} else {
 		alert("Please select exactly 2 editors to compare.")
 	}
 }
 
-const reviewed = computed(() => reviewStore.currentReview.id)
 const reviewsInDialog = ref<Review[]>([])
 const hasPreviousReview = computed(
 	() =>
