@@ -274,4 +274,5 @@ const countNesting = (editor: Editor) => {
 	const lines = input.split("\n").length
 	return { totalDepth, maxDepth, ratio: +(totalDepth / lines).toFixed(2) }
 }
+
 export { countComments, countLogs, countNesting, countWhitelines, stripInput, stripLoggingStatements }

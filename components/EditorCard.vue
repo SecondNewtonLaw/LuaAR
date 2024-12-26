@@ -112,7 +112,7 @@
 					<CodeInfoChip
 						v-if="lintResult"
 						:count="lintCount"
-						:color="lintCount == 0 ? 'success' : lintCount < 10 ? 'warning' : 'error'"
+						:color="lintCount <= 5 ? 'success' : lintCount < 10 ? 'warning' : 'error'"
 						:details="lintResultMessages"
 						text="Lint" />
 
@@ -172,25 +172,6 @@ const props = defineProps<{
 }>()
 
 const isLintResult = computed(() => props.editor.title?.toLowerCase().includes("lint"))
-const deprecatedAPI = ref([
-	/^\s*(wait|delay|spawn)\s*(\([^\)]*\))?\s*$/i,
-	/\bSetPrimaryPartCFrame\b/i,
-	/\bgame\.Chat\b/i,
-	/\bGetService\s*\(\s*["']Chat["']\s*\)/i,
-])
-
-const warnDeprecatedAPI = ref([
-	/^\s*LoadAnimation\s*(\([^\)]*\))?\s*$/i,
-	/\bBodyVelocity\b/i,
-	/\bBodyGyro\b/i,
-	/\bBodyPosition\b/i,
-	/\bBodyAngularVelocity\b/i,
-	/\bBodyThrust\b/i,
-	/\bBodyForce\b/i,
-	/\bLoadAnimation\b/i,
-])
-
-const incorrectAPI = ref([/\bFindFirst\w*\s*\([^\)]*\)\s*[:.]/i, /Instance\.new\s*\(\s*[^,]+,\s*[^)]+\s*\)/i])
 
 const loc = computed(() => stripLoggingStatements(stripInput(props.editor), props.editor.lang).split("\n").length)
 const lintResult = ref<LintResult | null>(null)
@@ -206,13 +187,14 @@ const lintResultMessages = computed(() => {
 })
 const comments = computed(() => countComments(props.editor))
 const nesting = computed(() => countNesting(props.editor))
+
 const codeInfoCount = computed(() => {
 	const strippedInput = stripInput(props.editor)
 
 	return {
-		definitive: strippedInput.split("\n").filter((line) => deprecatedAPI.value.some((regex) => regex.test(line))),
-		warning: strippedInput.split("\n").filter((line) => warnDeprecatedAPI.value.some((regex) => regex.test(line))),
-		incorrect: strippedInput.split("\n").filter((line) => incorrectAPI.value.some((regex) => regex.test(line))),
+		definitive: outputFilter(strippedInput, definitiveDeprecated),
+		warning: outputFilter(strippedInput, possibleDeprecated),
+		incorrect: outputFilter(strippedInput, incorrectAPI),
 		info: [
 			`Code has ${countWhitelines(props.editor)} whitelines`,
 			`Code has ${countLogs(props.editor)} logs`,
@@ -237,6 +219,7 @@ const formatCode = async (editor: Editor) => {
 const init = ref(true)
 const onInit = async () => {
 	// await nextTick()
+	if (props.editor.input.trim() === "") lintResult.value = null
 	if (!props.editor.input) return
 	if (props.editor.lang !== "lua") return
 	if (!tauri) return toast.error("Could not format code")

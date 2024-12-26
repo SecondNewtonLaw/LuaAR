@@ -38,15 +38,34 @@
 			</v-col>
 			<v-col>
 				<v-btn @click="showSkills = !showSkills" color="primary" prepend-icon="mdi-filter">
-					{{ showSkills ? "Show by Readers" : "Show by Skills" }}
+					{{ showSkills ? "Show by Skills" : "Show by Readers" }}
 				</v-btn>
 			</v-col>
 		</v-row>
 
 		<v-data-table
-			:sort-by="sortBy"
-			:headers="showSkills ? skillHeaders : headers"
-			:items="showSkills ? filteredSkills : filteredReaders">
+			v-show="showSkills"
+			density="compact"
+			multi-sort
+			:headers="skillHeaders"
+			:items="filteredSkills"
+			:sort-by="[{ key: 'readers', order: 'desc' }]">
+			<template #item.readers="{ item }">
+				<v-chip-group>
+					<v-chip v-if="'readers' in item" v-for="reader in item.readers" :key="reader" class="mr-2">{{
+						reader
+					}}</v-chip>
+				</v-chip-group>
+			</template>
+		</v-data-table>
+
+		<v-data-table
+			v-show="!showSkills"
+			density="compact"
+			multi-sort
+			:headers="headers"
+			:items="filteredReaders"
+			:sort-by="sortBy">
 			<template #item.skills="{ item }">
 				<v-chip-group column>
 					<v-chip
@@ -57,16 +76,9 @@
 						variant="tonal"
 						@click="selectedSkills = [skill]"
 						:style="{ backgroundColor: `${colors.get(skill)}` }"
-						style="filter: brightness(0.9)"
+						style="filter: brightness(0.9); text-shadow: 1px 1px 1px black"
 						>{{ skill }}</v-chip
 					>
-				</v-chip-group>
-			</template>
-			<template #item.readers="{ item }">
-				<v-chip-group>
-					<v-chip v-if="'readers' in item" v-for="reader in item.readers" :key="reader" class="mr-2">{{
-						reader
-					}}</v-chip>
 				</v-chip-group>
 			</template>
 		</v-data-table>
@@ -75,7 +87,7 @@
 
 <script lang="ts" setup>
 export interface Reader {
-	user_id: number
+	user_id: bigint
 	skills: Skill[]
 	role: "AR" | "SAR" | "Management" | "Head"
 	name: string
@@ -85,63 +97,63 @@ export interface Reader {
 const settingsStore = useSettingsStore()
 const readers = ref<Reader[]>([
 	{
-		user_id: 623238907772796961,
+		user_id: 623238907772796961n,
 		skills: ["Lua", "Voice Actor", "Video Editor", "JavaScript"],
 		name: "LifeDigger",
 		timezone: "",
 		role: "SAR",
 	},
 	{
-		user_id: 326078015727599616,
+		user_id: 326078015727599616n,
 		skills: ["Lua", "Python", "JavaScript"],
 		name: "Scriptone",
 		timezone: "Europe/Brussels",
 		role: "AR",
 	},
 	{
-		user_id: 1010290469235871785,
+		user_id: 1010290469235871785n,
 		skills: ["Lua", "C#", "C++"],
 		name: "Dottik",
 		timezone: "America/Barbados",
 		role: "AR",
 	},
 	{
-		user_id: 650283793374249011,
+		user_id: 650283793374249011n,
 		skills: ["Lua", "HTML/CSS", "JavaScript"],
 		name: "Ashlyn",
 		timezone: "",
 		role: "AR",
 	},
 	{
-		user_id: 302058196896579584,
+		user_id: 302058196896579584n,
 		skills: ["Lua"],
 		name: "Optimized",
 		timezone: "Asia/Kolkata",
 		role: "SAR",
 	},
 	{
-		user_id: 1143575748427382848,
+		user_id: 1143575748427382848n,
 		skills: ["3D Modeler", "Graphics Artist"],
 		name: "Akio",
 		timezone: "",
 		role: "AR",
 	},
 	{
-		user_id: 999018383817326723,
+		user_id: 999018383817326723n,
 		skills: ["Graphics Artist"],
 		name: "Austin",
 		timezone: "",
 		role: "SAR",
 	},
 	{
-		user_id: 661556544466583553,
+		user_id: 661556544466583553n,
 		skills: ["Interface Designer"],
 		name: "Bordoma",
 		role: "AR",
 		timezone: "",
 	},
 	{
-		user_id: 269724942180941824,
+		user_id: 269724942180941824n,
 		skills: [
 			"Lua",
 			"Interface Designer",
@@ -157,28 +169,28 @@ const readers = ref<Reader[]>([
 		timezone: "",
 	},
 	{
-		user_id: 381337534556274689,
+		user_id: 381337534556274689n,
 		skills: ["Builder"],
 		name: "souleth",
 		timezone: "",
 		role: "AR",
 	},
 	{
-		user_id: 879313965790920764,
+		user_id: 879313965790920764n,
 		skills: ["Builder", "Terrain Editor", "Interface Designer"],
 		name: "Parra",
 		timezone: "America/Belize",
 		role: "SAR",
 	},
 	{
-		user_id: 552477847751753739,
+		user_id: 552477847751753739n,
 		skills: ["Builder", "Interface Designer", "Clothing", "Graphics Artist"],
 		name: "Lettuce",
 		timezone: "",
 		role: "AR",
 	},
 	{
-		user_id: 352387677149986818,
+		user_id: 352387677149986818n,
 		skills: [
 			"Builder",
 			"Terrain Editor",
@@ -200,56 +212,56 @@ const readers = ref<Reader[]>([
 		role: "Head",
 	},
 	{
-		user_id: 524139654719471616,
+		user_id: 524139654719471616n,
 		skills: ["Builder", "3D Modeler"],
 		name: "Gator",
 		timezone: "",
 		role: "AR",
 	},
 	{
-		user_id: 886355963894988801,
+		user_id: 886355963894988801n,
 		skills: ["Interface Designer", "Graphics Artist"],
 		name: "jonahxo",
 		timezone: "America/Los_Angeles",
 		role: "Management",
 	},
 	{
-		user_id: 488164549027954708,
+		user_id: 488164549027954708n,
 		skills: ["3D Modeler", "Animator"],
 		name: "Shehatesaddy",
 		timezone: "",
 		role: "AR",
 	},
 	{
-		user_id: 610544677904449673,
+		user_id: 610544677904449673n,
 		skills: ["3D Modeler", "Clothing", "Graphics Artist"],
 		name: "Romaxino",
 		timezone: "",
 		role: "AR",
 	},
 	{
-		user_id: 766558323084230697,
+		user_id: 766558323084230697n,
 		skills: ["Clothing"],
 		name: "Dan",
 		timezone: "",
 		role: "AR",
 	},
 	{
-		user_id: 118496586299998209,
+		user_id: 118496586299998209n,
 		skills: ["Java"],
 		name: "Solo",
 		timezone: "",
 		role: "AR",
 	},
 	{
-		user_id: 222804393030844438,
+		user_id: 222804393030844438n,
 		skills: ["PHP"],
 		name: "Volvic",
 		timezone: "",
 		role: "AR",
 	},
 	{
-		user_id: 533903312551149588,
+		user_id: 533903312551149588n,
 		skills: ["Voice Actor", "Graphics Artist"],
 		name: "a1exmechanic101",
 		timezone: "",
@@ -291,27 +303,16 @@ colors.set("Sound Effects", "#A57BF7")
 colors.set("Visual Effects", "#65B9B2")
 
 const headers = [
-	{ title: "Name", key: "name" },
+	{ title: "Name", key: "name", value: (reader: Reader) => `${reader.name} (${reader.user_id})` },
+
 	//sort should be by index of the role in the roles array
 	{ title: "Role", key: "role", sort: (a: string, b: string) => roles.value.indexOf(a) - roles.value.indexOf(b) },
-	{ title: "Skills", key: "skills" },
-	// { title: "Timezone", key: "timezone" },
-	// {
-	// 	title: "Time",
-	// 	key: "_",
-	// 	value: (item: Reader) => {
-	// 		try {
-	// 			return new Date().toLocaleTimeString("en-US", { timeZone: item.timezone })
-	// 		} catch {
-	// 			return "Invalid timezone"
-	// 		}
-	// 	},
-	// },
+	{ title: "Skills", key: "skills", sort: (a: Skill[], b: Skill[]) => a.length - b.length },
 ]
 
 const skillHeaders = [
 	{ title: "Skill", key: "skill" },
-	{ title: "Readers", key: "readers" },
+	{ title: "Readers", key: "readers", sort: (a: Skill[], b: Skill[]) => a.length - b.length },
 ]
 
 const filteredReaders = computed(() => {
