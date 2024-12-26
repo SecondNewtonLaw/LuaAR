@@ -255,4 +255,23 @@ const countLogs = (editor: Editor) => {
 	return editor.input.match(regex)?.length || 0
 }
 
-export { countComments, countLogs, countWhitelines, stripInput, stripLoggingStatements }
+const countNesting = (editor: Editor) => {
+	const input = stripInput(editor)
+	let totalDepth = 0
+	let maxDepth = 0
+	let currentDepth = 0
+
+	for (let i = 0; i < input.length; i++) {
+		const currentChar = input[i]
+		if (currentChar === "\t") {
+			currentDepth++
+			if (currentDepth > maxDepth) maxDepth = currentDepth
+		} else if (currentChar === "\n") {
+			totalDepth += currentDepth
+			currentDepth = 0
+		}
+	}
+	const lines = input.split("\n").length
+	return { totalDepth, maxDepth, ratio: +(totalDepth / lines).toFixed(2) }
+}
+export { countComments, countLogs, countNesting, countWhitelines, stripInput, stripLoggingStatements }

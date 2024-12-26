@@ -102,6 +102,12 @@
 					<!-- LOC -->
 					<CodeInfoChip :count="loc" :color="loc < settingsStore.loc ? 'warning' : 'success'" text="LOC" />
 
+					<!-- Nesting -->
+					<CodeInfoChip
+						text="Nesting"
+						:count="nesting.maxDepth"
+						:color="nesting.ratio > 1.8 ? 'error' : nesting.ratio > 1.3 ? 'warning' : 'success'"
+						:details="Object.entries(nesting).map(([key, value]) => `${key}: ${value}`)" />
 					<!-- LINT -->
 					<CodeInfoChip
 						v-if="lintResult"
@@ -120,7 +126,6 @@
 						v-if="codeInfoCount.info.length > 0"
 						v-for="(info, index) in codeInfoCount.info"
 						:key="index"
-						:count="null"
 						color="info"
 						:text="info" />
 				</div>
@@ -200,6 +205,7 @@ const lintResultMessages = computed(() => {
 		.flat()
 })
 const comments = computed(() => countComments(props.editor))
+const nesting = computed(() => countNesting(props.editor))
 const codeInfoCount = computed(() => {
 	const strippedInput = stripInput(props.editor)
 

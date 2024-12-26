@@ -2,7 +2,7 @@
 	<v-menu open-on-hover attach>
 		<template v-slot:activator="{ props }">
 			<v-chip :color="color" tile rounded="lg" v-bind="props">
-				{{ text }}<template v-if="count !== null">: {{ count }}</template>
+				{{ text }}<template v-if="count || count === 0">: {{ count }}</template>
 			</v-chip>
 		</template>
 
@@ -15,12 +15,17 @@
 </template>
 
 <script lang="ts" setup>
-defineProps<{
-	color: string
-	text: string
-	count: number | null
-	details?: string[]
-}>()
+withDefaults(
+	defineProps<{
+		color?: string
+		text: string
+		count?: number
+		details?: string[]
+	}>(),
+	{
+		color: "primary",
+	}
+)
 </script>
 
 <style scoped lang="scss">
