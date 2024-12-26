@@ -48,7 +48,7 @@
 				</v-btn>
 			</v-card-title>
 			<v-card-subtitle>
-				<v-row>
+				<v-row dense>
 					<v-col>
 						<v-text-field
 							single-line
@@ -70,7 +70,8 @@
 						<v-autocomplete
 							density="compact"
 							variant="solo-filled"
-							:min-width="`${currentReview.role?.length * 10 + 110}px`"
+							:min-width="`${(currentReview.role?.length || 0) * 10 + 110}px`"
+							style="transition: all 0.3s"
 							single-line
 							clearable
 							class="mb-2"

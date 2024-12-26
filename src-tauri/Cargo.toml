@@ -1,10 +1,10 @@
 [package]
 name = "ar-atlas"
-version = "1.2.10"
+version = "1.3.0"
 description = "An AR app"
-authors = ["you"]
+authors = ["Scriptxne"]
 license = ""
-repository = ""
+repository = "https://github.com/Scriptone/LuaAR"
 edition = "2021"
 rust-version = "1.77.2"
 
