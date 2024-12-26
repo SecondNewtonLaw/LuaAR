@@ -1,7 +1,7 @@
 <template>
 	<div ref="card">
 		<v-card>
-			<v-card-title class="d-flex align-center pa-2 pl-4">
+			<v-card-title class="d-flex align-center pa-2 px-4">
 				Current Review {{ reviewStore.isTouched ? "*" : "" }}
 				<v-chip color="primary" label class="ml-2">
 					{{ currentReview.id ? "Editing" : "Adding" }}
