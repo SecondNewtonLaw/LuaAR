@@ -275,4 +275,12 @@ const countNesting = (editor: Editor) => {
 	return { totalDepth, maxDepth, ratio: +(totalDepth / lines).toFixed(2) }
 }
 
-export { countComments, countLogs, countNesting, countWhitelines, stripInput, stripLoggingStatements }
+export {
+	countComments,
+	countLogs,
+	countNesting,
+	countWhitelines,
+	getDeprecatedLuauAPI,
+	stripInput,
+	stripLoggingStatements,
+}

@@ -72,11 +72,10 @@
 						v-if="'skills' in item"
 						v-for="skill in item.skills"
 						:key="skill"
-						class="mr-2 font-weight-bold"
+						class="mr-2 font-weight-bold skill-chip"
 						variant="tonal"
 						@click="selectedSkills = [skill]"
 						:style="{ backgroundColor: `${colors.get(skill)}` }"
-						style="filter: brightness(0.9); text-shadow: 1px 1px 1px black"
 						>{{ skill }}</v-chip
 					>
 				</v-chip-group>
@@ -177,7 +176,7 @@ const readers = ref<Reader[]>([
 	},
 	{
 		user_id: 879313965790920764n,
-		skills: ["Builder", "Terrain Editor", "Interface Designer"],
+		skills: ["Builder", "Terrain Editor", "Interface Designer", "Graphics Artist"],
 		name: "Parra",
 		timezone: "America/Belize",
 		role: "SAR",
@@ -341,3 +340,10 @@ const filteredSkills = computed(() => {
 	return Object.entries(skillsMap).map(([skill, readers]) => ({ skill, readers }))
 })
 </script>
+
+<style lang="scss" scoped>
+.skill-chip {
+	text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.5);
+	filter: brightness(90%);
+}
+</style>
