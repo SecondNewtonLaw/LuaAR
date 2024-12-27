@@ -146,6 +146,7 @@
 								append-inner-icon="mdi-message-text"
 								variant="solo-filled"
 								ref="review-area"
+								hide-details
 								density="comfortable"
 								auto-grow
 								v-model="currentReview.review">
