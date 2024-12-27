@@ -58,7 +58,7 @@
 				</v-chip-group>
 			</template>
 		</v-data-table>
-
+		{{ ctrlHeld }}
 		<v-data-table
 			v-show="!showSkills"
 			density="compact"
@@ -74,8 +74,8 @@
 						:key="skill"
 						class="mr-2 font-weight-bold skill-chip"
 						variant="tonal"
-						@click="selectedSkills = [skill]"
-						:style="{ backgroundColor: `${colors.get(skill)}` }"
+						@click="selectSkill(skill)"
+						:style="{ backgroundColor: `${skillRoleColors?.get(skill)}` }"
 						>{{ skill }}</v-chip
 					>
 				</v-chip-group>
@@ -277,30 +277,6 @@ const selectedSkills = ref<Skill[]>([])
 const selectedUser = ref<string | null>(null)
 const sortBy = ref([{ key: "role", order: "desc" as const }])
 
-//color per skill
-const colors = new Map<Skill, string>()
-colors.set("Lua", "#26C620")
-colors.set("C#", "#26C620")
-colors.set("C++", "#26C620")
-colors.set("Python", "#26C620")
-colors.set("Java", "#26C620")
-colors.set("PHP", "#26C620")
-colors.set("JavaScript", "#26C620")
-colors.set("HTML/CSS", "#26C620")
-colors.set("Voice Actor", "#A57BF7")
-colors.set("Video Editor", "#F35167")
-colors.set("Graphics Artist", "#65B9B2")
-colors.set("Interface Designer", "#65B9B2")
-colors.set("Texture Artist", "#65B9B2")
-colors.set("Music Composer", "#A57BF7")
-colors.set("3D Modeler", "#27B3EE")
-colors.set("Animator", "#21BD74")
-colors.set("Clothing", "#CBCA49")
-colors.set("Builder", "#80A7FF")
-colors.set("Terrain Editor", "#BED048")
-colors.set("Sound Effects", "#A57BF7")
-colors.set("Visual Effects", "#65B9B2")
-
 const headers = [
 	{ title: "Name", key: "name", value: (reader: Reader) => `${reader.name} (${reader.user_id})` },
 
@@ -338,6 +314,40 @@ const filteredSkills = computed(() => {
 	})
 
 	return Object.entries(skillsMap).map(([skill, readers]) => ({ skill, readers }))
+})
+
+const ctrlHeld = ref(false)
+
+const selectSkill = (skill: Skill) => {
+	if (ctrlHeld.value) {
+		openInBrowser(
+			`https://hiddendevs.com/phpjs/applications_JS?offset=1&type=${skillToVolvic.get(skill)}&filterTag=None`
+		)
+	} else {
+		selectedSkills.value = [skill]
+	}
+}
+
+const onKeyDown = (e: KeyboardEvent) => {
+	if (e.key === "Control") {
+		ctrlHeld.value = true
+	}
+}
+
+const onKeyUp = (e: KeyboardEvent) => {
+	if (e.key === "Control") {
+		ctrlHeld.value = false
+	}
+}
+
+onMounted(() => {
+	window.addEventListener("keydown", onKeyDown)
+	window.addEventListener("keyup", onKeyUp)
+})
+
+onUnmounted(() => {
+	window.removeEventListener("keydown", onKeyDown)
+	window.removeEventListener("keyup", onKeyUp)
 })
 </script>
 

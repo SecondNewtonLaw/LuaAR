@@ -21,9 +21,14 @@
 					<v-skeleton-loader loading type="table-row@10"></v-skeleton-loader>
 				</template>
 				<template #item.url="{ value }">
-					<v-chip color="primary" v-if="value" small :href="value" @click.stop.prevent="shell.open(value)">{{
-						value
-					}}</v-chip>
+					<v-chip
+						color="primary"
+						v-if="value"
+						small
+						:href="value"
+						@click.stop.prevent="openInBrowser(value)"
+						>{{ value }}</v-chip
+					>
 					<v-chip color="grey" v-else small>None</v-chip>
 				</template>
 				<template #item.evidence="{ value }">
@@ -50,7 +55,7 @@
 							icon="mdi-shield-account"
 							density="comfortable"
 							color="primary"
-							@click.stop="shell.open(`https://hiddendevs.com/admin/useredit?userid=${item.user_id}`)"
+							@click.stop="openInBrowser(`https://hiddendevs.com/admin/useredit?userid=${item.user_id}`)"
 							title="View User" />
 
 						<v-btn
@@ -91,8 +96,6 @@
 </template>
 
 <script lang="ts" setup>
-import * as shell from "@tauri-apps/plugin-shell"
-
 import { toast } from "vuetify-sonner"
 const reviewStore = useReviewStore()
 const settingsStore = useSettingsStore()
