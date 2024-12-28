@@ -21,7 +21,7 @@
 								icon="mdi-shield-account"
 								density="comfortable"
 								color="primary"
-								@click.stop="shell.open(`https://hiddendevs.com/admin/useredit?userid=${item.id}`)"
+								@click.stop="openInBrowser(`https://hiddendevs.com/admin/useredit?userid=${item.id}`)"
 								title="View User" />
 
 							<v-divider thickness="2" class="mx-1" vertical></v-divider>
@@ -49,8 +49,6 @@
 </template>
 
 <script lang="ts" setup>
-import * as shell from "@tauri-apps/plugin-shell"
-
 import { toast } from "vuetify-sonner"
 
 interface User {

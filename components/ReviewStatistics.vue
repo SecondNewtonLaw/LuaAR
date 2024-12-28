@@ -84,17 +84,16 @@ const getCountsPerDay = (predecate: (review: Review) => boolean) => {
 
 const approvalsPerDay = computed(() => getCountsPerDay((r) => !!r.approved))
 const denialsPerDay = computed(() => getCountsPerDay((r) => !r.approved))
-
 const getRatio = (approved: boolean) =>
 	filteredReviews.value.length
-		? (
+		? +(
 				(filteredReviews.value.filter((r) => !!r.approved === approved).length / filteredReviews.value.length) *
 				100
 		  ).toFixed(2)
-		: "0"
+		: 0
 
 const approvalRatio = computed(() => getRatio(true))
-const deniedRatio = computed(() => getRatio(false))
+const deniedRatio = computed(() => 100 - approvalRatio.value)
 const totalMutes = computed(() => filteredReviews.value.filter((r) => r.muted).length)
 const chartOptions = computed(() => ({
 	chart: {
