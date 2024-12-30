@@ -78,60 +78,63 @@ const onMouseUp = () => {
 	isDragging = false
 	document.removeEventListener("mousemove", onMouseMove)
 	document.removeEventListener("mouseup", onMouseUp)
-	localStorage.setItem("position", JSON.stringify(position))
-	animateRelease()
+
+	const now = performance.now()
+	const deltaTime = now - lastTime
+	if (deltaTime < 50) animateRelease()
 }
 
 const updatePosition = () => {
 	if (!draggable.value) return
 	position.x = Math.min(window.innerWidth - draggable.value.offsetWidth - MARGIN, Math.max(MARGIN, position.x))
 	position.y = Math.min(window.innerHeight - draggable.value.offsetHeight - MARGIN, Math.max(MARGIN, position.y))
-
+	localStorage.setItem("position", JSON.stringify(position))
 	draggable.value.style.left = `${position.x}px`
 	draggable.value.style.top = `${position.y}px`
 }
 
-const animateRelease = () => {
-	const damping = 0.98 // Damping factor to reduce velocity
-	const threshold = 0.01 // Stop animation when velocity is small
-	let previousTimestamp: number | null = null
+const damping = 0.98 // Damping factor to reduce velocity
+const threshold = 0.01 // Stop animation when velocity is small
+let previousTimestamp: number | null = null
 
-	const step = (timestamp: number) => {
-		velocity.x *= damping
-		velocity.y *= damping
+const step = (timestamp: number) => {
+	velocity.x *= damping
+	velocity.y *= damping
 
-		if (Math.abs(velocity.x) < threshold && Math.abs(velocity.y) < threshold) {
-			return // Stop animation when velocity is negligible
-		}
-
-		if (previousTimestamp) {
-			const interval = timestamp - previousTimestamp
-
-			// Calculate the next position based on velocity
-			const nextX = position.x + velocity.x * interval
-			const nextY = position.y + velocity.y * interval
-
-			// Check for constraints and apply bounce
-			if (nextX < MARGIN || nextX > window.innerWidth - draggable.value!.offsetWidth - MARGIN) {
-				velocity.x = -velocity.x // Reverse horizontal velocity
-			} else {
-				position.x = nextX // Update position if not constrained
-			}
-
-			if (nextY < MARGIN || nextY > window.innerHeight - draggable.value!.offsetHeight - MARGIN) {
-				velocity.y = -velocity.y // Reverse vertical velocity
-			} else {
-				position.y = nextY // Update position if not constrained
-			}
-
-			updatePosition()
-		}
-
-		previousTimestamp = timestamp
-
-		animationFrame = requestAnimationFrame(step)
+	if (Math.abs(velocity.x) < threshold && Math.abs(velocity.y) < threshold) {
+		return // Stop animation when velocity is negligible
 	}
 
+	if (previousTimestamp) {
+		const interval = timestamp - previousTimestamp
+
+		// Calculate the next position based on velocity
+		const nextX = position.x + velocity.x * interval
+		const nextY = position.y + velocity.y * interval
+
+		// Check for constraints and apply bounce
+		if (nextX < MARGIN || nextX > window.innerWidth - draggable.value!.offsetWidth - MARGIN) {
+			velocity.x = -velocity.x * 0.8
+		} else {
+			position.x = nextX // Update position if not constrained
+		}
+
+		if (nextY < MARGIN || nextY > window.innerHeight - draggable.value!.offsetHeight - MARGIN) {
+			velocity.y = -velocity.y * 0.8
+		} else {
+			position.y = nextY // Update position if not constrained
+		}
+
+		updatePosition()
+	}
+
+	previousTimestamp = timestamp
+
+	animationFrame = requestAnimationFrame(step)
+}
+
+const animateRelease = () => {
+	previousTimestamp = null
 	animationFrame = requestAnimationFrame(step)
 }
 
