@@ -2,6 +2,17 @@
 	<div>
 		<v-row dense>
 			<v-col cols="12" sm="4">
+				<v-text-field
+					v-model="search"
+					label="Search"
+					prepend-inner-icon="mdi-magnify"
+					single-line
+					hide-details
+					class="mb-2"
+					density="compact"
+					variant="solo-filled" />
+			</v-col>
+			<v-col cols="12" sm="2">
 				<v-combobox
 					v-model="selectedRoles"
 					single-line
@@ -13,7 +24,7 @@
 					label="Filter by Role"
 					clearable />
 			</v-col>
-			<v-col cols="12" sm="4">
+			<v-col cols="12" sm="3">
 				<v-combobox
 					v-model="selectedSkills"
 					multiple
@@ -25,7 +36,7 @@
 					label="Filter by Skill"
 					clearable />
 			</v-col>
-			<v-col cols="12" sm="4">
+			<v-col cols="12" sm="3">
 				<v-combobox
 					density="compact"
 					single-line
@@ -47,6 +58,7 @@
 			v-show="showSkills"
 			density="compact"
 			multi-sort
+			:search="search"
 			:headers="skillHeaders"
 			:items="filteredSkills"
 			:sort-by="[{ key: 'readers', order: 'desc' }]">
@@ -58,11 +70,12 @@
 				</v-chip-group>
 			</template>
 		</v-data-table>
-		{{ ctrlHeld }}
+
 		<v-data-table
 			v-show="!showSkills"
 			density="compact"
 			multi-sort
+			:search="search"
 			:headers="headers"
 			:items="filteredReaders"
 			:sort-by="sortBy">
@@ -269,6 +282,7 @@ const readers = ref<Reader[]>([
 ])
 
 const showSkills = ref(false)
+const search = ref("")
 
 const roles = ref<string[]>(["AR", "SAR", "Management", "Head"])
 const users = ref<string[]>(readers.value.map((reader) => reader.name))
@@ -354,6 +368,5 @@ onUnmounted(() => {
 <style lang="scss" scoped>
 .skill-chip {
 	text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.5);
-	filter: brightness(90%);
 }
 </style>

@@ -1,3 +1,4 @@
+use std::os::windows::process::CommandExt;
 use std::process::Command;
 use tauri::command;
 use tauri::path::BaseDirectory;
@@ -11,6 +12,7 @@ use std::time::Instant; // For timing the sorting function
 use tauri_plugin_updater;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
+#[cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 #[cfg(not(target_os = "android"))]
 pub fn run() {
     tauri::Builder::default()
@@ -36,7 +38,7 @@ pub fn run_android() {
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
-
+#[cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 #[command]
 fn format_code(app_handle: AppHandle, lua_code: String) -> Result<String, String> {
     let stylua_path = app_handle
@@ -52,6 +54,7 @@ fn format_code(app_handle: AppHandle, lua_code: String) -> Result<String, String
         .arg("-")
         .stdin(std::process::Stdio::piped())
         .stdout(std::process::Stdio::piped())
+        .creation_flags(0x08000000) // CREATE_NO_WINDOW
         .spawn()
         .and_then(|mut child| {
             use std::io::Write;
@@ -78,7 +81,7 @@ fn format_code(app_handle: AppHandle, lua_code: String) -> Result<String, String
         }
     }
 }
-
+#[cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 #[command]
 fn lint_code(app_handle: AppHandle, lua_code: String) -> Result<String, String> {
     let selene_path = app_handle
@@ -97,6 +100,7 @@ fn lint_code(app_handle: AppHandle, lua_code: String) -> Result<String, String> 
         .stdin(std::process::Stdio::piped())
         .stdout(std::process::Stdio::piped())
         .stderr(std::process::Stdio::piped())
+        .creation_flags(0x08000000) // CREATE_NO_WINDOW
         .spawn()
         .and_then(|mut child| {
             use std::io::Write;
@@ -141,7 +145,7 @@ struct Review {
     evidence: Vec<String>,
     role: String, 
 }
-
+#[cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 #[command]
 fn sort_reviews(mut reviews: Vec<Review>, sort_by: String, ascending: bool) -> (Vec<Review>, String) {
     let start = Instant::now(); 

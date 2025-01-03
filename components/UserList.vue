@@ -2,13 +2,23 @@
 	<div>
 		<v-row>
 			<v-col cols="12">
+				<v-text-field
+					v-model="search"
+					label="Search Users"
+					prepend-inner-icon="mdi-magnify"
+					single-line
+					hide-details
+					class="mb-2"
+					density="compact"
+					variant="solo-filled" />
 				<v-data-table
 					:headers="headers"
 					:items="users"
 					:items-per-page="10"
 					v-model="selected"
 					:loading="reviewStore.loading"
-					:sort-by="sortBy">
+					:sort-by="sortBy"
+					:search="search">
 					<template #item.approved="{ value }">
 						<v-chip dense :text="value ? 'Approved' : 'Not Approved'" :color="value ? 'green' : 'red'" />
 					</template>
@@ -67,6 +77,7 @@ const reviews = computed(() =>
 
 const selected = ref<string[]>([])
 const isDialogOpen = ref(false)
+const search = ref("")
 //each review has a user_id, title, and muted property, calculate mutes and reviews for each user
 const users = computed(() => {
 	const users: Record<string, User> = {}

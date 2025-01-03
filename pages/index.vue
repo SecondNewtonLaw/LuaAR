@@ -104,7 +104,10 @@ const showDiff = () => {
 const reviewsInDialog = ref<Review[]>([])
 const hasPreviousReview = computed(
 	() =>
-		(reviewStore.reviews || []).filter((review) => review.user_id === reviewStore.currentReview.user_id).length > 1
+		(reviewStore.reviews || []).filter(
+			(review) =>
+				review.user_id === reviewStore.currentReview.user_id && review.id !== reviewStore.currentReview.id
+		).length > 0
 )
 
 const promptReviewChoice = () => {
