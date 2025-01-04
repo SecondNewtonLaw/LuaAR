@@ -41,6 +41,9 @@ export const useSettingsStore = defineStore(
 
 		//reviews
 		const reviewPage = ref(1)
+		const search = ref("")
+		const filtersEnabled = ref<string[]>([])
+		const selectedSkills = ref<Skill[]>([])
 
 		const today = new Date()
 		const startHalf = today.getDate() < 15 ? 1 : 16
@@ -92,6 +95,9 @@ export const useSettingsStore = defineStore(
 			endDate,
 			startDateString,
 			endDateString,
+			search,
+			filtersEnabled,
+			selectedSkills,
 
 			//app
 			version,

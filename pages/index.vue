@@ -104,7 +104,10 @@ const showDiff = () => {
 const reviewsInDialog = ref<Review[]>([])
 const hasPreviousReview = computed(
 	() =>
-		(reviewStore.reviews || []).filter((review) => review.user_id === reviewStore.currentReview.user_id).length > 1
+		(reviewStore.reviews || []).filter(
+			(review) =>
+				review.user_id === reviewStore.currentReview.user_id && review.id !== reviewStore.currentReview.id
+		).length > 0
 )
 
 const promptReviewChoice = () => {
@@ -120,18 +123,23 @@ const promptReviewChoice = () => {
 	if (reviews.length > 1) {
 		reviewsInDialog.value = reviews
 	} else {
-		addEditorFromReview(reviews[0]?.id || "")
+		addEditorFromReview(reviews[0]?.id)
 	}
 }
-const addEditorFromReview = async (id: string) => {
-	reviewsInDialog.value = []
-	const review = reviewStore.reviews?.find((review) => review.id === id)
-	if (review && review.id) {
-		const editor = (await reviewStore.getEditorsFromReview(review.id))[0]
-		editor.title = `From Review: #${review.id} | ${editor.title ?? "1"}`
 
-		editorStore.addEditor(editor)
-	}
+const addEditorFromReview = async (id?: string) => {
+	reviewsInDialog.value = []
+	if (!id) return
+
+	const editors = await reviewStore.getEditorsFromReview(id)
+	const review = reviewStore.reviews?.find((r) => r.id === id)
+
+	editors.forEach((editor, i) => {
+		editorStore.addEditor({
+			...editor,
+			title: editor.title || `Editor ${i + 1} - ${review?.title}`,
+		})
+	})
 }
 const newReview = () => {
 	if (reviewStore.isTouched) {

@@ -1,13 +1,18 @@
+use std::os::windows::process::CommandExt;
 use std::process::Command;
 use tauri::command;
 use tauri::path::BaseDirectory;
 use tauri::AppHandle;
 use tauri::Manager;
+use serde::{Deserialize, Serialize};
+use chrono::NaiveDateTime; // For parsing date strings
+use std::time::Instant; // For timing the sorting function
 
 #[cfg(not(target_os = "android"))]
 use tauri_plugin_updater;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
+#[cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 #[cfg(not(target_os = "android"))]
 pub fn run() {
     tauri::Builder::default()
@@ -18,7 +23,7 @@ pub fn run() {
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_persisted_scope::init())
 
-        .invoke_handler(tauri::generate_handler![format_code, lint_code])
+        .invoke_handler(tauri::generate_handler![format_code, lint_code, sort_reviews])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
@@ -33,7 +38,7 @@ pub fn run_android() {
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
-
+#[cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 #[command]
 fn format_code(app_handle: AppHandle, lua_code: String) -> Result<String, String> {
     let stylua_path = app_handle
@@ -49,6 +54,7 @@ fn format_code(app_handle: AppHandle, lua_code: String) -> Result<String, String
         .arg("-")
         .stdin(std::process::Stdio::piped())
         .stdout(std::process::Stdio::piped())
+        .creation_flags(0x08000000) // CREATE_NO_WINDOW
         .spawn()
         .and_then(|mut child| {
             use std::io::Write;
@@ -75,7 +81,7 @@ fn format_code(app_handle: AppHandle, lua_code: String) -> Result<String, String
         }
     }
 }
-
+#[cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 #[command]
 fn lint_code(app_handle: AppHandle, lua_code: String) -> Result<String, String> {
     let selene_path = app_handle
@@ -94,6 +100,7 @@ fn lint_code(app_handle: AppHandle, lua_code: String) -> Result<String, String> 
         .stdin(std::process::Stdio::piped())
         .stdout(std::process::Stdio::piped())
         .stderr(std::process::Stdio::piped())
+        .creation_flags(0x08000000) // CREATE_NO_WINDOW
         .spawn()
         .and_then(|mut child| {
             use std::io::Write;
@@ -122,4 +129,56 @@ fn lint_code(app_handle: AppHandle, lua_code: String) -> Result<String, String> 
             Err(e.to_string())
         }
     }
+}
+
+#[derive(Serialize, Deserialize, Clone)]
+struct Review {
+    title: Option<String>,
+    created_at: String,
+    updated_at: String,
+    url: Option<String>,
+    user_id: String,
+    review: Option<String>,
+    approved: bool,
+    muted: bool,
+    id: Option<String>,
+    evidence: Vec<String>,
+    role: String, 
+}
+#[cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
+#[command]
+fn sort_reviews(mut reviews: Vec<Review>, sort_by: String, ascending: bool) -> (Vec<Review>, String) {
+    let start = Instant::now(); 
+
+    reviews.sort_by(|a, b| {
+        let order = match sort_by.as_str() {
+            "title" => a.title.cmp(&b.title),
+            "created_at" => {
+                let date_a = NaiveDateTime::parse_from_str(&a.created_at, "%Y-%m-%d %H:%M:%S").unwrap_or_default();
+                let date_b = NaiveDateTime::parse_from_str(&b.created_at, "%Y-%m-%d %H:%M:%S").unwrap_or_default();
+                date_a.cmp(&date_b)
+            }
+            "updated_at" => {
+                let date_a = NaiveDateTime::parse_from_str(&a.updated_at, "%Y-%m-%d %H:%M:%S").unwrap_or_default();
+                let date_b = NaiveDateTime::parse_from_str(&b.updated_at, "%Y-%m-%d %H:%M:%S").unwrap_or_default();
+                date_a.cmp(&date_b)
+            }
+            "user_id" => a.user_id.cmp(&b.user_id),
+            "approved" => a.approved.cmp(&b.approved),
+            "muted" => a.muted.cmp(&b.muted),
+            "id" => a.id.cmp(&b.id),
+            "role" => a.role.cmp(&b.role),
+            _ => a.created_at.cmp(&b.created_at), 
+        };
+        if ascending {
+            order
+        } else {
+            order.reverse()
+        }
+    });
+
+    let elapsed = start.elapsed(); // End timer
+    let duration = format!("Sorting took {}ms", elapsed.as_millis());
+
+    (reviews, duration) // Return both the sorted reviews and the elapsed time
 }

@@ -108,6 +108,7 @@
 								variant="solo-filled"
 								v-model="currentReview.title"
 								@update:search="titleSelected"
+								:rules="[(v) => !!v || 'Title is required']"
 								:items="existingTitles" />
 						</v-col>
 					</v-row>
@@ -121,8 +122,9 @@
 						clearable
 						v-model="currentReview.url"
 						:rules="[
-							(v) => !v || /^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/i.test(v) || 'Must be a valid URL',
-							(v) => !v || v.includes('hiddendevs.com') || 'URL must be from hiddendevs.com domain',
+							(v) => !!v || 'URL is required',
+							(v) => /^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/i.test(v) || 'Must be a valid URL',
+							(v) => v.includes('hiddendevs.com') || 'URL must be from hiddendevs.com domain',
 						]" />
 
 					<v-combobox
@@ -146,6 +148,7 @@
 								append-inner-icon="mdi-message-text"
 								variant="solo-filled"
 								ref="review-area"
+								class="mb-2"
 								hide-details
 								density="comfortable"
 								auto-grow
@@ -186,6 +189,7 @@
 								clearable
 								multiple
 								chips
+								class="mb-2"
 								hide-details
 								accept="image/*"
 								variant="solo-filled"

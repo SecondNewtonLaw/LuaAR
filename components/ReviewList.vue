@@ -185,8 +185,8 @@ const headers = ref([
 ])
 
 let clickTimeout: number | null = null
-const selectReview = (review: Review) => {
-	reviewStore.loadReview(review.id)
+const selectReview = async (review: Review) => {
+	await reviewStore.loadReview(review.id)
 	useRouter().push({ name: "index" })
 }
 const clickedRow = (event: PointerEvent, row: any) => {

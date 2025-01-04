@@ -108,6 +108,9 @@ export const useReviewStore = defineStore("reviews", () => {
 					const data = await readFile(`${basePath.value}/${review.name}/meta.json`, dirOptions.value)
 					const reviewData = JSON.parse(new TextDecoder().decode(data)) as Review
 					reviewData.role ??= settingsStore.defaultSkill
+					reviewData.approved ??= false
+					reviewData.muted ??= false
+					reviewData.evidence ??= []
 					return reviewData
 				})
 			)

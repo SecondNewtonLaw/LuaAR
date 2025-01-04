@@ -31,8 +31,6 @@ const getInitialPosition = () => {
 }
 
 let initialPosition = getInitialPosition()
-
-// Ensure initial positions are at least MARGIN px from the screen borders
 initialPosition.x = Math.max(MARGIN, initialPosition.x)
 initialPosition.y = Math.max(MARGIN, initialPosition.y)
 
@@ -40,40 +38,104 @@ const position = reactive(initialPosition)
 
 let isDragging = false
 let offset = { x: 0, y: 0 }
+let velocity = { x: 0, y: 0 }
+let lastTime = 0
+let animationFrame: number | null = null
 
 const isLocked = ref(false)
 
 const onMouseDown = (event: MouseEvent) => {
 	if (isLocked.value) return
 	isDragging = true
-	const currentX = position.x
-	const currentY = position.y
-	offset.x = event.clientX - currentX
-	offset.y = event.clientY - currentY
+	offset.x = event.clientX - position.x
+	offset.y = event.clientY - position.y
+	velocity = { x: 0, y: 0 } // Reset velocity
+	lastTime = performance.now()
+	if (animationFrame) cancelAnimationFrame(animationFrame)
 	document.addEventListener("mousemove", onMouseMove)
 	document.addEventListener("mouseup", onMouseUp)
 }
 
-const constrainPosition = () => {
-	if (!draggable.value) return
-	position.x = Math.min(window.innerWidth - draggable.value.offsetWidth - MARGIN, Math.max(MARGIN, position.x))
-	position.y = Math.min(window.innerHeight - draggable.value.offsetHeight - MARGIN, Math.max(MARGIN, position.y))
-	draggable.value.style.left = `${position.x}px`
-	draggable.value.style.top = `${position.y}px`
-}
-
 const onMouseMove = (event: MouseEvent) => {
-	if (!(isDragging && draggable.value)) return
-	position.x = event.clientX - offset.x
-	position.y = event.clientY - offset.y
-	constrainPosition()
+	if (!isDragging) return
+
+	const now = performance.now()
+	const deltaTime = now - lastTime
+	lastTime = now
+
+	const newX = event.clientX - offset.x
+	const newY = event.clientY - offset.y
+
+	velocity.x = (newX - position.x) / deltaTime
+	velocity.y = (newY - position.y) / deltaTime
+
+	position.x = newX
+	position.y = newY
+	updatePosition()
 }
 
 const onMouseUp = () => {
 	isDragging = false
 	document.removeEventListener("mousemove", onMouseMove)
 	document.removeEventListener("mouseup", onMouseUp)
+
+	const now = performance.now()
+	const deltaTime = now - lastTime
+	if (deltaTime < 50) animateRelease()
+}
+
+const updatePosition = () => {
+	if (!draggable.value) return
+	position.x = Math.min(window.innerWidth - draggable.value.offsetWidth - MARGIN, Math.max(MARGIN, position.x))
+	position.y = Math.min(window.innerHeight - draggable.value.offsetHeight - MARGIN, Math.max(MARGIN, position.y))
 	localStorage.setItem("position", JSON.stringify(position))
+	draggable.value.style.left = `${position.x}px`
+	draggable.value.style.top = `${position.y}px`
+}
+
+const damping = 0.98 // Damping factor to reduce velocity
+const threshold = 0.01 // Stop animation when velocity is small
+let previousTimestamp: number | null = null
+
+const step = (timestamp: number) => {
+	velocity.x *= damping
+	velocity.y *= damping
+
+	if (Math.abs(velocity.x) < threshold && Math.abs(velocity.y) < threshold) {
+		return // Stop animation when velocity is negligible
+	}
+
+	if (previousTimestamp) {
+		const interval = timestamp - previousTimestamp
+
+		// Calculate the next position based on velocity
+		const nextX = position.x + velocity.x * interval
+		const nextY = position.y + velocity.y * interval
+
+		// Check for constraints and apply bounce
+		if (nextX < MARGIN || nextX > window.innerWidth - draggable.value!.offsetWidth - MARGIN) {
+			velocity.x = -velocity.x * 0.8
+		} else {
+			position.x = nextX // Update position if not constrained
+		}
+
+		if (nextY < MARGIN || nextY > window.innerHeight - draggable.value!.offsetHeight - MARGIN) {
+			velocity.y = -velocity.y * 0.8
+		} else {
+			position.y = nextY // Update position if not constrained
+		}
+
+		updatePosition()
+	}
+
+	previousTimestamp = timestamp
+
+	animationFrame = requestAnimationFrame(step)
+}
+
+const animateRelease = () => {
+	previousTimestamp = null
+	animationFrame = requestAnimationFrame(step)
 }
 
 const close = () => {
@@ -88,11 +150,12 @@ onMounted(() => {
 	if (!draggable.value) return
 	draggable.value.style.left = `${position.x}px`
 	draggable.value.style.top = `${position.y}px`
-	window.addEventListener("resize", constrainPosition)
+	window.addEventListener("resize", updatePosition)
+	if (animationFrame) cancelAnimationFrame(animationFrame)
 })
 
 onUnmounted(() => {
-	window.removeEventListener("resize", constrainPosition)
+	window.removeEventListener("resize", updatePosition)
 })
 </script>
 
