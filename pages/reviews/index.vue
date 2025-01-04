@@ -4,7 +4,7 @@
 			<v-row align-content="center" dense>
 				<v-col class="py-0">
 					<v-text-field
-						v-model="search"
+						v-model="settingsStore.search"
 						label="Search"
 						density="compact"
 						single-line
@@ -25,7 +25,7 @@
 						multiple
 						chips
 						clearable
-						v-model="filtersEnabled"
+						v-model="settingsStore.filtersEnabled"
 						:items="Object.keys(filters)"
 						label="Filters"
 						dense>
@@ -88,7 +88,7 @@
 						chips
 						closable-chips
 						clearable
-						v-model="selectedSkills"
+						v-model="settingsStore.selectedSkills"
 						:items="settingsStore.skills"
 						label="Roles"></v-select>
 				</v-col>
@@ -130,7 +130,6 @@ const settingsStore = useSettingsStore()
 const reviewStore = useReviewStore()
 
 const viewMode = ref<"list" | "grid">("list")
-const selectedSkills = ref<Skill[]>([])
 
 type Filter = (r: Review) => boolean
 const filters: Record<string, Filter> = {
@@ -140,17 +139,15 @@ const filters: Record<string, Filter> = {
 	Muted: (r) => !!r.muted,
 }
 
-const search = ref("")
-const filtersEnabled = ref<string[]>([])
-
 const reviews = computed(() =>
 	reviewStore.reviews?.filter((review) => {
-		if (selectedSkills.value.length && !selectedSkills.value.includes(review.role)) return false
+		if (settingsStore.selectedSkills.length && !settingsStore.selectedSkills.includes(review.role)) return false
 		if (settingsStore.startDate && new Date(review.created_at) < settingsStore.startDate) return false
 		if (settingsStore.endDate && new Date(review.created_at) > settingsStore.endDate) return false
-		if (filtersEnabled.value.length > 0) return filtersEnabled.value.every((filter) => filters[filter](review))
-		if (!search.value) return true
-		const searchLower = search.value.toLowerCase()
+		if (settingsStore.filtersEnabled.length > 0)
+			return settingsStore.filtersEnabled.every((filter) => filters[filter](review))
+		if (!settingsStore.search) return true
+		const searchLower = settingsStore.search.toLowerCase()
 		return (
 			review.review?.toLowerCase().includes(searchLower) ||
 			review.user_id?.toLowerCase().includes(searchLower) ||
