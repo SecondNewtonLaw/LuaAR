@@ -79,7 +79,6 @@ export const useEditorStore = defineStore("editors", () => {
 			toast.error("Failed to apply lint fixes: code contains errors, aborting")
 		}
 
-		console.log("Hello")
 		for (const detail of details.warnings) {
 			// We can fix some lints that have simple solutions, such as definitions without use
 			if (detail.message.includes("is assigned a value, but never used") && typeof(detail.code) === "string"){
