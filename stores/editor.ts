@@ -68,6 +68,28 @@ export const useEditorStore = defineStore("editors", () => {
 			title: `Lint Results: ${summary.errors} errors, ${summary.warnings} warnings`,
 		})
 	}
+
+	const applyLintFixes = async (editor: Editor) => {
+		const parsedResult = await processLintResult(editor)
+		if (!parsedResult) return
+
+		const { details, summary } = parsedResult
+		
+		if (summary.errors > 0) {
+			toast.error("Failed to apply lint fixes: code contains errors, aborting")
+		}
+
+		console.log("Hello")
+		for (const detail of details.warnings) {
+			// We can fix some lints that have simple solutions, such as definitions without use
+			if (detail.message.includes("is assigned a value, but never used") && typeof(detail.code) === "string"){
+				editor.input = editor.input.replace(detail.code, "")
+			}
+		}
+		
+		console.log("Apply Lint Fixes Called. Results:", details, summary)
+	}
+
 	const stripCode = (editor: Editor) => {
 		editor.input = stripInput(editor)
 		toast.success("Stripped code")
@@ -90,5 +112,6 @@ export const useEditorStore = defineStore("editors", () => {
 		lintCode,
 		stripCode,
 		removeLogs,
+		applyLintFixes
 	}
 })

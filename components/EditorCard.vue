@@ -54,6 +54,11 @@
 								:disabled="editor.input === '' || !tauri || editor.lang !== 'lua'">
 								Lint Code
 							</v-btn>
+							<v-btn
+								@click="editorStore.applyLintFixes(editor)"
+								:disabled="editor.input === '' || !tauri || editor.lang !== 'lua'">
+								Apply Lint Fixes
+							</v-btn>
 						</v-btn-group>
 						<v-spacer />
 						<v-btn-group variant="elevated" class="ga-2">
